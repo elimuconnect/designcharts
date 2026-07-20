@@ -3,26 +3,9 @@
     sidebar.css
 ==========================================*/
 
-/*=========================
-APP LAYOUT
-=========================*/
-
-.app{
-
-    display:flex;
-
-    width:100%;
-
-    height:calc(100vh - 70px);
-
-    overflow:hidden;
-
-}
-
-
-/*=========================
+/*==============================
 LEFT SIDEBAR
-=========================*/
+==============================*/
 
 .sidebar{
 
@@ -38,43 +21,39 @@ LEFT SIDEBAR
 
     align-items:center;
 
-    padding-top:20px;
+    padding:18px 8px;
+
+    gap:10px;
 
     overflow-y:auto;
 
-    box-shadow:4px 0 15px rgba(0,0,0,.08);
+    border-right:1px solid #1E293B;
 
 }
 
-
-/*=========================
-SCROLLBAR
-=========================*/
-
 .sidebar::-webkit-scrollbar{
 
-    width:5px;
+    width:6px;
 
 }
 
 .sidebar::-webkit-scrollbar-thumb{
 
-    background:#334155;
+    background:#475569;
+
+    border-radius:20px;
 
 }
 
-
-/*=========================
-BUTTON
-=========================*/
+/*==============================
+SIDEBAR BUTTONS
+==============================*/
 
 .sidebar button{
 
-    width:72px;
+    width:70px;
 
-    height:72px;
-
-    margin-bottom:12px;
+    height:70px;
 
     border:none;
 
@@ -94,25 +73,13 @@ BUTTON
 
     cursor:pointer;
 
-    transition:.25s;
-
-}
-
-
-/*=========================
-ICON
-=========================*/
-
-.sidebar button{
+    transition:all .25s ease;
 
     font-size:22px;
 
+    flex-shrink:0;
+
 }
-
-
-/*=========================
-TEXT
-=========================*/
 
 .sidebar button span{
 
@@ -128,89 +95,47 @@ TEXT
 
 }
 
-
-/*=========================
-HOVER
-=========================*/
-
 .sidebar button:hover{
 
     background:#2563EB;
 
-    color:white;
+    color:#fff;
 
-    transform:translateY(-2px);
+    transform:scale(1.05);
 
 }
-
-
-/*=========================
-ACTIVE
-=========================*/
 
 .sidebar button.active{
 
     background:#1565C0;
 
-    color:white;
+    color:#fff;
 
-    box-shadow:
+    transform:scale(1.05);
 
-        0 0 15px rgba(21,101,192,.4);
-
-}
-
-
-/*=========================
-TOOL PANEL
-=========================*/
-
-.tool-panel{
-
-    width:320px;
-
-    min-width:320px;
-
-    background:white;
-
-    border-right:1px solid #E2E8F0;
-
-    padding:20px;
-
-    overflow-y:auto;
+    box-shadow:0 8px 20px rgba(21,101,192,.35);
 
 }
 
+.sidebar button:active{
 
-/*=========================
-TITLE
-=========================*/
-
-.tool-panel h2{
-
-    color:#1565C0;
-
-    font-size:24px;
-
-    margin-bottom:20px;
+    transform:scale(.96);
 
 }
 
-
-/*=========================
-CONTENT
-=========================*/
+/*==============================
+TOOL PANEL CONTENT
+==============================*/
 
 #toolContent{
 
-    min-height:400px;
+    min-height:450px;
 
 }
 
-
-/*=========================
-CARD
-=========================*/
+/*==============================
+TOOL CARD
+==============================*/
 
 .tool-card{
 
@@ -220,29 +145,43 @@ CARD
 
     border-radius:12px;
 
-    padding:15px;
+    padding:16px;
 
     margin-bottom:18px;
 
+    animation:fade .25s ease;
+
 }
-
-
-/*=========================
-CARD TITLE
-=========================*/
 
 .tool-card h3{
 
-    margin-bottom:12px;
+    margin-bottom:15px;
 
     color:#1565C0;
 
+    font-size:18px;
+
 }
 
+.tool-card p{
 
-/*=========================
-BUTTONS
-=========================*/
+    font-size:14px;
+
+    color:#64748B;
+
+    line-height:1.6;
+
+}
+
+.tool-card small{
+
+    color:#94A3B8;
+
+}
+
+/*==============================
+CARD BUTTONS
+==============================*/
 
 .tool-card button{
 
@@ -254,15 +193,13 @@ BUTTONS
 
     background:#1565C0;
 
-    color:white;
+    color:#fff;
 
     border:none;
 
     border-radius:8px;
 
     font-weight:600;
-
-    cursor:pointer;
 
     transition:.25s;
 
@@ -274,10 +211,15 @@ BUTTONS
 
 }
 
+.tool-card button:last-child{
 
-/*=========================
-INPUTS
-=========================*/
+    margin-bottom:0;
+
+}
+
+/*==============================
+CARD INPUTS
+==============================*/
 
 .tool-card input,
 
@@ -289,18 +231,17 @@ INPUTS
 
     padding:10px;
 
-    border-radius:8px;
-
     border:1px solid #CBD5E1;
 
-    font-family:Poppins,sans-serif;
+    border-radius:8px;
+
+    font-family:"Poppins",sans-serif;
 
 }
 
-
-/*=========================
+/*==============================
 IMAGE PREVIEW
-=========================*/
+==============================*/
 
 .image-thumb{
 
@@ -308,20 +249,21 @@ IMAGE PREVIEW
 
     border-radius:10px;
 
+    display:block;
+
     margin-bottom:12px;
 
 }
 
-
-/*=========================
-SHAPES GRID
-=========================*/
+/*==============================
+SHAPE GRID
+==============================*/
 
 .shape-grid{
 
     display:grid;
 
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns:repeat(2,1fr);
 
     gap:10px;
 
@@ -329,11 +271,13 @@ SHAPES GRID
 
 .shape-item{
 
-    height:70px;
+    height:80px;
 
     border:1px solid #CBD5E1;
 
     border-radius:10px;
+
+    background:#fff;
 
     display:flex;
 
@@ -347,20 +291,21 @@ SHAPES GRID
 
     font-size:30px;
 
-    background:white;
-
 }
 
 .shape-item:hover{
 
     background:#E3F2FD;
 
+    border-color:#1565C0;
+
+    transform:scale(1.04);
+
 }
 
-
-/*=========================
+/*==============================
 TEMPLATE GRID
-=========================*/
+==============================*/
 
 .template-grid{
 
@@ -374,13 +319,13 @@ TEMPLATE GRID
 
 .template{
 
-    height:170px;
+    min-height:170px;
 
-    background:white;
-
-    border-radius:12px;
+    background:#fff;
 
     border:1px solid #CBD5E1;
+
+    border-radius:12px;
 
     overflow:hidden;
 
@@ -398,11 +343,6 @@ TEMPLATE GRID
 
 }
 
-
-/*=========================
-TEMPLATE IMAGE
-=========================*/
-
 .template img{
 
     width:100%;
@@ -411,12 +351,9 @@ TEMPLATE IMAGE
 
     object-fit:cover;
 
+    display:block;
+
 }
-
-
-/*=========================
-LABEL
-=========================*/
 
 .template h4{
 
@@ -424,66 +361,19 @@ LABEL
 
     font-size:15px;
 
-}
+    font-weight:600;
 
-
-/*=========================
-RESPONSIVE
-=========================*/
-
-@media(max-width:1200px){
-
-.tool-panel{
-
-    width:270px;
-
-    min-width:270px;
+    color:#334155;
 
 }
 
-}
-
-
-@media(max-width:900px){
-
-.sidebar{
-
-    width:70px;
-
-    min-width:70px;
-
-}
-
-.sidebar button{
-
-    width:55px;
-
-    height:55px;
-
-}
-
-.sidebar button span{
-
-    display:none;
-
-}
-
-.tool-panel{
-
-    display:none;
-
-}
-
-}
-
-
-/*=========================
-ANIMATION
-=========================*/
+/*==============================
+FADE ANIMATION
+==============================*/
 
 .fadeIn{
 
-    animation:fade .25s;
+    animation:fade .25s ease;
 
 }
 
@@ -502,6 +392,60 @@ ANIMATION
         opacity:1;
 
         transform:translateY(0);
+
+    }
+
+}
+
+/*==============================
+RESPONSIVE
+==============================*/
+
+@media(max-width:1200px){
+
+    .sidebar{
+
+        width:80px;
+
+        min-width:80px;
+
+    }
+
+    .sidebar button{
+
+        width:62px;
+
+        height:62px;
+
+        font-size:20px;
+
+    }
+
+}
+
+@media(max-width:900px){
+
+    .sidebar{
+
+        width:70px;
+
+        min-width:70px;
+
+    }
+
+    .sidebar button{
+
+        width:54px;
+
+        height:54px;
+
+        font-size:18px;
+
+    }
+
+    .sidebar button span{
+
+        display:none;
 
     }
 
