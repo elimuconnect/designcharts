@@ -3,13 +3,123 @@
     layout.css
 ==========================================*/
 
-/* Main Layout */
+/*==============================
+TOP BAR
+==============================*/
 
-.container{
+.topbar{
+
+    height:70px;
+
+    background:#ffffff;
+
+    border-bottom:1px solid #D9E2EC;
 
     display:flex;
 
-    width:100%;
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 20px;
+
+    box-shadow:0 3px 12px rgba(0,0,0,.08);
+
+    z-index:1000;
+
+}
+
+.brand{
+
+    font-size:22px;
+
+    font-weight:700;
+
+    color:#1565C0;
+
+    white-space:nowrap;
+
+}
+
+/*==============================
+TOP TOOLBAR
+==============================*/
+
+.toolbar{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+
+.toolbar button{
+
+    background:#1565C0;
+
+    color:#fff;
+
+    padding:9px 16px;
+
+    font-size:14px;
+
+}
+
+.toolbar button:hover{
+
+    background:#0D47A1;
+
+}
+
+/*==============================
+RIGHT TOOLBAR
+==============================*/
+
+.toolbar-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    min-width:320px;
+
+}
+
+.toolbar-right select{
+
+    width:90px;
+
+}
+
+.toolbar-right input[type=range]{
+
+    width:120px;
+
+}
+
+#zoomValue{
+
+    min-width:55px;
+
+    text-align:center;
+
+    font-weight:600;
+
+    color:#1565C0;
+
+}
+
+/*==============================
+MAIN APP
+==============================*/
+
+.app{
+
+    display:flex;
 
     height:calc(100vh - 70px);
 
@@ -17,58 +127,35 @@
 
 }
 
+/*==============================
+TOOL PANEL
+==============================*/
 
-/*=========================================
-LEFT PANEL
-==========================================*/
+.tool-panel{
 
-.left-panel{
+    width:320px;
 
-    width:260px;
+    min-width:320px;
 
-    min-width:260px;
+    background:#fff;
 
-    background:#ffffff;
-
-    border-right:1px solid #d9e2ec;
-
-    padding:20px;
-
-    overflow-y:auto;
-
-}
-
-
-/*=========================================
-RIGHT PANEL
-==========================================*/
-
-.right-panel{
-
-    width:300px;
-
-    min-width:300px;
-
-    background:#ffffff;
-
-    border-left:1px solid #d9e2ec;
+    border-right:1px solid #D9E2EC;
 
     padding:20px;
 
-    overflow-y:auto;
+    overflow:auto;
 
 }
 
-
-/*=========================================
-CENTER WORKSPACE
-==========================================*/
+/*==============================
+WORKSPACE
+==============================*/
 
 .workspace{
 
     flex:1;
 
-    background:#dde5ee;
+    background:#DDE5EE;
 
     display:flex;
 
@@ -82,137 +169,123 @@ CENTER WORKSPACE
 
 }
 
-
-/*=========================================
-CANVAS WRAPPER
-==========================================*/
+/*==============================
+CANVAS
+==============================*/
 
 #canvasWrapper{
 
-    background:white;
+    background:#fff;
 
-    box-shadow:0 10px 35px rgba(0,0,0,.15);
+    padding:25px;
 
-    border-radius:6px;
+    margin:40px;
 
-    padding:20px;
+    border-radius:8px;
 
-    margin:50px;
-
-    position:relative;
+    box-shadow:0 10px 35px rgba(0,0,0,.18);
 
 }
-
-
-/*=========================================
-CANVAS
-==========================================*/
 
 #designerCanvas{
 
     display:block;
 
-    background:white;
+    background:#fff;
 
-    border:1px solid #ddd;
-
-}
-
-
-/*=========================================
-SECTION SPACING
-==========================================*/
-
-.left-panel h3,
-.right-panel h3{
-
-    margin-top:10px;
-    margin-bottom:15px;
+    border:1px solid #D9D9D9;
 
 }
 
+/*==============================
+RIGHT PROPERTIES PANEL
+==============================*/
 
-.left-panel label,
-.right-panel label{
+.properties{
 
-    margin-top:15px;
+    width:320px;
 
-}
+    min-width:320px;
 
+    background:#fff;
 
-/*=========================================
-ZOOM DISPLAY
-==========================================*/
+    border-left:1px solid #D9E2EC;
 
-#zoomValue{
+    padding:20px;
 
-    display:block;
-
-    text-align:center;
-
-    margin-top:10px;
-
-    font-weight:600;
-
-    color:#1565C0;
+    overflow:auto;
 
 }
 
+.properties input,
 
-/*=========================================
-PROPERTY CONTROLS
-==========================================*/
-
-.right-panel input,
-.right-panel select{
+.properties select{
 
     margin-bottom:12px;
 
 }
 
+/*==============================
+ALIGN BUTTONS
+==============================*/
 
-/*=========================================
-BUTTON GROUPS
-==========================================*/
+.alignButtons{
 
-.left-panel button{
+    display:grid;
 
-    margin-bottom:8px;
+    grid-template-columns:repeat(3,1fr);
 
-}
-
-
-.right-panel button{
-
-    margin-top:15px;
+    gap:8px;
 
 }
 
+.alignButtons button{
 
-/*=========================================
-DELETE BUTTON
-==========================================*/
-
-#deleteObject{
-
-    background:#d32f2f;
+    background:#1565C0;
 
     color:white;
 
-    border:none;
+    padding:10px;
+
+}
+
+.alignButtons button:hover{
+
+    background:#0D47A1;
+
+}
+
+/*==============================
+ACTION BUTTONS
+==============================*/
+
+.properties button{
+
+    width:100%;
+
+    margin-top:10px;
+
+    padding:11px;
+
+}
+
+#deleteObject{
+
+    background:#C62828;
+
+    color:#fff;
 
 }
 
 #deleteObject:hover{
 
-    background:#b71c1c;
+    background:#B71C1C;
 
 }
 
-
-/*=========================================
-LAYER PANEL
-==========================================*/
+/*==============================
+LAYERS
+==============================*/
 
 #layersList{
 
@@ -220,76 +293,60 @@ LAYER PANEL
 
 }
 
-
-/*=========================================
+/*==============================
 RESPONSIVE
-==========================================*/
+==============================*/
 
 @media(max-width:1200px){
 
-.left-panel{
+.tool-panel{
 
-    width:220px;
-    min-width:220px;
+    width:280px;
 
-}
-
-.right-panel{
-
-    width:260px;
-    min-width:260px;
+    min-width:280px;
 
 }
 
+.properties{
+
+    width:280px;
+
+    min-width:280px;
+
 }
 
+}
 
 @media(max-width:900px){
 
-.container{
+.app{
 
     flex-direction:column;
 
 }
 
-.left-panel{
+.tool-panel{
 
-    width:100%;
-    min-width:100%;
-    height:240px;
-    border-right:none;
-    border-bottom:1px solid #ddd;
+    display:none;
 
 }
 
-.right-panel{
+.properties{
 
-    width:100%;
-    min-width:100%;
-    height:260px;
-    border-left:none;
-    border-top:1px solid #ddd;
+    display:none;
 
 }
 
 .workspace{
 
-    flex:1;
+    width:100%;
 
 }
 
+.toolbar{
+
+    overflow:auto;
+
 }
-
-
-/*=========================================
-SMOOTH TRANSITIONS
-==========================================*/
-
-.left-panel,
-.right-panel,
-.workspace,
-#canvasWrapper{
-
-    transition:.25s;
 
 }
