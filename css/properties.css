@@ -1,0 +1,354 @@
+/*=========================================
+    SCHOOL WALL CHART DESIGNER PRO
+    properties.css
+==========================================*/
+
+/*==============================
+PROPERTIES PANEL
+==============================*/
+
+.properties{
+
+    width:320px;
+
+    min-width:320px;
+
+    background:#FFFFFF;
+
+    border-left:1px solid #D9E2EC;
+
+    display:flex;
+
+    flex-direction:column;
+
+    overflow-y:auto;
+
+    padding:20px;
+
+}
+
+/*==============================
+SCROLLBAR
+==============================*/
+
+.properties::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+.properties::-webkit-scrollbar-thumb{
+
+    background:#CBD5E1;
+
+    border-radius:20px;
+
+}
+
+/*==============================
+TITLE
+==============================*/
+
+.properties h2{
+
+    color:#1565C0;
+
+    font-size:24px;
+
+    margin-bottom:20px;
+
+}
+
+.properties h3{
+
+    color:#1565C0;
+
+    font-size:18px;
+
+    margin:18px 0 10px;
+
+}
+
+/*==============================
+LABELS
+==============================*/
+
+.properties label{
+
+    display:block;
+
+    margin-top:12px;
+
+    margin-bottom:6px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    color:#475569;
+
+}
+
+/*==============================
+INPUTS
+==============================*/
+
+.properties input,
+
+.properties select,
+
+.properties textarea{
+
+    width:100%;
+
+    padding:10px;
+
+    border:1px solid #CBD5E1;
+
+    border-radius:8px;
+
+    background:white;
+
+    font-family:"Poppins",sans-serif;
+
+    font-size:14px;
+
+    margin-bottom:12px;
+
+    transition:.25s;
+
+}
+
+.properties input:focus,
+
+.properties select:focus,
+
+.properties textarea:focus{
+
+    outline:none;
+
+    border-color:#1565C0;
+
+    box-shadow:0 0 0 3px rgba(21,101,192,.15);
+
+}
+
+/*==============================
+COLOR PICKER
+==============================*/
+
+.properties input[type=color]{
+
+    padding:3px;
+
+    height:45px;
+
+    cursor:pointer;
+
+}
+
+/*==============================
+RANGE
+==============================*/
+
+.properties input[type=range]{
+
+    padding:0;
+
+    cursor:pointer;
+
+}
+
+/*==============================
+ALIGNMENT
+==============================*/
+
+.alignButtons{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:8px;
+
+    margin-top:10px;
+
+}
+
+.alignButtons button{
+
+    height:42px;
+
+    background:#1565C0;
+
+    color:white;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    font-size:18px;
+
+}
+
+.alignButtons button:hover{
+
+    background:#0D47A1;
+
+}
+
+/*==============================
+ACTION BUTTONS
+==============================*/
+
+.properties button{
+
+    width:100%;
+
+    padding:11px;
+
+    margin-top:10px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#1565C0;
+
+    color:white;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+.properties button:hover{
+
+    background:#0D47A1;
+
+}
+
+/*==============================
+DELETE BUTTON
+==============================*/
+
+#deleteObject{
+
+    background:#D32F2F;
+
+}
+
+#deleteObject:hover{
+
+    background:#B71C1C;
+
+}
+
+/*==============================
+DIVIDER
+==============================*/
+
+.properties hr{
+
+    border:none;
+
+    height:1px;
+
+    background:#E2E8F0;
+
+    margin:20px 0;
+
+}
+
+/*==============================
+LAYERS
+==============================*/
+
+#layersList{
+
+    list-style:none;
+
+    margin-top:10px;
+
+    padding:0;
+
+}
+
+#layersList li{
+
+    padding:10px;
+
+    border:1px solid #CBD5E1;
+
+    border-radius:8px;
+
+    background:#F8FAFC;
+
+    margin-bottom:8px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    font-size:14px;
+
+}
+
+#layersList li:hover{
+
+    background:#E3F2FD;
+
+    border-color:#1565C0;
+
+}
+
+/*==============================
+SECTION CARD
+==============================*/
+
+.property-card{
+
+    background:#F8FAFC;
+
+    border:1px solid #E2E8F0;
+
+    border-radius:10px;
+
+    padding:15px;
+
+    margin-bottom:18px;
+
+}
+
+/*==============================
+RESPONSIVE
+==============================*/
+
+@media(max-width:1200px){
+
+    .properties{
+
+        width:280px;
+
+        min-width:280px;
+
+    }
+
+}
+
+@media(max-width:900px){
+
+    .properties{
+
+        display:none;
+
+    }
+
+}
