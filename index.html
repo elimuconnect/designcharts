@@ -1,46 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
 
 <title>School Wall Chart Designer Pro</title>
 
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+rel="stylesheet">
+
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/sidebar.css">
 <link rel="stylesheet" href="css/canvas.css">
-<link rel="stylesheet" href="css/toolbar.css">
-<link rel="stylesheet" href="css/editor.css">
+<link rel="stylesheet" href="css/properties.css">
 
-<!-- Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-<!-- Fabric.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </head>
 
 <body>
 
-<header>
+<!-- ===========================
+TOP BAR
+=========================== -->
 
-<div class="logo">
+<header class="topbar">
 
-<h2>School Wall Chart Designer Pro</h2>
+<div class="brand">
+
+🎓 School Wall Chart Designer
 
 </div>
 
-<div class="top-buttons">
+<div class="toolbar">
 
-<button id="newProject">New</button>
+<button id="newBtn">New</button>
 
-<button id="saveProject">Save</button>
+<button id="saveBtn">Save</button>
 
-<button id="loadProject">Load</button>
+<button id="loadBtn">Open</button>
+
+<button id="undoBtn">Undo</button>
+
+<button id="redoBtn">Redo</button>
+
+<button id="copyBtn">Copy</button>
+
+<button id="pasteBtn">Paste</button>
+
+<button id="duplicateBtn">Duplicate</button>
 
 <button id="exportPNG">PNG</button>
 
@@ -48,106 +70,242 @@
 
 </div>
 
-</header>
-
-<div class="container">
-
-<!-- LEFT PANEL -->
-
-<aside class="left-panel">
-
-<h3>Canvas</h3>
-
-<label>Paper Size</label>
+<div class="toolbar-right">
 
 <select id="paperSize">
 
-<option value="A4">A4</option>
-<option value="A3">A3</option>
-<option value="A2">A2</option>
-<option value="A1">A1</option>
-<option value="A0">A0</option>
+<option>A4</option>
+<option>A3</option>
+<option>A2</option>
+<option>A1</option>
+<option>A0</option>
 
 </select>
-
-<label>Orientation</label>
 
 <select id="orientation">
 
-<option value="portrait">Portrait</option>
-<option value="landscape">Landscape</option>
+<option value="portrait">
+
+Portrait
+
+</option>
+
+<option value="landscape">
+
+Landscape
+
+</option>
 
 </select>
 
-<hr>
-
-<h3>Add Objects</h3>
-
-<button id="addTitle">Title</button>
-
-<button id="addSubtitle">Subtitle</button>
-
-<button id="addParagraph">Paragraph</button>
-
-<button id="addImage">Image</button>
-
-<button id="addRectangle">Rectangle</button>
-
-<button id="addCircle">Circle</button>
-
-<button id="addLine">Line</button>
-
-<button id="addArrow">Arrow</button>
-
-<hr>
-
-<h3>Zoom</h3>
-
 <input
 type="range"
+id="zoomSlider"
 min="20"
 max="300"
-value="100"
-id="zoomSlider">
+value="100">
 
-<span id="zoomValue">100%</span>
+<span id="zoomValue">
 
-</aside>
+100%
 
-<!-- CENTER -->
-
-<main class="workspace">
-
-<div id="canvasWrapper">
-
-<canvas id="designerCanvas"></canvas>
+</span>
 
 </div>
 
-</main>
+</header>
+
+<!-- ===========================
+MAIN
+=========================== -->
+
+<div class="app">
+
+<!-- LEFT SIDEBAR -->
+
+<nav class="sidebar">
+
+<button id="toolTemplates">
+
+⭐
+
+<span>
+
+Templates
+
+</span>
+
+</button>
+
+<button id="toolText">
+
+📝
+
+<span>
+
+Text
+
+</span>
+
+</button>
+
+<button id="toolImages">
+
+🖼️
+
+<span>
+
+Images
+
+</span>
+
+</button>
+
+<button id="toolShapes">
+
+⬜
+
+<span>
+
+Shapes
+
+</span>
+
+</button>
+
+<button id="toolTables">
+
+📊
+
+<span>
+
+Tables
+
+</span>
+
+</button>
+
+<button id="toolIcons">
+
+😀
+
+<span>
+
+Icons
+
+</span>
+
+</button>
+
+<button id="toolCharts">
+
+📈
+
+<span>
+
+Charts
+
+</span>
+
+</button>
+
+<button id="toolBackground">
+
+🎨
+
+<span>
+
+Background
+
+</span>
+
+</button>
+
+<button id="toolUploads">
+
+⬆️
+
+<span>
+
+Uploads
+
+</span>
+
+</button>
+
+<button id="toolLogos">
+
+🏫
+
+<span>
+
+School Logo
+
+</span>
+
+</button>
+
+</nav>
+
+<!-- TOOL PANEL -->
+
+<section class="tool-panel">
+
+<h2>
+
+Tool Box
+
+</h2>
+
+<div id="toolContent">
+
+Select a tool from the left.
+
+</div>
+
+</section>
+
+<!-- CANVAS -->
+
+<section class="workspace">
+
+<div id="canvasWrapper">
+
+<canvas id="designerCanvas">
+
+</canvas>
+
+</div>
+
+</section>
 
 <!-- RIGHT PANEL -->
 
-<aside class="right-panel">
+<aside class="properties">
 
-<h3>Properties</h3>
+<h2>
 
-<label>Text</label>
+Properties
+
+</h2>
+
+<label>
+
+Text
+
+</label>
 
 <input
-type="text"
 id="objectText">
 
-<label>Font Size</label>
+<label>
 
-<input
-type="number"
-id="fontSize"
-value="36">
+Font
 
-<label>Font Family</label>
+</label>
 
-<select id="fontFamily">
+<select
+id="fontFamily">
 
 <option>Poppins</option>
 
@@ -157,42 +315,133 @@ value="36">
 
 <option>Georgia</option>
 
-<option>Times New Roman</option>
-
 </select>
 
-<label>Text Color</label>
+<label>
+
+Size
+
+</label>
+
+<input
+type="number"
+id="fontSize"
+value="36">
+
+<label>
+
+Color
+
+</label>
 
 <input
 type="color"
-id="textColor"
-value="#000000">
+id="textColor">
 
-<label>Background</label>
+<label>
+
+Background
+
+</label>
 
 <input
 type="color"
-id="backgroundColor"
-value="#ffffff">
+id="backgroundColor">
 
-<label>Opacity</label>
+<label>
+
+Opacity
+
+</label>
 
 <input
 type="range"
+id="opacity"
 min="0"
 max="100"
-value="100"
-id="opacity">
+value="100">
+
+<hr>
+
+<h3>
+
+Alignment
+
+</h3>
+
+<div class="alignButtons">
+
+<button id="leftBtn">
+
+⬅
+
+</button>
+
+<button id="centerBtn">
+
+⬌
+
+</button>
+
+<button id="rightBtn">
+
+➡
+
+</button>
+
+<button id="topBtn">
+
+⬆
+
+</button>
+
+<button id="middleBtn">
+
+⬍
+
+</button>
+
+<button id="bottomBtn">
+
+⬇
+
+</button>
+
+</div>
+
+<hr>
+
+<h3>
+
+Layer
+
+</h3>
+
+<button id="frontBtn">
+
+Bring Front
+
+</button>
+
+<button id="backBtn">
+
+Send Back
+
+</button>
 
 <button id="deleteObject">
 
-Delete Selected
+Delete
 
 </button>
 
 <hr>
 
-<h3>Layers</h3>
+<h3>
+
+Objects
+
+</h3>
 
 <ul id="layersList">
 
@@ -206,12 +455,12 @@ Delete Selected
 <script src="js/history.js"></script>
 <script src="js/templates.js"></script>
 <script src="js/canvas.js"></script>
-<script src="js/drag.js"></script>
-<script src="js/resize.js"></script>
 <script src="js/editor.js"></script>
 <script src="js/export.js"></script>
 <script src="js/toolbar.js"></script>
+<script src="js/sidebar.js"></script>
 <script src="js/app.js"></script>
 
 </body>
+
 </html>
