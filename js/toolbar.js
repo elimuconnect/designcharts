@@ -3,238 +3,351 @@
     toolbar.js
 ==================================================*/
 
+
 let clipboardObject = null;
 
-/*-----------------------------------------
-UNDO / REDO STACKS
------------------------------------------*/
+
+/*=========================================
+HISTORY SYSTEM
+=========================================*/
 
 let undoStack = [];
 let redoStack = [];
 
-/*-----------------------------------------
-SAVE STATE
------------------------------------------*/
+let historyLock = false;
+
+
 
 function saveState(){
 
-    if(!canvas) return;
+    if(!canvas || historyLock)
+        return;
 
-    undoStack.push(JSON.stringify(canvas));
 
-    if(undoStack.length > 50){
+    undoStack.push(
+
+        JSON.stringify(
+
+            canvas.toJSON([
+                "id",
+                "name",
+                "locked"
+            ])
+
+        )
+
+    );
+
+
+    if(undoStack.length > 60){
 
         undoStack.shift();
 
     }
 
-    redoStack = [];
+
+    redoStack=[];
 
 }
 
-/*-----------------------------------------
-UNDO
------------------------------------------*/
 
-function undo(){
 
-    if(undoStack.length < 2) return;
 
-    redoStack.push(undoStack.pop());
+function loadState(state){
 
-    let previous = undoStack[undoStack.length-1];
+    historyLock=true;
 
-    canvas.loadFromJSON(previous,function(){
 
-        canvas.renderAll();
+    canvas.loadFromJSON(
 
-    });
+        state,
 
-}
+        function(){
 
-/*-----------------------------------------
-REDO
------------------------------------------*/
+            canvas.renderAll();
 
-function redo(){
+            historyLock=false;
 
-    if(redoStack.length===0) return;
-
-    let next = redoStack.pop();
-
-    undoStack.push(next);
-
-    canvas.loadFromJSON(next,function(){
-
-        canvas.renderAll();
-
-    });
-
-}
-
-/*-----------------------------------------
-COPY
------------------------------------------*/
-
-function copyObject(){
-
-    let active = canvas.getActiveObject();
-
-    if(!active) return;
-
-    active.clone(function(clone){
-
-        clipboardObject = clone;
-
-    });
-
-}
-
-/*-----------------------------------------
-PASTE
------------------------------------------*/
-
-function pasteObject(){
-
-    if(!clipboardObject) return;
-
-    clipboardObject.clone(function(clone){
-
-        canvas.discardActiveObject();
-
-        clone.set({
-
-            left:clone.left+30,
-
-            top:clone.top+30,
-
-            evented:true
-
-        });
-
-        if(clone.type==="activeSelection"){
-
-            clone.canvas=canvas;
-
-            clone.forEachObject(function(obj){
-
-                canvas.add(obj);
-
-            });
-
-            clone.setCoords();
-
-        }else{
-
-            canvas.add(clone);
+            if(typeof refreshLayers==="function")
+                refreshLayers();
 
         }
 
-        clipboardObject=clone;
-
-        canvas.setActiveObject(clone);
-
-        canvas.renderAll();
-
-        saveState();
-
-    });
+    );
 
 }
 
-/*-----------------------------------------
-DUPLICATE
------------------------------------------*/
 
-function duplicateObject(){
 
-    let obj=canvas.getActiveObject();
 
-    if(!obj) return;
+function undo(){
+
+    if(undoStack.length<=1)
+        return;
+
+
+    let current =
+        undoStack.pop();
+
+
+    redoStack.push(current);
+
+
+    loadState(
+        undoStack[
+            undoStack.length-1
+        ]
+    );
+
+}
+
+
+
+
+function redo(){
+
+    if(redoStack.length===0)
+        return;
+
+
+    let state =
+        redoStack.pop();
+
+
+    undoStack.push(state);
+
+
+    loadState(state);
+
+}
+
+
+
+
+
+/*=========================================
+COPY
+=========================================*/
+
+
+function copyObject(){
+
+    let obj =
+        canvas.getActiveObject();
+
+
+    if(!obj)
+        return;
+
 
     obj.clone(function(clone){
 
-        clone.left+=40;
-
-        clone.top+=40;
-
-        canvas.add(clone);
-
-        canvas.setActiveObject(clone);
-
-        canvas.renderAll();
-
-        saveState();
+        clipboardObject=clone;
 
     });
 
 }
 
-/*-----------------------------------------
+
+
+
+
+/*=========================================
+PASTE
+=========================================*/
+
+
+function pasteObject(){
+
+    if(!clipboardObject)
+        return;
+
+
+    clipboardObject.clone(function(clone){
+
+
+        canvas.discardActiveObject();
+
+
+        clone.set({
+
+            left:clone.left+40,
+
+            top:clone.top+40,
+
+            evented:true,
+
+            id:crypto.randomUUID()
+
+        });
+
+
+
+        canvas.add(clone);
+
+
+        canvas.setActiveObject(clone);
+
+
+        canvas.renderAll();
+
+
+        saveState();
+
+
+    });
+
+}
+
+
+
+
+
+/*=========================================
+DUPLICATE
+=========================================*/
+
+
+function duplicateObject(){
+
+    let obj =
+        canvas.getActiveObject();
+
+
+    if(!obj)
+        return;
+
+
+    obj.clone(function(clone){
+
+
+        clone.set({
+
+            left:obj.left+40,
+
+            top:obj.top+40,
+
+            id:crypto.randomUUID()
+
+        });
+
+
+
+        canvas.add(clone);
+
+
+        canvas.setActiveObject(clone);
+
+
+        canvas.renderAll();
+
+
+        saveState();
+
+
+    });
+
+}
+
+
+
+
+
+/*=========================================
 DELETE
------------------------------------------*/
+=========================================*/
+
 
 function deleteObject(){
 
-    let obj=canvas.getActiveObject();
+    let obj =
+        canvas.getActiveObject();
 
-    if(!obj) return;
+
+    if(!obj)
+        return;
+
 
     canvas.remove(obj);
 
+
     canvas.discardActiveObject();
 
+
     canvas.renderAll();
+
 
     saveState();
 
 }
 
-/*-----------------------------------------
-BRING TO FRONT
------------------------------------------*/
+
+
+
+
+/*=========================================
+LAYERS
+=========================================*/
+
 
 function bringToFront(){
 
-    let obj=canvas.getActiveObject();
+    let obj =
+        canvas.getActiveObject();
 
-    if(!obj) return;
+
+    if(!obj)
+        return;
+
 
     canvas.bringToFront(obj);
 
+
     canvas.renderAll();
+
 
     saveState();
 
 }
 
-/*-----------------------------------------
-SEND TO BACK
------------------------------------------*/
+
+
 
 function sendToBack(){
 
-    let obj=canvas.getActiveObject();
+    let obj =
+        canvas.getActiveObject();
 
-    if(!obj) return;
+
+    if(!obj)
+        return;
+
 
     canvas.sendToBack(obj);
 
+
     canvas.renderAll();
+
 
     saveState();
 
 }
 
-/*-----------------------------------------
-ALIGN LEFT
------------------------------------------*/
+
+
+
+
+/*=========================================
+ALIGNMENT
+=========================================*/
+
 
 function alignLeft(){
 
     let obj=canvas.getActiveObject();
 
-    if(!obj) return;
+    if(!obj)return;
+
 
     obj.left=20;
 
@@ -244,15 +357,15 @@ function alignLeft(){
 
 }
 
-/*-----------------------------------------
-ALIGN CENTER
------------------------------------------*/
+
+
 
 function alignCenter(){
 
     let obj=canvas.getActiveObject();
 
-    if(!obj) return;
+    if(!obj)return;
+
 
     obj.centerH();
 
@@ -262,17 +375,21 @@ function alignCenter(){
 
 }
 
-/*-----------------------------------------
-ALIGN RIGHT
------------------------------------------*/
+
+
 
 function alignRight(){
 
     let obj=canvas.getActiveObject();
 
-    if(!obj) return;
+    if(!obj)return;
 
-    obj.left=canvas.width-obj.getScaledWidth()-20;
+
+    obj.left =
+    canvas.width -
+    obj.getScaledWidth() -
+    20;
+
 
     obj.setCoords();
 
@@ -280,15 +397,15 @@ function alignRight(){
 
 }
 
-/*-----------------------------------------
-ALIGN TOP
------------------------------------------*/
+
+
 
 function alignTop(){
 
     let obj=canvas.getActiveObject();
 
-    if(!obj) return;
+    if(!obj)return;
+
 
     obj.top=20;
 
@@ -298,15 +415,15 @@ function alignTop(){
 
 }
 
-/*-----------------------------------------
-ALIGN MIDDLE
------------------------------------------*/
+
+
 
 function alignMiddle(){
 
     let obj=canvas.getActiveObject();
 
-    if(!obj) return;
+    if(!obj)return;
+
 
     obj.centerV();
 
@@ -316,17 +433,21 @@ function alignMiddle(){
 
 }
 
-/*-----------------------------------------
-ALIGN BOTTOM
------------------------------------------*/
+
+
 
 function alignBottom(){
 
     let obj=canvas.getActiveObject();
 
-    if(!obj) return;
+    if(!obj)return;
 
-    obj.top=canvas.height-obj.getScaledHeight()-20;
+
+    obj.top =
+    canvas.height -
+    obj.getScaledHeight() -
+    20;
+
 
     obj.setCoords();
 
@@ -334,9 +455,94 @@ function alignBottom(){
 
 }
 
-/*-----------------------------------------
-AUTO SAVE HISTORY
------------------------------------------*/
+
+
+
+
+/*=========================================
+LOCK OBJECT
+=========================================*/
+
+
+function toggleLock(){
+
+    let obj =
+        canvas.getActiveObject();
+
+
+    if(!obj)
+        return;
+
+
+    obj.locked =
+    !obj.locked;
+
+
+    obj.set({
+
+        selectable:!obj.locked,
+
+        evented:!obj.locked
+
+    });
+
+
+    canvas.renderAll();
+
+
+    saveState();
+
+}
+
+
+
+
+
+/*=========================================
+ZOOM
+=========================================*/
+
+
+function zoomIn(){
+
+    canvas.setZoom(
+        canvas.getZoom()+0.1
+    );
+
+    canvas.renderAll();
+
+}
+
+
+
+function zoomOut(){
+
+    canvas.setZoom(
+        canvas.getZoom()-0.1
+    );
+
+    canvas.renderAll();
+
+}
+
+
+
+function resetZoom(){
+
+    canvas.setZoom(1);
+
+    canvas.renderAll();
+
+}
+
+
+
+
+
+/*=========================================
+AUTO HISTORY
+=========================================*/
+
 
 canvas.on("object:added",function(){
 
@@ -344,11 +550,13 @@ canvas.on("object:added",function(){
 
 });
 
+
 canvas.on("object:modified",function(){
 
     saveState();
 
 });
+
 
 canvas.on("object:removed",function(){
 
@@ -356,100 +564,161 @@ canvas.on("object:removed",function(){
 
 });
 
-/*-----------------------------------------
+
+
+
+
+/*=========================================
 KEYBOARD SHORTCUTS
------------------------------------------*/
+=========================================*/
 
-document.addEventListener("keydown",function(e){
 
-    if(e.ctrlKey && e.key==="c"){
+document.addEventListener(
+"keydown",
+function(e){
 
-        e.preventDefault();
 
-        copyObject();
+if(e.ctrlKey && e.key==="c"){
 
-    }
+    e.preventDefault();
 
-    if(e.ctrlKey && e.key==="v"){
+    copyObject();
 
-        e.preventDefault();
+}
 
-        pasteObject();
 
-    }
 
-    if(e.ctrlKey && e.key==="d"){
+if(e.ctrlKey && e.key==="v"){
 
-        e.preventDefault();
+    e.preventDefault();
 
-        duplicateObject();
+    pasteObject();
 
-    }
+}
 
-    if(e.ctrlKey && e.key==="z"){
 
-        e.preventDefault();
 
-        undo();
+if(e.ctrlKey && e.key==="d"){
 
-    }
+    e.preventDefault();
 
-    if(e.ctrlKey && e.key==="y"){
+    duplicateObject();
 
-        e.preventDefault();
+}
 
-        redo();
 
-    }
 
-    if(e.key==="Delete"){
+if(e.ctrlKey && e.key==="z"){
 
-        deleteObject();
+    e.preventDefault();
 
-    }
+    undo();
+
+}
+
+
+
+if(e.ctrlKey && e.key==="y"){
+
+    e.preventDefault();
+
+    redo();
+
+}
+
+
+
+if(e.key==="Delete"){
+
+    deleteObject();
+
+}
+
+
+
+if(e.key==="Escape"){
+
+    canvas.discardActiveObject();
+
+    canvas.renderAll();
+
+}
+
+
 
 });
 
-/*-----------------------------------------
-OPTIONAL BUTTONS
------------------------------------------*/
+
+
+
+
+/*=========================================
+BUTTON CONNECTOR
+=========================================*/
+
 
 [
 ["undoBtn",undo],
 ["redoBtn",redo],
+
 ["copyBtn",copyObject],
 ["pasteBtn",pasteObject],
 ["duplicateBtn",duplicateObject],
+
+["deleteBtn",deleteObject],
+
 ["frontBtn",bringToFront],
 ["backBtn",sendToBack],
+
+["lockBtn",toggleLock],
+
+["zoomInBtn",zoomIn],
+["zoomOutBtn",zoomOut],
+["resetZoomBtn",resetZoom],
+
 ["leftBtn",alignLeft],
 ["centerBtn",alignCenter],
 ["rightBtn",alignRight],
+
 ["topBtn",alignTop],
 ["middleBtn",alignMiddle],
 ["bottomBtn",alignBottom]
-].forEach(([id,fn])=>{
 
-    const btn=document.getElementById(id);
+]
+.forEach(([id,fn])=>{
 
-    if(btn){
 
-        btn.onclick=fn;
+let btn=document.getElementById(id);
 
-    }
+
+if(btn){
+
+    btn.onclick=fn;
+
+}
+
 
 });
 
-/*-----------------------------------------
-INITIAL STATE
------------------------------------------*/
 
-window.addEventListener("load",function(){
 
-    setTimeout(function(){
 
-        saveState();
 
-    },500);
+/*=========================================
+INITIAL HISTORY
+=========================================*/
+
+
+window.addEventListener(
+"load",
+function(){
+
+
+setTimeout(function(){
+
+    saveState();
+
+},500);
+
 
 });
