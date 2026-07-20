@@ -4,7 +4,12 @@
 ==================================================*/
 
 
-const {jsPDF}=window.jspdf;
+"use strict";
+
+
+const PDF =
+window.jspdf ? window.jspdf.jsPDF : null;
+
 
 
 
@@ -39,6 +44,7 @@ function downloadFile(dataURL,filename){
 
 
 
+
 /*=========================================
 TIMESTAMP
 =========================================*/
@@ -50,19 +56,24 @@ function timestamp(){
     const d=new Date();
 
 
-    return d.getFullYear()
-    +
-    "-"
-    +
-    String(d.getMonth()+1).padStart(2,"0")
-    +
-    "-"
-    +
-    String(d.getDate()).padStart(2,"0")
-    +
-    "-"
-    +
-    Date.now();
+    return (
+
+        d.getFullYear()
+        +
+        "-"
+        +
+        String(d.getMonth()+1).padStart(2,"0")
+        +
+        "-"
+        +
+        String(d.getDate()).padStart(2,"0")
+        +
+        "-"
+        +
+        Date.now()
+
+    );
+
 
 }
 
@@ -71,11 +82,16 @@ function timestamp(){
 
 
 /*=========================================
-EXPORT SETTINGS
+EXPORT IMAGE
 =========================================*/
 
 
 function getExportImage(multiplier=3){
+
+
+    if(!canvas)
+        return null;
+
 
 
     return canvas.toDataURL({
@@ -85,7 +101,6 @@ function getExportImage(multiplier=3){
         multiplier,
 
         enableRetinaScaling:true
-
 
     });
 
@@ -97,20 +112,27 @@ function getExportImage(multiplier=3){
 
 
 /*=========================================
-PNG
+PNG EXPORT
 =========================================*/
 
 
 function exportPNG(){
 
 
+    let image=getExportImage(3);
+
+
+    if(!image)return;
+
+
     downloadFile(
 
-        getExportImage(3),
+        image,
 
         "Wall-Chart-"+timestamp()+".png"
 
     );
+
 
 }
 
@@ -119,15 +141,14 @@ function exportPNG(){
 
 
 /*=========================================
-JPG
+JPG EXPORT
 =========================================*/
 
 
 function exportJPG(){
 
 
-    let dataURL =
-    canvas.toDataURL({
+    let image=canvas.toDataURL({
 
         format:"jpeg",
 
@@ -141,7 +162,7 @@ function exportJPG(){
 
     downloadFile(
 
-        dataURL,
+        image,
 
         "Wall-Chart-"+timestamp()+".jpg"
 
@@ -155,19 +176,23 @@ function exportJPG(){
 
 
 /*=========================================
-SVG
+SVG EXPORT
 =========================================*/
 
 
 function exportSVG(){
 
 
-    let svg =
-    canvas.toSVG();
+    if(!canvas)
+        return;
 
 
-    let blob =
-    new Blob(
+
+    let svg=canvas.toSVG();
+
+
+
+    let blob=new Blob(
 
         [svg],
 
@@ -178,22 +203,23 @@ function exportSVG(){
     );
 
 
-    let url =
+
+    let url=
     URL.createObjectURL(blob);
 
 
 
-    let a=document.createElement("a");
+    let link=document.createElement("a");
 
 
-    a.href=url;
+    link.href=url;
 
 
-    a.download=
+    link.download=
     "Wall-Chart-"+timestamp()+".svg";
 
 
-    a.click();
+    link.click();
 
 
 
@@ -207,29 +233,25 @@ function exportSVG(){
 
 
 /*=========================================
-PDF PRINT EXPORT
+PDF EXPORT
 =========================================*/
 
 
 function exportPDF(){
 
 
-    let image =
+    if(!PDF || !canvas)
+        return;
+
+
+
+    let image=
     getExportImage(4);
 
 
 
-    let width =
-    canvas.width;
-
-
-    let height =
-    canvas.height;
-
-
-
     let orientation =
-    width>height
+    canvas.width > canvas.height
     ?
     "landscape"
     :
@@ -237,8 +259,7 @@ function exportPDF(){
 
 
 
-    let pdf =
-    new jsPDF({
+    let pdf=new PDF({
 
         orientation,
 
@@ -250,11 +271,11 @@ function exportPDF(){
 
 
 
-    let pageWidth =
+    let width =
     pdf.internal.pageSize.getWidth();
 
 
-    let pageHeight =
+    let height =
     pdf.internal.pageSize.getHeight();
 
 
@@ -269,9 +290,9 @@ function exportPDF(){
 
         0,
 
-        pageWidth,
+        width,
 
-        pageHeight
+        height
 
     );
 
@@ -291,7 +312,7 @@ function exportPDF(){
 
 
 /*=========================================
-HIGH QUALITY EXPORT
+HIGH RES EXPORT
 =========================================*/
 
 
@@ -308,7 +329,6 @@ function exportHighResPNG(){
 
 
 }
-
 
 
 
@@ -339,6 +359,11 @@ SAVE PROJECT
 function saveProject(){
 
 
+    if(!canvas)
+        return;
+
+
+
     let project={
 
 
@@ -354,15 +379,26 @@ function saveProject(){
 
 
         paper:
-        currentPaper || null,
+        currentPaper,
+
+
+        orientation:
+        currentOrientation,
+
+
+        zoom:
+        currentZoom,
 
 
         canvas:
+
         canvas.toJSON([
 
             "id",
 
             "name",
+
+            "customType",
 
             "locked"
 
@@ -372,15 +408,16 @@ function saveProject(){
 
 
 
-    let blob =
-    new Blob(
+    let blob=new Blob(
 
         [
+
             JSON.stringify(
                 project,
                 null,
                 2
             )
+
         ],
 
         {
@@ -391,22 +428,23 @@ function saveProject(){
 
 
 
-    let url =
+    let url=
     URL.createObjectURL(blob);
 
 
 
-    let a=document.createElement("a");
+    let link=document.createElement("a");
 
 
-    a.href=url;
+    link.href=url;
 
 
-    a.download=
+    link.download=
     "Project-"+timestamp()+".json";
 
 
-    a.click();
+    link.click();
+
 
 
     URL.revokeObjectURL(url);
@@ -426,7 +464,7 @@ LOAD PROJECT
 function loadProject(){
 
 
-    let input =
+    let input=
     document.createElement("input");
 
 
@@ -446,7 +484,8 @@ function loadProject(){
         let file=e.target.files[0];
 
 
-        if(!file)return;
+        if(!file)
+            return;
 
 
 
@@ -457,36 +496,60 @@ function loadProject(){
         reader.onload=function(){
 
 
-            let project =
+            let project=
             JSON.parse(reader.result);
 
 
 
-            let data =
-            project.canvas ||
-            project;
+            if(project.paper){
+
+                currentPaper=
+                project.paper;
+
+            }
 
 
 
-            canvas.loadFromJSON(
+            if(project.orientation){
 
-                data,
+                currentOrientation=
+                project.orientation;
 
-                function(){
-
-
-                    canvas.renderAll();
+            }
 
 
 
-                    if(typeof refreshLayers==="function")
-
-                        refreshLayers();
+            if(project.canvas){
 
 
-                }
+                canvas.loadFromJSON(
 
-            );
+                    project.canvas,
+
+                    function(){
+
+
+                        canvas.renderAll();
+
+
+
+                        if(typeof refreshLayers==="function")
+
+                            refreshLayers();
+
+
+
+                        if(typeof saveHistory==="function")
+
+                            saveHistory();
+
+
+                    }
+
+                );
+
+
+            }
 
 
         };
@@ -512,35 +575,38 @@ PRINT
 function printCanvas(){
 
 
-    let image =
-    getExportImage(3);
+    let image=
+    getExportImage(4);
 
 
 
-    let win =
+    let win=
     window.open("");
 
 
 
     win.document.write(`
 
-        <html>
+    <html>
 
-        <body style="margin:0">
+    <body style="margin:0">
 
-        <img src="${image}"
-        style="width:100%">
+    <img src="${image}"
+    style="width:100%">
 
 
-        </body>
+    </body>
 
-        </html>
+    </html>
 
     `);
 
 
 
     win.document.close();
+
+
+    win.focus();
 
 
     win.print();
@@ -553,15 +619,15 @@ function printCanvas(){
 
 
 /*=========================================
-BUTTONS
+BUTTON EVENTS
 =========================================*/
 
 
 [
 ["exportPNG",exportPNG],
-["exportPDF",exportPDF],
 ["exportJPG",exportJPG],
 ["exportSVG",exportSVG],
+["exportPDF",exportPDF],
 ["saveProject",saveProject],
 ["loadProject",loadProject],
 ["printCanvas",printCanvas]
@@ -570,12 +636,13 @@ BUTTONS
 .forEach(([id,fn])=>{
 
 
-let btn=document.getElementById(id);
+    let btn=
+    document.getElementById(id);
 
 
-if(btn)
+    if(btn)
 
-btn.onclick=fn;
+        btn.onclick=fn;
 
 
 });
@@ -585,7 +652,7 @@ btn.onclick=fn;
 
 
 /*=========================================
-GLOBAL
+GLOBAL API
 =========================================*/
 
 
