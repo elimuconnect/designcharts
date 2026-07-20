@@ -10,18 +10,65 @@ CLEAR DESIGN
 
 function clearDesign(){
 
-    canvas.clear();
+    if(!confirm("Replace the current design?")) return;
+
+
+    canvas.getObjects().forEach(obj=>{
+        canvas.remove(obj);
+    });
+
 
     canvas.backgroundColor="#ffffff";
 
-    applyPaperSize(currentPaper);
+    canvas.discardActiveObject();
+
+    canvas.requestRenderAll();
+
+
+    if(typeof refreshLayers==="function")
+        refreshLayers();
+
+
+    if(typeof saveHistory==="function")
+        saveHistory();
 
 }
 
 
+
 /*=========================================
-TITLE
+CORE ADD FUNCTION
 =========================================*/
+
+function addTemplateObjects(...objects){
+
+    objects.forEach(obj=>{
+
+        if(obj)
+            canvas.add(obj);
+
+    });
+
+
+    canvas.requestRenderAll();
+
+
+    if(typeof refreshLayers==="function")
+        refreshLayers();
+
+
+    if(typeof saveHistory==="function")
+        saveHistory();
+
+}
+
+
+
+
+/*=========================================
+TEXT HELPERS
+=========================================*/
+
 
 function createTitle(text,color="#1565C0"){
 
@@ -48,25 +95,22 @@ function createTitle(text,color="#1565C0"){
 }
 
 
-/*=========================================
-SUBTITLE
-=========================================*/
 
-function createSubtitle(text){
+function createSectionTitle(text,color){
 
     return new fabric.Textbox(text,{
 
-        left:100,
+        left:80,
 
-        top:160,
+        top:220,
 
-        width:canvas.width-200,
+        width:700,
 
-        fontSize:34,
+        fontSize:50,
 
-        fill:"#444",
+        fontWeight:"bold",
 
-        textAlign:"center",
+        fill:color,
 
         fontFamily:"Poppins"
 
@@ -75,19 +119,17 @@ function createSubtitle(text){
 }
 
 
-/*=========================================
-BODY
-=========================================*/
+
 
 function createBody(text,left,top,width){
 
     return new fabric.Textbox(text,{
 
-        left:left,
+        left,
 
-        top:top,
+        top,
 
-        width:width,
+        width,
 
         fontSize:30,
 
@@ -102,42 +144,106 @@ function createBody(text,left,top,width){
 }
 
 
+
 /*=========================================
-HEADER BAR
+SHAPE HELPERS
 =========================================*/
 
-function addHeaderBar(color){
 
-    canvas.add(
+function createBox(left,top,width,height,color="#E3F2FD",stroke="#1565C0"){
 
-        new fabric.Rect({
+    return new fabric.Rect({
 
-            left:0,
+        left,
 
-            top:0,
+        top,
 
-            width:canvas.width,
+        width,
 
-            height:140,
+        height,
 
-            fill:color,
+        fill:color,
 
-            selectable:false
+        stroke,
 
-        })
+        strokeWidth:3,
 
-    );
+        rx:20,
+
+        ry:20
+
+    });
 
 }
 
 
+
+function createImagePlaceholder(
+    text="Insert Image",
+    left=900,
+    top=250
+){
+
+    return [
+
+        createBox(
+            left,
+            top,
+            500,
+            600
+        ),
+
+        new fabric.Text(
+            text,
+            {
+                left:left+100,
+                top:top+260,
+                fontSize:40,
+                fill:"#1565C0",
+                fontFamily:"Poppins"
+            }
+        )
+
+    ];
+
+}
+
+
+
+
+
 /*=========================================
-FOOTER
+HEADER
 =========================================*/
 
-function addFooter(){
 
-    canvas.add(
+function createHeader(color="#1565C0"){
+
+    return new fabric.Rect({
+
+        left:0,
+
+        top:0,
+
+        width:canvas.width,
+
+        height:140,
+
+        fill:color,
+
+        selectable:false
+
+    });
+
+}
+
+
+
+
+
+function createFooter(){
+
+    return [
 
         new fabric.Rect({
 
@@ -153,11 +259,8 @@ function addFooter(){
 
             selectable:false
 
-        })
+        }),
 
-    );
-
-    canvas.add(
 
         new fabric.Text(
 
@@ -179,409 +282,301 @@ function addFooter(){
 
         )
 
-    );
+    ];
 
 }
 
 
-/*=========================================
-MATHEMATICS TEMPLATE
-=========================================*/
 
-function mathematicsTemplate(){
-
-    clearDesign();
-
-    addHeaderBar("#1565C0");
-
-    canvas.add(
-
-        new fabric.Text(
-
-            "MATHEMATICS",
-
-            {
-
-                left:0,
-
-                top:35,
-
-                width:canvas.width,
-
-                textAlign:"center",
-
-                fill:"white",
-
-                fontSize:78,
-
-                fontWeight:"bold",
-
-                fontFamily:"Poppins"
-
-            }
-
-        )
-
-    );
-
-    canvas.add(
-
-        createBody(
-
-`✓ Numbers
-
-✓ Fractions
-
-✓ Decimals
-
-✓ Percentages
-
-✓ Ratio
-
-✓ Algebra
-
-✓ Geometry
-
-✓ Statistics`,
-
-70,
-
-220,
-
-650
-
-        )
-
-    );
-
-    canvas.add(
-
-        new fabric.Rect({
-
-            left:900,
-
-            top:220,
-
-            width:520,
-
-            height:700,
-
-            fill:"#E3F2FD",
-
-            stroke:"#1565C0",
-
-            strokeWidth:3,
-
-            rx:20,
-
-            ry:20
-
-        })
-
-    );
-
-    canvas.add(
-
-        new fabric.Text(
-
-            "Illustration Area",
-
-            {
-
-                left:1020,
-
-                top:520,
-
-                fontSize:42,
-
-                fill:"#1565C0"
-
-            }
-
-        )
-
-    );
-
-    addFooter();
-
-}
 
 
 /*=========================================
-SCIENCE TEMPLATE
+TEMPLATE BUILDERS
 =========================================*/
 
-function scienceTemplate(){
+
+function createFractionsTemplate(){
+
 
     clearDesign();
 
-    addHeaderBar("#2E7D32");
 
-    canvas.add(
+    let footer=createFooter();
 
-        new fabric.Text(
 
-            "SCIENCE",
+    addTemplateObjects(
 
-            {
+        createHeader("#1565C0"),
 
-                left:0,
 
-                top:35,
+        createTitle(
+            "FRACTIONS",
+            "#ffffff"
+        ),
 
-                width:canvas.width,
 
-                textAlign:"center",
+        createSectionTitle(
+            "Understanding Fractions",
+            "#1565C0"
+        ),
 
-                fill:"white",
-
-                fontSize:78,
-
-                fontWeight:"bold"
-
-            }
-
-        )
-
-    );
-
-    canvas.add(
 
         createBody(
 
-`• Living Things
+`✓ Numerator
 
-• Human Body
+✓ Denominator
 
-• Plants
+✓ Equivalent Fractions
 
-• Energy
+✓ Adding Fractions
 
-• Matter
-
-• Weather
-
-• Environment
-
-• Experiments`,
+✓ Comparing Fractions`,
 
 80,
 
-220,
+320,
 
 700
 
-        )
+        ),
+
+
+        ...createImagePlaceholder(
+            "Fraction Diagram",
+            900,
+            250
+        ),
+
+
+        ...footer
 
     );
-
-    canvas.add(
-
-        new fabric.Circle({
-
-            radius:220,
-
-            fill:"#C8E6C9",
-
-            left:980,
-
-            top:300
-
-        })
-
-    );
-
-    canvas.add(
-
-        new fabric.Text(
-
-            "Science Image",
-
-            {
-
-                left:1030,
-
-                top:500,
-
-                fontSize:40,
-
-                fill:"#1B5E20"
-
-            }
-
-        )
-
-    );
-
-    addFooter();
 
 }
 
 
-/*=========================================
-ENGLISH TEMPLATE
-=========================================*/
 
-function englishTemplate(){
+
+function createAnglesTemplate(){
+
 
     clearDesign();
 
-    addHeaderBar("#8E24AA");
 
-    canvas.add(
+    addTemplateObjects(
 
-        new fabric.Text(
+        createHeader("#EF6C00"),
 
-            "ENGLISH",
 
-            {
+        createTitle(
+            "ANGLES",
+            "#ffffff"
+        ),
 
-                left:0,
-
-                top:35,
-
-                width:canvas.width,
-
-                textAlign:"center",
-
-                fill:"white",
-
-                fontSize:78,
-
-                fontWeight:"bold"
-
-            }
-
-        )
-
-    );
-
-    canvas.add(
 
         createBody(
 
-`Grammar
+`Types of Angles
 
-Reading
+• Acute Angle
 
-Writing
+• Right Angle
 
-Listening
+• Obtuse Angle
 
-Speaking
+• Straight Angle
 
-Vocabulary
+• Reflex Angle`,
 
-Comprehension
+100,
 
-Creative Writing`,
+250,
 
-90,
+700
 
-220,
+        ),
 
-650
 
-        )
+        ...createImagePlaceholder(
+            "Angle Drawing",
+            900,
+            250
+        ),
 
-    );
 
-    canvas.add(
-
-        new fabric.Rect({
-
-            left:930,
-
-            top:260,
-
-            width:500,
-
-            height:650,
-
-            fill:"#F3E5F5",
-
-            stroke:"#8E24AA",
-
-            strokeWidth:3,
-
-            rx:15,
-
-            ry:15
-
-        })
+        ...createFooter()
 
     );
 
-    canvas.add(
-
-        new fabric.Text(
-
-            "Insert Picture",
-
-            {
-
-                left:1050,
-
-                top:520,
-
-                fill:"#8E24AA",
-
-                fontSize:40
-
-            }
-
-        )
-
-    );
-
-    addFooter();
 
 }
+
+
+
+
+
+function createPlantsTemplate(){
+
+
+    clearDesign();
+
+
+    addTemplateObjects(
+
+        createHeader("#2E7D32"),
+
+
+        createTitle(
+            "PLANTS",
+            "#ffffff"
+        ),
+
+
+        createBody(
+
+`Plant Parts
+
+✓ Roots
+
+✓ Stem
+
+✓ Leaves
+
+✓ Flowers
+
+✓ Seeds`,
+
+100,
+
+250,
+
+700
+
+        ),
+
+
+        ...createImagePlaceholder(
+            "Plant Image",
+            900,
+            250
+        ),
+
+
+        ...createFooter()
+
+    );
+
+}
+
+
+
+
+
+/*=========================================
+TEMPLATE LIBRARY
+=========================================*/
+
+
+const TEMPLATE_LIBRARY=[
+
+
+{
+
+id:"math-fractions",
+
+title:"Fractions",
+
+category:"Mathematics",
+
+preview:"templates/math/fractions.png",
+
+load:createFractionsTemplate
+
+},
+
+
+{
+
+id:"math-angles",
+
+title:"Angles",
+
+category:"Mathematics",
+
+preview:"templates/math/angles.png",
+
+load:createAnglesTemplate
+
+},
+
+
+{
+
+id:"science-plants",
+
+title:"Plants",
+
+category:"Science",
+
+preview:"templates/science/plants.png",
+
+load:createPlantsTemplate
+
+}
+
+
+];
+
+
+
 
 
 /*=========================================
 LOAD TEMPLATE
 =========================================*/
 
-function loadTemplate(name){
 
-    switch(name){
+function loadTemplate(id){
 
-        case "math":
+    let template=TEMPLATE_LIBRARY.find(
+        t=>t.id===id
+    );
 
-            mathematicsTemplate();
 
-            break;
+    if(template){
 
-        case "science":
-
-            scienceTemplate();
-
-            break;
-
-        case "english":
-
-            englishTemplate();
-
-            break;
+        template.load();
 
     }
 
 }
 
 
+
+
+
 /*=========================================
-GLOBAL
+EXPORT
 =========================================*/
+
 
 window.chartTemplates={
 
-    mathematicsTemplate,
 
-    scienceTemplate,
+loadTemplate,
 
-    englishTemplate,
 
-    loadTemplate
+TEMPLATE_LIBRARY,
+
+
+createFractionsTemplate,
+
+
+createAnglesTemplate,
+
+
+createPlantsTemplate
+
 
 };
