@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>School Wall Chart Designer Pro</title>
+
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/canvas.css">
+<link rel="stylesheet" href="css/toolbar.css">
+<link rel="stylesheet" href="css/editor.css">
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Fabric.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">
+
+<h2>School Wall Chart Designer Pro</h2>
+
+</div>
+
+<div class="top-buttons">
+
+<button id="newProject">New</button>
+
+<button id="saveProject">Save</button>
+
+<button id="loadProject">Load</button>
+
+<button id="exportPNG">PNG</button>
+
+<button id="exportPDF">PDF</button>
+
+</div>
+
+</header>
+
+<div class="container">
+
+<!-- LEFT PANEL -->
+
+<aside class="left-panel">
+
+<h3>Canvas</h3>
+
+<label>Paper Size</label>
+
+<select id="paperSize">
+
+<option value="A4">A4</option>
+<option value="A3">A3</option>
+<option value="A2">A2</option>
+<option value="A1">A1</option>
+<option value="A0">A0</option>
+
+</select>
+
+<label>Orientation</label>
+
+<select id="orientation">
+
+<option value="portrait">Portrait</option>
+<option value="landscape">Landscape</option>
+
+</select>
+
+<hr>
+
+<h3>Add Objects</h3>
+
+<button id="addTitle">Title</button>
+
+<button id="addSubtitle">Subtitle</button>
+
+<button id="addParagraph">Paragraph</button>
+
+<button id="addImage">Image</button>
+
+<button id="addRectangle">Rectangle</button>
+
+<button id="addCircle">Circle</button>
+
+<button id="addLine">Line</button>
+
+<button id="addArrow">Arrow</button>
+
+<hr>
+
+<h3>Zoom</h3>
+
+<input
+type="range"
+min="20"
+max="300"
+value="100"
+id="zoomSlider">
+
+<span id="zoomValue">100%</span>
+
+</aside>
+
+<!-- CENTER -->
+
+<main class="workspace">
+
+<div id="canvasWrapper">
+
+<canvas id="designerCanvas"></canvas>
+
+</div>
+
+</main>
+
+<!-- RIGHT PANEL -->
+
+<aside class="right-panel">
+
+<h3>Properties</h3>
+
+<label>Text</label>
+
+<input
+type="text"
+id="objectText">
+
+<label>Font Size</label>
+
+<input
+type="number"
+id="fontSize"
+value="36">
+
+<label>Font Family</label>
+
+<select id="fontFamily">
+
+<option>Poppins</option>
+
+<option>Arial</option>
+
+<option>Verdana</option>
+
+<option>Georgia</option>
+
+<option>Times New Roman</option>
+
+</select>
+
+<label>Text Color</label>
+
+<input
+type="color"
+id="textColor"
+value="#000000">
+
+<label>Background</label>
+
+<input
+type="color"
+id="backgroundColor"
+value="#ffffff">
+
+<label>Opacity</label>
+
+<input
+type="range"
+min="0"
+max="100"
+value="100"
+id="opacity">
+
+<button id="deleteObject">
+
+Delete Selected
+
+</button>
+
+<hr>
+
+<h3>Layers</h3>
+
+<ul id="layersList">
+
+</ul>
+
+</aside>
+
+</div>
+
+<script src="js/utils.js"></script>
+<script src="js/history.js"></script>
+<script src="js/templates.js"></script>
+<script src="js/canvas.js"></script>
+<script src="js/drag.js"></script>
+<script src="js/resize.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/export.js"></script>
+<script src="js/toolbar.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
