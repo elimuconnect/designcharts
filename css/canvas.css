@@ -3,88 +3,81 @@
     canvas.css
 ==========================================*/
 
-/*=========================================
+/*==============================
 WORKSPACE
-==========================================*/
+==============================*/
 
 .workspace{
 
     position:relative;
 
+    display:flex;
+
+    justify-content:center;
+
+    align-items:flex-start;
+
     overflow:auto;
 
-    background:#dfe7ef;
+    background:#DFE7EF;
 
     background-image:
-
         linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px),
-
         linear-gradient(90deg, rgba(0,0,0,.04) 1px, transparent 1px);
 
     background-size:25px 25px;
 
 }
 
-
-/*=========================================
+/*==============================
 CANVAS WRAPPER
-==========================================*/
+==============================*/
 
 #canvasWrapper{
 
     position:relative;
 
-    background:white;
+    margin:60px;
 
-    margin:80px;
+    padding:25px;
 
-    padding:30px;
+    background:#FFFFFF;
 
     border-radius:8px;
 
     box-shadow:
-
         0 10px 30px rgba(0,0,0,.15),
-
         0 0 0 1px rgba(0,0,0,.08);
 
     transform-origin:center center;
 
-    transition:.25s;
+    transition:transform .25s ease;
 
 }
 
-
-/*=========================================
-DESIGN CANVAS
-==========================================*/
+/*==============================
+FABRIC CANVAS
+==============================*/
 
 #designerCanvas{
 
     display:block;
 
-    background:white;
+    background:#FFFFFF;
 
-    border:1px solid #d6d6d6;
+    border:1px solid #D6D6D6;
 
 }
 
-
-/*=========================================
+/*==============================
 SAFE MARGIN
-==========================================*/
+==============================*/
 
 .canvas-safe-area{
 
     position:absolute;
 
-    top:20px;
-
-    left:20px;
-
-    right:20px;
-
-    bottom:20px;
+    inset:20px;
 
     border:2px dashed rgba(33,150,243,.25);
 
@@ -92,22 +85,15 @@ SAFE MARGIN
 
 }
 
-
-/*=========================================
+/*==============================
 PRINT MARGIN
-==========================================*/
+==============================*/
 
 .canvas-print-area{
 
     position:absolute;
 
-    top:8px;
-
-    left:8px;
-
-    right:8px;
-
-    bottom:8px;
+    inset:8px;
 
     border:1px dashed rgba(255,0,0,.25);
 
@@ -115,84 +101,23 @@ PRINT MARGIN
 
 }
 
-
-/*=========================================
-RULERS
-==========================================*/
-
-.horizontal-ruler{
-
-    position:absolute;
-
-    top:0;
-
-    left:40px;
-
-    right:0;
-
-    height:40px;
-
-    background:white;
-
-    border-bottom:1px solid #ccc;
-
-}
-
-.vertical-ruler{
-
-    position:absolute;
-
-    top:40px;
-
-    left:0;
-
-    width:40px;
-
-    bottom:0;
-
-    background:white;
-
-    border-right:1px solid #ccc;
-
-}
-
-
-/*=========================================
-CANVAS SHADOW
-==========================================*/
-
-.canvas-shadow{
-
-    position:absolute;
-
-    inset:0;
-
-    box-shadow:
-
-        inset 0 0 30px rgba(0,0,0,.04);
-
-    pointer-events:none;
-
-}
-
-
-/*=========================================
+/*==============================
 PAGE LABEL
-==========================================*/
+==============================*/
 
 .paper-label{
 
     position:absolute;
 
-    top:-45px;
+    top:-42px;
 
     left:0;
 
+    padding:6px 14px;
+
     background:#1565C0;
 
-    color:white;
-
-    padding:6px 15px;
+    color:#FFFFFF;
 
     border-radius:6px;
 
@@ -202,21 +127,9 @@ PAGE LABEL
 
 }
 
-
-/*=========================================
-ZOOM ANIMATION
-==========================================*/
-
-.zooming{
-
-    transition:transform .2s ease;
-
-}
-
-
-/*=========================================
-GRID TOGGLE
-==========================================*/
+/*==============================
+GRID
+==============================*/
 
 .hide-grid{
 
@@ -224,13 +137,9 @@ GRID TOGGLE
 
 }
 
-
-/*=========================================
-PAGE SIZES
-==========================================*/
-
-/* These dimensions are display sizes only.
-   JS will calculate real scaling. */
+/*==============================
+DISPLAY PAPER SIZES
+==============================*/
 
 .paper-a4{
 
@@ -272,21 +181,19 @@ PAGE SIZES
 
 }
 
-
-/*=========================================
+/*==============================
 LANDSCAPE
-==========================================*/
+==============================*/
 
 .landscape{
 
-    transform:rotate(0deg);
+    transform:none;
 
 }
 
-
-/*=========================================
-OBJECT SELECTION
-==========================================*/
+/*==============================
+SELECTION
+==============================*/
 
 .canvas-object-selected{
 
@@ -294,22 +201,25 @@ OBJECT SELECTION
 
 }
 
-
-/*=========================================
+/*==============================
 ALIGNMENT GUIDES
-==========================================*/
+==============================*/
 
 .guide-horizontal{
 
     position:absolute;
 
-    height:1px;
-
-    background:#ff1744;
+    left:0;
 
     width:100%;
 
+    height:1px;
+
+    background:#FF1744;
+
     pointer-events:none;
+
+    display:none;
 
 }
 
@@ -317,47 +227,51 @@ ALIGNMENT GUIDES
 
     position:absolute;
 
-    width:1px;
+    top:0;
 
-    background:#ff1744;
+    width:1px;
 
     height:100%;
 
+    background:#FF1744;
+
     pointer-events:none;
+
+    display:none;
 
 }
 
-
-/*=========================================
-CENTER CROSS
-==========================================*/
+/*==============================
+CENTER POINT
+==============================*/
 
 .center-point{
 
     position:absolute;
 
-    width:12px;
-
-    height:12px;
-
-    border-radius:50%;
-
-    background:#1565C0;
-
     left:50%;
 
     top:50%;
+
+    width:10px;
+
+    height:10px;
+
+    background:#1565C0;
+
+    border-radius:50%;
 
     transform:translate(-50%,-50%);
 
     pointer-events:none;
 
+    display:none;
+
 }
 
-
-/*=========================================
-LOADING OVERLAY
-==========================================*/
+/*==============================
+LOADING
+==============================*/
 
 .canvas-loading{
 
@@ -365,7 +279,7 @@ LOADING OVERLAY
 
     inset:0;
 
-    display:flex;
+    display:none;
 
     justify-content:center;
 
@@ -375,25 +289,34 @@ LOADING OVERLAY
 
     font-size:22px;
 
-    font-weight:bold;
+    font-weight:700;
 
     color:#1565C0;
 
 }
 
+/*==============================
+ZOOM
+==============================*/
 
-/*=========================================
+.zooming{
+
+    transition:transform .2s ease;
+
+}
+
+/*==============================
 RESPONSIVE
-==========================================*/
+==============================*/
 
 @media(max-width:900px){
 
-#canvasWrapper{
+    #canvasWrapper{
 
-    margin:20px;
+        margin:20px;
 
-    padding:15px;
+        padding:15px;
 
-}
+    }
 
 }
