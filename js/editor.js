@@ -1,474 +1,524 @@
-/*==================================================
+/*=========================================================
     SCHOOL WALL CHART DESIGNER PRO
     editor.js
-==================================================*/
+=========================================================*/
 
-const fileInput = document.createElement("input");
-fileInput.type = "file";
-fileInput.accept = "image/*";
+"use strict";
 
-/*--------------------------------------------------
-ADD TITLE
---------------------------------------------------*/
+/*=========================================================
+    IMAGE INPUT SETUP
+=========================================================*/
 
-function addTitle(){
+const imageInput = document.createElement("input");
+imageInput.type = "file";
+imageInput.accept = "image/*";
 
-    const title = new fabric.Textbox("Main Title",{
+/*=========================================================
+    COMMON ADD FUNCTION
+=========================================================*/
 
-        left:120,
-        top:80,
+function addObject(obj) {
+    if (typeof canvas === "undefined" || !canvas) {
+        console.error("Fabric canvas instance is not defined.");
+        return;
+    }
 
-        width:700,
+    canvas.add(obj);
+    canvas.setActiveObject(obj);
+    canvas.requestRenderAll();
 
-        fontFamily:"Poppins",
+    if (typeof saveHistory === "function") {
+        saveHistory();
+    }
 
-        fontSize:64,
-
-        fontWeight:"bold",
-
-        fill:"#1565C0",
-
-        editable:true
-
-    });
-
-    canvas.add(title);
-
-    canvas.setActiveObject(title);
-
-    canvas.renderAll();
-
+    if (typeof refreshLayers === "function") {
+        refreshLayers();
+    }
 }
 
+/*=========================================================
+    PART 1: BASIC ELEMENTS
+=========================================================*/
 
-/*--------------------------------------------------
-ADD SUBTITLE
---------------------------------------------------*/
-
-function addSubtitle(){
-
-    const subtitle = new fabric.Textbox("Subtitle",{
-
-        left:120,
-        top:180,
-
-        width:700,
-
-        fontFamily:"Poppins",
-
-        fontSize:36,
-
-        fill:"#333333"
-
-    });
-
-    canvas.add(subtitle);
-
-    canvas.setActiveObject(subtitle);
-
-    canvas.renderAll();
-
+function addTitle() {
+    addObject(
+        new fabric.Textbox("MAIN TITLE", {
+            left: 120,
+            top: 80,
+            width: 900,
+            fontFamily: "Poppins",
+            fontSize: 64,
+            fontWeight: "bold",
+            fill: "#1565C0",
+            editable: true,
+            name: "Main Title"
+        })
+    );
 }
 
-
-/*--------------------------------------------------
-ADD PARAGRAPH
---------------------------------------------------*/
-
-function addParagraph(){
-
-    const paragraph = new fabric.Textbox(
-
-`Type your content here.
-
-This paragraph automatically wraps.
-
-Perfect for educational wall charts.`,
-
-    {
-
-        left:120,
-
-        top:280,
-
-        width:900,
-
-        fontFamily:"Poppins",
-
-        fontSize:28,
-
-        lineHeight:1.35,
-
-        fill:"#222"
-
-    });
-
-    canvas.add(paragraph);
-
-    canvas.setActiveObject(paragraph);
-
-    canvas.renderAll();
-
+function addSubtitle() {
+    addObject(
+        new fabric.Textbox("Subtitle", {
+            left: 120,
+            top: 180,
+            width: 800,
+            fontFamily: "Poppins",
+            fontSize: 36,
+            fill: "#333333",
+            name: "Subtitle"
+        })
+    );
 }
 
+function addParagraph() {
+    addObject(
+        new fabric.Textbox(
+`Type your educational content here.
 
-/*--------------------------------------------------
-RECTANGLE
---------------------------------------------------*/
+This text automatically wraps.
 
-function addRectangle(){
-
-    const rect = new fabric.Rect({
-
-        left:150,
-
-        top:150,
-
-        width:300,
-
-        height:180,
-
-        fill:"#90CAF9",
-
-        stroke:"#1565C0",
-
-        strokeWidth:2,
-
-        rx:10,
-
-        ry:10
-
-    });
-
-    canvas.add(rect);
-
-    canvas.setActiveObject(rect);
-
+Perfect for school wall charts.`,
+            {
+                left: 120,
+                top: 280,
+                width: 900,
+                fontFamily: "Poppins",
+                fontSize: 28,
+                lineHeight: 1.35,
+                fill: "#222222",
+                name: "Paragraph"
+            }
+        )
+    );
 }
 
-
-/*--------------------------------------------------
-CIRCLE
---------------------------------------------------*/
-
-function addCircle(){
-
-    const circle = new fabric.Circle({
-
-        radius:80,
-
-        fill:"#4CAF50",
-
-        left:180,
-
-        top:180
-
-    });
-
-    canvas.add(circle);
-
-    canvas.setActiveObject(circle);
-
+function addTextbox() {
+    addObject(
+        new fabric.Textbox("Text", {
+            left: 150,
+            top: 150,
+            width: 300,
+            fontFamily: "Poppins",
+            fontSize: 30,
+            fill: "#000000",
+            name: "Text Box"
+        })
+    );
 }
 
+function addRectangle() {
+    addObject(
+        new fabric.Rect({
+            left: 180,
+            top: 180,
+            width: 300,
+            height: 180,
+            fill: "#90CAF9",
+            stroke: "#1565C0",
+            strokeWidth: 2,
+            rx: 12,
+            ry: 12,
+            name: "Rectangle"
+        })
+    );
+}
 
-/*--------------------------------------------------
-LINE
---------------------------------------------------*/
+function addCircle() {
+    addObject(
+        new fabric.Circle({
+            left: 200,
+            top: 200,
+            radius: 80,
+            fill: "#4CAF50",
+            stroke: "#2E7D32",
+            strokeWidth: 2,
+            name: "Circle"
+        })
+    );
+}
 
-function addLine(){
+function addEllipse() {
+    addObject(
+        new fabric.Ellipse({
+            left: 220,
+            top: 220,
+            rx: 120,
+            ry: 70,
+            fill: "#FFF176",
+            stroke: "#F9A825",
+            strokeWidth: 2,
+            name: "Ellipse"
+        })
+    );
+}
 
-    const line = new fabric.Line(
+function addTriangle() {
+    addObject(
+        new fabric.Triangle({
+            left: 220,
+            top: 220,
+            width: 180,
+            height: 180,
+            fill: "#EF5350",
+            stroke: "#C62828",
+            strokeWidth: 2,
+            name: "Triangle"
+        })
+    );
+}
 
-        [0,0,300,0],
+function addLine() {
+    addObject(
+        new fabric.Line([0, 0, 300, 0], {
+            left: 200,
+            top: 250,
+            stroke: "#000000",
+            strokeWidth: 4,
+            name: "Line"
+        })
+    );
+}
 
+function addArrow() {
+    const arrow = new fabric.Group(
+        [
+            new fabric.Line([0, 0, 220, 0], {
+                stroke: "#E53935",
+                strokeWidth: 5
+            }),
+            new fabric.Triangle({
+                width: 25,
+                height: 25,
+                fill: "#E53935",
+                left: 210,
+                top: -10,
+                angle: 90
+            })
+        ],
         {
-
-            left:200,
-
-            top:250,
-
-            stroke:"#000",
-
-            strokeWidth:4
-
+            left: 180,
+            top: 300,
+            name: "Arrow"
         }
-
     );
 
-    canvas.add(line);
-
-    canvas.setActiveObject(line);
-
+    addObject(arrow);
 }
 
-
-/*--------------------------------------------------
-ARROW
-(Simple Version)
---------------------------------------------------*/
-
-function addArrow(){
-
-    const group = new fabric.Group([
-
-        new fabric.Line([0,0,220,0],{
-
-            stroke:"red",
-
-            strokeWidth:5
-
-        }),
-
-        new fabric.Triangle({
-
-            width:25,
-
-            height:25,
-
-            fill:"red",
-
-            left:210,
-
-            top:-12,
-
-            angle:90
-
-        })
-
-    ],{
-
-        left:180,
-
-        top:300
-
-    });
-
-    canvas.add(group);
-
-    canvas.setActiveObject(group);
-
+function addImage() {
+    imageInput.click();
 }
 
+imageInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
 
-/*--------------------------------------------------
-IMAGE
---------------------------------------------------*/
+    const reader = new FileReader();
 
-function addImage(){
-
-    fileInput.click();
-
-}
-
-fileInput.onchange=function(e){
-
-    const file=e.target.files[0];
-
-    if(!file) return;
-
-    const reader=new FileReader();
-
-    reader.onload=function(f){
-
-        fabric.Image.fromURL(f.target.result,function(img){
-
-            img.scaleToWidth(350);
-
-            img.set({
-
-                left:150,
-
-                top:120
-
+    reader.onload = function (e) {
+        const imgObj = new Image();
+        imgObj.src = e.target.result;
+        imgObj.onload = function () {
+            const fabricImg = new fabric.Image(imgObj);
+            fabricImg.scaleToWidth(350);
+            fabricImg.set({
+                left: 150,
+                top: 120,
+                name: "Image"
             });
-
-            canvas.add(img);
-
-            canvas.setActiveObject(img);
-
-            canvas.renderAll();
-
-        });
-
+            addObject(fabricImg);
+        };
     };
 
     reader.readAsDataURL(file);
+    // Reset value so re-uploading the same image triggers 'change'
+    this.value = "";
+});
 
-};
+/*=========================================================
+    PART 2: ADVANCED ELEMENTS
+=========================================================*/
 
-
-/*--------------------------------------------------
-PROPERTY PANEL
---------------------------------------------------*/
-
-canvas.on("selection:created",loadProperties);
-
-canvas.on("selection:updated",loadProperties);
-
-function loadProperties(){
-
-    const obj=canvas.getActiveObject();
-
-    if(!obj) return;
-
-    if(obj.text!==undefined){
-
-        document.getElementById("objectText").value=obj.text;
-
-    }
-
-    document.getElementById("fontSize").value=obj.fontSize || 24;
-
-    document.getElementById("textColor").value=obj.fill || "#000000";
-
-    document.getElementById("opacity").value=Math.round((obj.opacity||1)*100);
-
+function addRoundedBox() {
+    addObject(
+        new fabric.Rect({
+            left: 150,
+            top: 150,
+            width: 350,
+            height: 180,
+            rx: 25,
+            ry: 25,
+            fill: "#E3F2FD",
+            stroke: "#1565C0",
+            strokeWidth: 3,
+            name: "Rounded Box"
+        })
+    );
 }
 
+function addDiamond() {
+    addObject(
+        new fabric.Rect({
+            left: 220,
+            top: 180,
+            width: 170,
+            height: 170,
+            angle: 45,
+            fill: "#FFF59D",
+            stroke: "#F9A825",
+            strokeWidth: 3,
+            name: "Diamond"
+        })
+    );
+}
 
-/*--------------------------------------------------
-TEXT
---------------------------------------------------*/
-
-document.getElementById("objectText").addEventListener("input",function(){
-
-    const obj=canvas.getActiveObject();
-
-    if(!obj) return;
-
-    if(obj.text!==undefined){
-
-        obj.text=this.value;
-
-        canvas.renderAll();
-
-    }
-
-});
-
-
-/*--------------------------------------------------
-FONT SIZE
---------------------------------------------------*/
-
-document.getElementById("fontSize").addEventListener("input",function(){
-
-    const obj=canvas.getActiveObject();
-
-    if(!obj) return;
-
-    if(obj.fontSize!==undefined){
-
-        obj.set({
-
-            fontSize:Number(this.value)
-
-        });
-
-        canvas.renderAll();
-
-    }
-
-});
-
-
-/*--------------------------------------------------
-FONT
---------------------------------------------------*/
-
-document.getElementById("fontFamily").addEventListener("change",function(){
-
-    const obj=canvas.getActiveObject();
-
-    if(!obj) return;
-
-    if(obj.fontFamily!==undefined){
-
-        obj.set({
-
-            fontFamily:this.value
-
-        });
-
-        canvas.renderAll();
-
-    }
-
-});
-
-
-/*--------------------------------------------------
-COLOR
---------------------------------------------------*/
-
-document.getElementById("textColor").addEventListener("input",function(){
-
-    const obj=canvas.getActiveObject();
-
-    if(!obj) return;
-
-    obj.set({
-
-        fill:this.value
-
+function addCallout() {
+    const rect = new fabric.Rect({
+        width: 320,
+        height: 150,
+        rx: 15,
+        ry: 15,
+        fill: "#FFFDE7",
+        stroke: "#F9A825",
+        strokeWidth: 2
     });
 
-    canvas.renderAll();
-
-});
-
-
-/*--------------------------------------------------
-BACKGROUND
---------------------------------------------------*/
-
-document.getElementById("backgroundColor").addEventListener("input",function(){
-
-    canvas.backgroundColor=this.value;
-
-    canvas.renderAll();
-
-});
-
-
-/*--------------------------------------------------
-OPACITY
---------------------------------------------------*/
-
-document.getElementById("opacity").addEventListener("input",function(){
-
-    const obj=canvas.getActiveObject();
-
-    if(!obj) return;
-
-    obj.set({
-
-        opacity:this.value/100
-
+    const tri = new fabric.Triangle({
+        width: 35,
+        height: 35,
+        fill: "#FFFDE7",
+        stroke: "#F9A825",
+        strokeWidth: 2,
+        angle: 180,
+        left: 75,
+        top: 180
     });
 
-    canvas.renderAll();
+    const txt = new fabric.Textbox("Callout", {
+        width: 280,
+        left: 20,
+        top: 20,
+        fontSize: 28,
+        fontFamily: "Poppins",
+        fill: "#333333"
+    });
 
+    addObject(
+        new fabric.Group([rect, tri, txt], {
+            left: 180,
+            top: 180,
+            name: "Callout"
+        })
+    );
+}
+
+function addNumberBox() {
+    const circle = new fabric.Circle({
+        radius: 35,
+        fill: "#1565C0"
+    });
+
+    const num = new fabric.Text("1", {
+        left: 25,
+        top: 18,
+        fill: "#FFFFFF",
+        fontWeight: "bold",
+        fontSize: 30
+    });
+
+    const text = new fabric.Textbox("Learning Point", {
+        left: 90,
+        top: 18,
+        width: 280,
+        fontSize: 28,
+        fontFamily: "Poppins",
+        fill: "#222222"
+    });
+
+    addObject(
+        new fabric.Group([circle, num, text], {
+            left: 120,
+            top: 120,
+            name: "Number Box"
+        })
+    );
+}
+
+function addTable(rows = 4, cols = 4) {
+    const objects = [];
+    const cellW = 170;
+    const cellH = 70;
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            objects.push(
+                new fabric.Rect({
+                    left: c * cellW,
+                    top: r * cellH,
+                    width: cellW,
+                    height: cellH,
+                    fill: r === 0 ? "#1565C0" : "#FFFFFF",
+                    stroke: "#333333"
+                })
+            );
+
+            objects.push(
+                new fabric.Text(r === 0 ? "Heading" : "", {
+                    left: c * cellW + 15,
+                    top: r * cellH + 20,
+                    fill: r === 0 ? "#FFFFFF" : "#000000",
+                    fontSize: 22,
+                    fontFamily: "Poppins"
+                })
+            );
+        }
+    }
+
+    addObject(
+        new fabric.Group(objects, {
+            left: 100,
+            top: 120,
+            name: "Table"
+        })
+    );
+}
+
+function addLogoPlaceholder() {
+    const circle = new fabric.Circle({
+        radius: 70,
+        fill: "#ECEFF1",
+        stroke: "#90A4AE",
+        strokeWidth: 2
+    });
+
+    const txt = new fabric.Text("LOGO", {
+        left: 36,
+        top: 55,
+        fontSize: 24,
+        fontWeight: "bold",
+        fill: "#455A64"
+    });
+
+    addObject(
+        new fabric.Group([circle, txt], {
+            left: 120,
+            top: 100,
+            name: "School Logo"
+        })
+    );
+}
+
+function addContentBox() {
+    const rect = new fabric.Rect({
+        width: 500,
+        height: 260,
+        fill: "#FFFFFF",
+        stroke: "#1565C0",
+        strokeWidth: 3,
+        rx: 12,
+        ry: 12
+    });
+
+    const title = new fabric.Text("CONTENT TITLE", {
+        left: 20,
+        top: 15,
+        fontSize: 32,
+        fontWeight: "bold",
+        fill: "#1565C0"
+    });
+
+    const body = new fabric.Textbox(
+`• Point One
+• Point Two
+• Point Three`,
+        {
+            left: 20,
+            top: 70,
+            width: 450,
+            fontSize: 26,
+            fontFamily: "Poppins",
+            fill: "#333333"
+        }
+    );
+
+    addObject(
+        new fabric.Group([rect, title, body], {
+            left: 120,
+            top: 120,
+            name: "Content Box"
+        })
+    );
+}
+
+function addDivider() {
+    addObject(
+        new fabric.Line([0, 0, 900, 0], {
+            left: 80,
+            top: 200,
+            stroke: "#1565C0",
+            strokeWidth: 6,
+            name: "Divider"
+        })
+    );
+}
+
+/*=========================================================
+    BUTTON EVENT BINDINGS
+=========================================================*/
+
+const editorButtons = [
+    ["addTitle", addTitle],
+    ["addSubtitle", addSubtitle],
+    ["addParagraph", addParagraph],
+    ["addTextbox", addTextbox],
+    ["addRectangle", addRectangle],
+    ["addCircle", addCircle],
+    ["addEllipse", addEllipse],
+    ["addTriangle", addTriangle],
+    ["addLine", addLine],
+    ["addArrow", addArrow],
+    ["addImage", addImage],
+    ["addRoundedBox", addRoundedBox],
+    ["addDiamond", addDiamond],
+    ["addCallout", addCallout],
+    ["addNumberBox", addNumberBox],
+    ["addTable", () => addTable(4, 4)],
+    ["addLogoPlaceholder", addLogoPlaceholder],
+    ["addContentBox", addContentBox],
+    ["addDivider", addDivider]
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+    editorButtons.forEach(([id, fn]) => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.addEventListener("click", fn);
+        }
+    });
 });
 
+/*=========================================================
+    GLOBAL PUBLIC API EXPOSE
+=========================================================*/
 
-/*--------------------------------------------------
-BUTTONS
---------------------------------------------------*/
-
-document.getElementById("addTitle").onclick=addTitle;
-
-document.getElementById("addSubtitle").onclick=addSubtitle;
-
-document.getElementById("addParagraph").onclick=addParagraph;
-
-document.getElementById("addRectangle").onclick=addRectangle;
-
-document.getElementById("addCircle").onclick=addCircle;
-
-document.getElementById("addLine").onclick=addLine;
-
-document.getElementById("addArrow").onclick=addArrow;
-
-document.getElementById("addImage").onclick=addImage;
+window.editor = {
+    addTitle,
+    addSubtitle,
+    addParagraph,
+    addTextbox,
+    addRectangle,
+    addCircle,
+    addEllipse,
+    addTriangle,
+    addLine,
+    addArrow,
+    addImage,
+    addRoundedBox,
+    addDiamond,
+    addCallout,
+    addNumberBox,
+    addTable,
+    addLogoPlaceholder,
+    addContentBox,
+    addDivider
+};
