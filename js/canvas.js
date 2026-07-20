@@ -1,435 +1,640 @@
-/*==================================================
+/*=========================================================
     SCHOOL WALL CHART DESIGNER PRO
-    canvas.js
-==================================================*/
+    canvas.js - Fully Fixed & Optimized
+=========================================================*/
 
-let canvas;
+"use strict";
 
-/*-----------------------------------------------
-Paper Sizes (Pixels @ Approx. 96 DPI)
-These are for editing. High-resolution export
-will be handled separately.
-------------------------------------------------*/
+/*=========================================================
+    GLOBALS
+=========================================================*/
 
-const PAPER_SIZES = {
-
-    A4: { width: 794, height: 1123 },
-
-    A3: { width: 1123, height: 1587 },
-
-    A2: { width: 1587, height: 2245 },
-
-    A1: { width: 2245, height: 3179 },
-
-    A0: { width: 3179, height: 4494 }
-
-};
-
-
-/*-----------------------------------------------
-Current Settings
-------------------------------------------------*/
-
+let canvas = null;
+let clipboard = null;
 let currentPaper = "A4";
-
 let currentOrientation = "portrait";
-
 let currentZoom = 1;
 
+// History control flag to prevent event feedback loops
+let isHistoryAction = false;
+let history = [];
+let historyIndex = -1;
 
-/*-----------------------------------------------
-Initialize Canvas
-------------------------------------------------*/
+/*=========================================================
+    PAPER SIZES (96 DPI Editing Sizes)
+=========================================================*/
 
-window.addEventListener("load", () => {
+const PAPER_SIZES = {
+    A4: { width: 794, height: 1123 },
+    A3: { width: 1123, height: 1587 },
+    A2: { width: 1587, height: 2245 },
+    A1: { width: 2245, height: 3179 },
+    A0: { width: 3179, height: 4494 }
+};
 
-    canvas = new fabric.Canvas("designerCanvas",{
+/*=========================================================
+    INITIALIZE
+=========================================================*/
 
-        preserveObjectStacking:true,
+window.addEventListener("DOMContentLoaded", initCanvas);
 
-        selection:true,
-
-        backgroundColor:"#ffffff"
-
+function initCanvas() {
+    canvas = new fabric.Canvas("designerCanvas", {
+        preserveObjectStacking: true,
+        selection: true,
+        fireRightClick: true,
+        stopContextMenu: true,
+        backgroundColor: "#ffffff"
     });
 
-    initializeCanvas();
-
-});
-
-
-/*-----------------------------------------------
-Canvas Setup
-------------------------------------------------*/
-
-function initializeCanvas(){
-
     applyPaperSize(currentPaper);
+    registerCanvasEvents();
+    registerToolbarEvents();
+    registerPropertyEvents();
+
+    // Save initial canvas state for History
+    saveHistory();
 
     canvas.renderAll();
-
+    refreshLayers();
 }
 
+/*=========================================================
+    PAPER SIZE & ORIENTATION
+=========================================================*/
 
-/*-----------------------------------------------
-Apply Paper Size
-------------------------------------------------*/
-
-function applyPaperSize(size){
-
+function applyPaperSize(size) {
     currentPaper = size;
-
     let width = PAPER_SIZES[size].width;
-
     let height = PAPER_SIZES[size].height;
 
-    if(currentOrientation==="landscape"){
-
-        [width,height]=[height,width];
-
+    if (currentOrientation === "landscape") {
+        const temp = width;
+        width = height;
+        height = temp;
     }
 
-    canvas.setWidth(width);
-
-    canvas.setHeight(height);
-
-    canvas.calcOffset();
-
-    canvas.renderAll();
-
+    canvas.setDimensions({ width, height });
+    canvas.requestRenderAll();
 }
 
-
-/*-----------------------------------------------
-Orientation
-------------------------------------------------*/
-
-function setOrientation(mode){
-
+function setOrientation(mode) {
     currentOrientation = mode;
-
     applyPaperSize(currentPaper);
-
 }
 
+/*=========================================================
+    ZOOM CONTROLS (Issue 5 Fixed)
+=========================================================*/
 
-/*-----------------------------------------------
-Zoom
-------------------------------------------------*/
+function setZoom(value) {
+    value = Math.max(0.2, Math.min(value, 3));
+    currentZoom = value;
 
-function setZoom(level){
+    // Zoom from center of viewport instead of top-left
+    const center = new fabric.Point(canvas.getWidth() / 2, canvas.getHeight() / 2);
+    canvas.zoomToPoint(center, value);
+    canvas.requestRenderAll();
 
-    currentZoom = level;
+    const slider = document.getElementById("zoomSlider");
+    if (slider) slider.value = value * 100;
 
-    canvas.setZoom(level);
-
-    canvas.renderAll();
-
+    const label = document.getElementById("zoomValue");
+    if (label) label.textContent = Math.round(value * 100) + "%";
 }
 
-
-/*-----------------------------------------------
-Fit Canvas to Screen
-------------------------------------------------*/
-
-function fitCanvas(){
-
+function fitPage() {
     const workspace = document.querySelector(".workspace");
+    if (!workspace || !canvas) return;
 
-    const padding = 150;
+    const padding = 120;
+    const zoomX = (workspace.clientWidth - padding) / canvas.getWidth();
+    const zoomY = (workspace.clientHeight - padding) / canvas.getHeight();
+    let zoom = Math.min(zoomX, zoomY);
 
-    const scaleX = (workspace.clientWidth-padding)/canvas.getWidth();
-
-    const scaleY = (workspace.clientHeight-padding)/canvas.getHeight();
-
-    let zoom = Math.min(scaleX,scaleY);
-
-    if(zoom>1){
-
-        zoom=1;
-
-    }
-
+    if (zoom > 1) zoom = 1;
     setZoom(zoom);
-
 }
 
-
-/*-----------------------------------------------
-Reset Zoom
-------------------------------------------------*/
-
-function resetZoom(){
-
+function resetZoom() {
     setZoom(1);
-
 }
 
+/*=========================================================
+    BACKGROUND & CLEAR (Issue 1 Fixed)
+=========================================================*/
 
-/*-----------------------------------------------
-Canvas Background
-------------------------------------------------*/
-
-function setCanvasBackground(color){
-
-    canvas.backgroundColor=color;
-
-    canvas.renderAll();
-
+function setCanvasBackground(color) {
+    if (!canvas) return;
+    canvas.backgroundColor = color;
+    canvas.requestRenderAll();
+    saveHistory();
 }
 
+function clearCanvas() {
+    if (!confirm("Create a new project? Unsaved work will be lost.")) return;
 
-/*-----------------------------------------------
-Clear Canvas
-------------------------------------------------*/
-
-function clearCanvas(){
-
-    if(confirm("Create a new project?")){
-
-        canvas.clear();
-
-        canvas.backgroundColor="#ffffff";
-
-        applyPaperSize(currentPaper);
-
-    }
-
-}
-
-
-/*-----------------------------------------------
-Delete Selected Object
-------------------------------------------------*/
-
-function deleteSelected(){
-
-    const obj=canvas.getActiveObject();
-
-    if(!obj) return;
-
-    canvas.remove(obj);
-
+    // Safely remove objects without destroying background or handlers
     canvas.discardActiveObject();
-
-    canvas.renderAll();
-
+    canvas.getObjects().slice().forEach(obj => canvas.remove(obj));
+    
+    canvas.backgroundColor = "#ffffff";
+    applyPaperSize(currentPaper);
+    canvas.requestRenderAll();
+    
+    saveHistory();
+    refreshLayers();
 }
 
+/*=========================================================
+    EVENT REGISTRATIONS (Issue 6 Fixed)
+=========================================================*/
 
-/*-----------------------------------------------
-Duplicate Selected Object
-------------------------------------------------*/
+function registerToolbarEvents() {
+    const paper = document.getElementById("paperSize");
+    if (paper) paper.addEventListener("change", e => applyPaperSize(e.target.value));
 
-function duplicateSelected(){
+    const orientation = document.getElementById("orientation");
+    if (orientation) orientation.addEventListener("change", e => setOrientation(e.target.value));
 
-    const obj=canvas.getActiveObject();
+    const zoom = document.getElementById("zoomSlider");
+    if (zoom) zoom.addEventListener("input", e => setZoom(e.target.value / 100));
 
-    if(!obj) return;
+    // Fit & Reset Zoom UI Handlers
+    const fitBtn = document.getElementById("fitBtn");
+    if (fitBtn) fitBtn.addEventListener("click", fitPage);
 
-    obj.clone(function(clone){
+    const resetZoomBtn = document.getElementById("resetZoomBtn");
+    if (resetZoomBtn) resetZoomBtn.addEventListener("click", resetZoom);
 
-        clone.left+=40;
+    const newBtn = document.getElementById("newBtn");
+    if (newBtn) newBtn.addEventListener("click", clearCanvas);
 
-        clone.top+=40;
+    const undoBtn = document.getElementById("undoBtn");
+    if (undoBtn) undoBtn.onclick = undo;
 
-        canvas.add(clone);
+    const redoBtn = document.getElementById("redoBtn");
+    if (redoBtn) redoBtn.onclick = redo;
 
-        canvas.setActiveObject(clone);
+    // Action buttons
+    const actions = [
+        ["deleteObject", deleteSelected],
+        ["duplicateBtn", duplicateSelected],
+        ["copyBtn", copySelected],
+        ["pasteBtn", pasteSelected],
+        ["frontBtn", bringForward],
+        ["backBtn", sendBackward]
+    ];
 
-        canvas.renderAll();
-
+    actions.forEach(([id, fn]) => {
+        const btn = document.getElementById(id);
+        if (btn) btn.addEventListener("click", fn);
     });
 
+    // Alignment buttons
+    [
+        ["leftBtn", "left"],
+        ["centerBtn", "center"],
+        ["rightBtn", "right"],
+        ["topBtn", "top"],
+        ["middleBtn", "middle"],
+        ["bottomBtn", "bottom"]
+    ].forEach(([id, pos]) => {
+        const btn = document.getElementById(id);
+        if (btn) btn.addEventListener("click", () => alignObject(pos));
+    });
 }
 
+function registerCanvasEvents() {
+    canvas.on("selection:created", selectionChanged);
+    canvas.on("selection:updated", selectionChanged);
+    canvas.on("selection:cleared", selectionChanged);
 
-/*-----------------------------------------------
-Bring Forward
-------------------------------------------------*/
+    // Issue 2 Fix: Only track user modifications in events.
+    // Batch insertions (paste, templates) invoke saveHistory() directly on completion.
+    canvas.on("object:modified", saveHistory);
 
-function bringForward(){
-
-    const obj=canvas.getActiveObject();
-
-    if(!obj) return;
-
-    canvas.bringForward(obj);
-
-    canvas.renderAll();
-
+    // Mouse wheel zoom
+    canvas.on("mouse:wheel", opt => {
+        let zoom = canvas.getZoom();
+        zoom *= 0.999 ** opt.e.deltaY;
+        zoom = Math.min(3, Math.max(0.2, zoom));
+        setZoom(zoom);
+        opt.e.preventDefault();
+        opt.e.stopPropagation();
+    });
 }
 
-
-/*-----------------------------------------------
-Send Backward
-------------------------------------------------*/
-
-function sendBackward(){
-
-    const obj=canvas.getActiveObject();
-
-    if(!obj) return;
-
-    canvas.sendBackwards(obj);
-
-    canvas.renderAll();
-
+function selectionChanged() {
+    updateProperties();
+    refreshLayers();
 }
 
+/*=========================================================
+    OBJECT EDITING & SHORTCUTS
+=========================================================*/
 
-/*-----------------------------------------------
-Center Object
-------------------------------------------------*/
+function deleteSelected() {
+    const activeObjects = canvas.getActiveObjects();
+    if (!activeObjects.length) return;
 
-function centerObject(){
+    activeObjects.forEach(obj => canvas.remove(obj));
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+    saveHistory(); // Save once for batch delete
+}
 
-    const obj=canvas.getActiveObject();
+function duplicateSelected() {
+    const obj = canvas.getActiveObject();
+    if (!obj) return;
 
-    if(!obj) return;
+    obj.clone(cloned => {
+        canvas.discardActiveObject();
+        cloned.set({
+            left: cloned.left + 20,
+            top: cloned.top + 20,
+            evented: true
+        });
 
+        if (cloned.type === "activeSelection") {
+            cloned.canvas = canvas;
+            cloned.forEachObject(o => canvas.add(o));
+            cloned.setCoords();
+        } else {
+            canvas.add(cloned);
+        }
+
+        canvas.setActiveObject(cloned);
+        canvas.requestRenderAll();
+        saveHistory(); // Issue 2: Save history after duplicate action completes
+    });
+}
+
+function copySelected() {
+    const obj = canvas.getActiveObject();
+    if (!obj) return;
+    obj.clone(cloned => {
+        clipboard = cloned;
+    });
+}
+
+function pasteSelected() {
+    if (!clipboard) return;
+
+    clipboard.clone(cloned => {
+        canvas.discardActiveObject();
+        cloned.set({
+            left: cloned.left + 20,
+            top: cloned.top + 20,
+            evented: true
+        });
+
+        if (cloned.type === "activeSelection") {
+            cloned.canvas = canvas;
+            cloned.forEachObject(o => canvas.add(o));
+            cloned.setCoords();
+        } else {
+            canvas.add(cloned);
+        }
+
+        clipboard.top += 20;
+        clipboard.left += 20;
+
+        canvas.setActiveObject(cloned);
+        canvas.requestRenderAll();
+        saveHistory(); // Issue 2: Save history once after entire paste completes
+    });
+}
+
+function bringForward() {
+    const obj = canvas.getActiveObject();
+    if (obj) {
+        canvas.bringForward(obj);
+        canvas.requestRenderAll();
+        saveHistory();
+    }
+}
+
+function sendBackward() {
+    const obj = canvas.getActiveObject();
+    if (obj) {
+        canvas.sendBackwards(obj);
+        canvas.requestRenderAll();
+        saveHistory();
+    }
+}
+
+function centerObject() {
+    const obj = canvas.getActiveObject();
+    if (!obj) return;
     obj.center();
+    obj.setCoords();
+    canvas.requestRenderAll();
+    saveHistory();
+}
+
+function moveSelected(dx, dy) {
+    const obj = canvas.getActiveObject();
+    if (!obj) return;
+    obj.left += dx;
+    obj.top += dy;
+    obj.setCoords();
+    canvas.requestRenderAll();
+}
+
+/* Keyboard Shortcuts */
+document.addEventListener("keydown", e => {
+    if (!canvas) return;
+
+    const active = document.activeElement;
+    if (active && ["INPUT", "TEXTAREA", "SELECT"].includes(active.tagName)) {
+        return;
+    }
+
+    if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        deleteSelected();
+    }
+
+    if (e.ctrlKey || e.metaKey) {
+        const key = e.key.toLowerCase();
+        if (key === "d") { e.preventDefault(); duplicateSelected(); }
+        if (key === "c") { e.preventDefault(); copySelected(); }
+        if (key === "v") { e.preventDefault(); pasteSelected(); }
+        if (key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+        if (key === "y" || (key === "z" && e.shiftKey)) { e.preventDefault(); redo(); }
+    }
+
+    const step = e.shiftKey ? 10 : 1;
+    switch (e.key) {
+        case "ArrowLeft": e.preventDefault(); moveSelected(-step, 0); break;
+        case "ArrowRight": e.preventDefault(); moveSelected(step, 0); break;
+        case "ArrowUp": e.preventDefault(); moveSelected(0, -step); break;
+        case "ArrowDown": e.preventDefault(); moveSelected(0, step); break;
+    }
+});
+
+/*=========================================================
+    ALIGNMENT & PROPERTIES (Issue 4 Fixed)
+=========================================================*/
+
+function alignObject(position) {
+    const obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    const w = canvas.getWidth();
+    const h = canvas.getHeight();
+    const objWidth = obj.getScaledWidth();
+    const objHeight = obj.getScaledHeight();
+
+    let targetX = obj.left;
+    let targetY = obj.top;
+    let originX = "left";
+    let originY = "top";
+
+    switch (position) {
+        case "left":
+            targetX = 0;
+            originX = "left";
+            break;
+        case "center":
+            targetX = w / 2;
+            originX = "center";
+            break;
+        case "right":
+            targetX = w;
+            originX = "right";
+            break;
+        case "top":
+            targetY = 0;
+            originY = "top";
+            break;
+        case "middle":
+            targetY = h / 2;
+            originY = "center";
+            break;
+        case "bottom":
+            targetY = h;
+            originY = "bottom";
+            break;
+    }
+
+    // Origin-aware position updating
+    obj.setPositionByOrigin(
+        new fabric.Point(targetX, targetY),
+        originX,
+        originY
+    );
 
     obj.setCoords();
-
-    canvas.renderAll();
-
+    canvas.requestRenderAll();
+    saveHistory();
 }
 
+function updateProperties() {
+    const obj = canvas.getActiveObject();
+    if (!obj) return;
 
-/*-----------------------------------------------
-Grid (Optional)
-------------------------------------------------*/
+    const text = document.getElementById("objectText");
+    const font = document.getElementById("fontFamily");
+    const size = document.getElementById("fontSize");
+    const color = document.getElementById("textColor");
+    const opacity = document.getElementById("opacity");
 
-function drawGrid(){
-
-    const size=50;
-
-    const width=canvas.getWidth();
-
-    const height=canvas.getHeight();
-
-    for(let i=0;i<(width/size);i++){
-
-        canvas.add(new fabric.Line(
-
-            [i*size,0,i*size,height],
-
-            {
-
-                stroke:"#eeeeee",
-
-                selectable:false,
-
-                evented:false
-
-            }
-
-        ));
-
-    }
-
-    for(let i=0;i<(height/size);i++){
-
-        canvas.add(new fabric.Line(
-
-            [0,i*size,width,i*size],
-
-            {
-
-                stroke:"#eeeeee",
-
-                selectable:false,
-
-                evented:false
-
-            }
-
-        ));
-
-    }
-
+    if (text) text.value = obj.text !== undefined ? obj.text : "";
+    if (font && obj.fontFamily) font.value = obj.fontFamily;
+    if (size && obj.fontSize) size.value = obj.fontSize;
+    if (color && obj.fill) color.value = obj.fill;
+    if (opacity) opacity.value = Math.round((obj.opacity ?? 1) * 100);
 }
 
+/*=========================================================
+    LAYERS PANEL (Issue 3 Fixed)
+=========================================================*/
 
-/*-----------------------------------------------
-Events
-------------------------------------------------*/
+function getLayerLabel(obj) {
+    if (obj.name) return obj.name;
+    if (obj.customType) return obj.customType;
 
-document.getElementById("paperSize").addEventListener("change",(e)=>{
+    switch (obj.type) {
+        case "i-text":
+        case "textbox":
+        case "text":
+            if (obj.text) {
+                const cleanText = obj.text.trim();
+                return cleanText.length > 15 ? cleanText.substring(0, 15) + "..." : cleanText;
+            }
+            return "Text Block";
+        case "rect":
+            return "Rectangle";
+        case "circle":
+            return "Circle";
+        case "triangle":
+            return "Triangle";
+        case "image":
+            return "Image / Logo";
+        case "group":
+            return "Grouped Object";
+        case "path":
+            return "Drawing / Shape";
+        default:
+            return obj.type ? obj.type.charAt(0).toUpperCase() + obj.type.slice(1) : "Object";
+    }
+}
 
-    applyPaperSize(e.target.value);
+function refreshLayers() {
+    const list = document.getElementById("layersList");
+    if (!list || !canvas) return;
 
+    list.innerHTML = "";
+    
+    // Reverse array display so top layer renders at top of list
+    const objects = canvas.getObjects().slice().reverse();
+
+    objects.forEach((obj) => {
+        const li = document.createElement("li");
+        li.textContent = getLayerLabel(obj);
+
+        if (canvas.getActiveObject() === obj) {
+            li.classList.add("active-layer");
+        }
+
+        li.onclick = () => {
+            canvas.setActiveObject(obj);
+            canvas.requestRenderAll();
+        };
+        list.appendChild(li);
+    });
+}
+
+function registerPropertyEvents() {
+    const text = document.getElementById("objectText");
+    if (text) {
+        text.addEventListener("input", () => {
+            const obj = canvas.getActiveObject();
+            if (obj && obj.text !== undefined) {
+                obj.set("text", text.value);
+                canvas.requestRenderAll();
+            }
+        });
+    }
+
+    const font = document.getElementById("fontFamily");
+    if (font) {
+        font.addEventListener("change", () => {
+            const obj = canvas.getActiveObject();
+            if (obj) {
+                obj.set("fontFamily", font.value);
+                canvas.requestRenderAll();
+            }
+        });
+    }
+
+    const size = document.getElementById("fontSize");
+    if (size) {
+        size.addEventListener("input", () => {
+            const obj = canvas.getActiveObject();
+            if (obj) {
+                obj.set("fontSize", Number(size.value));
+                canvas.requestRenderAll();
+            }
+        });
+    }
+
+    const color = document.getElementById("textColor");
+    if (color) {
+        color.addEventListener("input", () => {
+            const obj = canvas.getActiveObject();
+            if (obj) {
+                obj.set("fill", color.value);
+                canvas.requestRenderAll();
+            }
+        });
+    }
+
+    const bg = document.getElementById("backgroundColor");
+    if (bg) {
+        bg.addEventListener("input", () => setCanvasBackground(bg.value));
+    }
+
+    const opacity = document.getElementById("opacity");
+    if (opacity) {
+        opacity.addEventListener("input", () => {
+            const obj = canvas.getActiveObject();
+            if (obj) {
+                obj.set("opacity", opacity.value / 100);
+                canvas.requestRenderAll();
+            }
+        });
+    }
+}
+
+/*=========================================================
+    HISTORY (UNDO / REDO)
+=========================================================*/
+
+function saveHistory() {
+    if (isHistoryAction || !canvas) return;
+
+    history = history.slice(0, historyIndex + 1);
+    history.push(JSON.stringify(canvas));
+    historyIndex++;
+}
+
+function undo() {
+    if (historyIndex <= 0) return;
+
+    isHistoryAction = true;
+    historyIndex--;
+
+    canvas.loadFromJSON(history[historyIndex], () => {
+        canvas.renderAll();
+        refreshLayers();
+        isHistoryAction = false;
+    });
+}
+
+function redo() {
+    if (historyIndex >= history.length - 1) return;
+
+    isHistoryAction = true;
+    historyIndex++;
+
+    canvas.loadFromJSON(history[historyIndex], () => {
+        canvas.renderAll();
+        refreshLayers();
+        isHistoryAction = false;
+    });
+}
+
+/*=========================================================
+    WINDOW RESIZE & PUBLIC API
+=========================================================*/
+
+window.addEventListener("resize", () => {
+    if (canvas) canvas.calcOffset();
 });
 
-document.getElementById("orientation").addEventListener("change",(e)=>{
-
-    setOrientation(e.target.value);
-
-});
-
-document.getElementById("zoomSlider").addEventListener("input",(e)=>{
-
-    const zoom=e.target.value/100;
-
-    setZoom(zoom);
-
-    document.getElementById("zoomValue").innerHTML=e.target.value+"%";
-
-});
-
-document.getElementById("deleteObject").addEventListener("click",()=>{
-
-    deleteSelected();
-
-});
-
-document.getElementById("newProject").addEventListener("click",()=>{
-
-    clearCanvas();
-
-});
-
-
-/*-----------------------------------------------
-Resize Window
-------------------------------------------------*/
-
-window.addEventListener("resize",()=>{
-
-    canvas.calcOffset();
-
-});
-
-
-/*-----------------------------------------------
-Expose Functions
-------------------------------------------------*/
-
-window.canvasEditor={
-
-    canvas,
-
+window.canvasEditor = {
+    get canvas() { return canvas; },
     applyPaperSize,
-
     setOrientation,
-
     setZoom,
-
-    fitCanvas,
-
+    fitPage,
     resetZoom,
-
+    setCanvasBackground,
+    clearCanvas,
     deleteSelected,
-
     duplicateSelected,
-
+    copySelected,
+    pasteSelected,
     bringForward,
-
     sendBackward,
-
     centerObject,
-
-    setCanvasBackground
-
+    alignObject,
+    updateProperties,
+    refreshLayers,
+    saveHistory,
+    undo,
+    redo
 };
