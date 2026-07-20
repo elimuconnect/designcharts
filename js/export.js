@@ -3,150 +3,265 @@
     export.js
 ==================================================*/
 
-const { jsPDF } = window.jspdf;
 
-/*----------------------------------------
+const {jsPDF}=window.jspdf;
+
+
+
+/*=========================================
 DOWNLOAD HELPER
-----------------------------------------*/
+=========================================*/
 
-function downloadFile(dataURL, filename){
 
-    const link = document.createElement("a");
+function downloadFile(dataURL,filename){
 
-    link.href = dataURL;
 
-    link.download = filename;
+    const link=document.createElement("a");
+
+
+    link.href=dataURL;
+
+
+    link.download=filename;
+
 
     document.body.appendChild(link);
 
+
     link.click();
+
 
     document.body.removeChild(link);
 
+
 }
 
-/*----------------------------------------
+
+
+
+/*=========================================
 TIMESTAMP
-----------------------------------------*/
+=========================================*/
+
 
 function timestamp(){
 
-    const d = new Date();
 
-    return d.getFullYear()+"-"
-        +(d.getMonth()+1).toString().padStart(2,"0")+"-"
-        +d.getDate().toString().padStart(2,"0")+"-"
-        +d.getHours().toString().padStart(2,"0")
-        +d.getMinutes().toString().padStart(2,"0")
-        +d.getSeconds().toString().padStart(2,"0");
+    const d=new Date();
+
+
+    return d.getFullYear()
+    +
+    "-"
+    +
+    String(d.getMonth()+1).padStart(2,"0")
+    +
+    "-"
+    +
+    String(d.getDate()).padStart(2,"0")
+    +
+    "-"
+    +
+    Date.now();
 
 }
 
-/*----------------------------------------
-PNG EXPORT
-----------------------------------------*/
 
-function exportPNG(){
 
-    const dataURL = canvas.toDataURL({
+
+
+/*=========================================
+EXPORT SETTINGS
+=========================================*/
+
+
+function getExportImage(multiplier=3){
+
+
+    return canvas.toDataURL({
 
         format:"png",
 
-        multiplier:2
+        multiplier,
+
+        enableRetinaScaling:true
+
 
     });
 
+
+}
+
+
+
+
+
+/*=========================================
+PNG
+=========================================*/
+
+
+function exportPNG(){
+
+
     downloadFile(
-        dataURL,
-        "Chart-"+timestamp()+".png"
+
+        getExportImage(3),
+
+        "Wall-Chart-"+timestamp()+".png"
+
     );
 
 }
 
-/*----------------------------------------
-JPG EXPORT
-----------------------------------------*/
+
+
+
+
+/*=========================================
+JPG
+=========================================*/
+
 
 function exportJPG(){
 
-    const dataURL = canvas.toDataURL({
+
+    let dataURL =
+    canvas.toDataURL({
 
         format:"jpeg",
 
         quality:1,
 
-        multiplier:2
+        multiplier:3
 
     });
 
+
+
     downloadFile(
+
         dataURL,
-        "Chart-"+timestamp()+".jpg"
+
+        "Wall-Chart-"+timestamp()+".jpg"
+
     );
+
 
 }
 
-/*----------------------------------------
-SVG EXPORT
-----------------------------------------*/
+
+
+
+
+/*=========================================
+SVG
+=========================================*/
+
 
 function exportSVG(){
 
-    const svg = canvas.toSVG();
 
-    const blob = new Blob([svg],{
+    let svg =
+    canvas.toSVG();
 
-        type:"image/svg+xml"
 
-    });
+    let blob =
+    new Blob(
 
-    const url = URL.createObjectURL(blob);
+        [svg],
 
-    const a = document.createElement("a");
+        {
+            type:"image/svg+xml"
+        }
 
-    a.href = url;
+    );
 
-    a.download = "Chart-"+timestamp()+".svg";
+
+    let url =
+    URL.createObjectURL(blob);
+
+
+
+    let a=document.createElement("a");
+
+
+    a.href=url;
+
+
+    a.download=
+    "Wall-Chart-"+timestamp()+".svg";
+
 
     a.click();
 
+
+
     URL.revokeObjectURL(url);
+
 
 }
 
-/*----------------------------------------
-PDF EXPORT
-----------------------------------------*/
+
+
+
+
+/*=========================================
+PDF PRINT EXPORT
+=========================================*/
+
 
 function exportPDF(){
 
-    const img = canvas.toDataURL({
 
-        format:"png",
+    let image =
+    getExportImage(4);
 
-        multiplier:2
+
+
+    let width =
+    canvas.width;
+
+
+    let height =
+    canvas.height;
+
+
+
+    let orientation =
+    width>height
+    ?
+    "landscape"
+    :
+    "portrait";
+
+
+
+    let pdf =
+    new jsPDF({
+
+        orientation,
+
+        unit:"mm",
+
+        format:"a1"
 
     });
 
-    const pdf = new jsPDF({
 
-        orientation:
 
-            canvas.width>canvas.height
+    let pageWidth =
+    pdf.internal.pageSize.getWidth();
 
-            ?"landscape"
 
-            :"portrait",
+    let pageHeight =
+    pdf.internal.pageSize.getHeight();
 
-        unit:"px",
 
-        format:[canvas.width,canvas.height]
-
-    });
 
     pdf.addImage(
 
-        img,
+        image,
 
         "PNG",
 
@@ -154,210 +269,346 @@ function exportPDF(){
 
         0,
 
-        canvas.width,
+        pageWidth,
 
-        canvas.height
+        pageHeight
 
     );
+
+
 
     pdf.save(
 
-        "Chart-"+timestamp()+".pdf"
+        "Wall-Chart-"+timestamp()+".pdf"
 
     );
 
+
 }
 
-/*----------------------------------------
-HIGH RES PNG
-----------------------------------------*/
+
+
+
+
+/*=========================================
+HIGH QUALITY EXPORT
+=========================================*/
+
 
 function exportHighResPNG(){
 
-    const dataURL = canvas.toDataURL({
-
-        format:"png",
-
-        multiplier:4
-
-    });
 
     downloadFile(
 
-        dataURL,
+        getExportImage(6),
 
-        "Chart-HD-"+timestamp()+".png"
+        "Wall-Chart-HD-"+timestamp()+".png"
 
     );
 
+
 }
 
-/*----------------------------------------
-300 DPI EXPORT
-----------------------------------------*/
+
+
+
 
 function exportPrintPNG(){
 
-    const dataURL = canvas.toDataURL({
-
-        format:"png",
-
-        multiplier:6
-
-    });
 
     downloadFile(
 
-        dataURL,
+        getExportImage(8),
 
-        "Chart-Print-300DPI-"+timestamp()+".png"
+        "Wall-Chart-Print-"+timestamp()+".png"
 
     );
 
+
 }
 
-/*----------------------------------------
-JSON SAVE
-----------------------------------------*/
+
+
+
+
+/*=========================================
+SAVE PROJECT
+=========================================*/
+
 
 function saveProject(){
 
-    const json = JSON.stringify(canvas);
 
-    const blob = new Blob([json],{
+    let project={
 
-        type:"application/json"
 
-    });
+        app:
+        "School Wall Chart Designer Pro",
 
-    const url = URL.createObjectURL(blob);
 
-    const a = document.createElement("a");
+        version:"1.0",
 
-    a.href = url;
 
-    a.download = "Project-"+timestamp()+".json";
+        created:
+        new Date(),
+
+
+        paper:
+        currentPaper || null,
+
+
+        canvas:
+        canvas.toJSON([
+
+            "id",
+
+            "name",
+
+            "locked"
+
+        ])
+
+    };
+
+
+
+    let blob =
+    new Blob(
+
+        [
+            JSON.stringify(
+                project,
+                null,
+                2
+            )
+        ],
+
+        {
+            type:"application/json"
+        }
+
+    );
+
+
+
+    let url =
+    URL.createObjectURL(blob);
+
+
+
+    let a=document.createElement("a");
+
+
+    a.href=url;
+
+
+    a.download=
+    "Project-"+timestamp()+".json";
+
 
     a.click();
 
+
     URL.revokeObjectURL(url);
+
 
 }
 
-/*----------------------------------------
+
+
+
+
+/*=========================================
 LOAD PROJECT
-----------------------------------------*/
+=========================================*/
+
 
 function loadProject(){
 
-    const input = document.createElement("input");
 
-    input.type = "file";
+    let input =
+    document.createElement("input");
 
-    input.accept = ".json";
+
+    input.type="file";
+
+
+    input.accept=".json";
+
 
     input.click();
 
-    input.onchange = function(e){
 
-        const file = e.target.files[0];
 
-        if(!file) return;
+    input.onchange=function(e){
 
-        const reader = new FileReader();
 
-        reader.onload = function(f){
+        let file=e.target.files[0];
+
+
+        if(!file)return;
+
+
+
+        let reader=new FileReader();
+
+
+
+        reader.onload=function(){
+
+
+            let project =
+            JSON.parse(reader.result);
+
+
+
+            let data =
+            project.canvas ||
+            project;
+
+
 
             canvas.loadFromJSON(
 
-                f.target.result,
+                data,
 
                 function(){
 
+
                     canvas.renderAll();
+
+
+
+                    if(typeof refreshLayers==="function")
+
+                        refreshLayers();
+
 
                 }
 
             );
 
+
         };
+
 
         reader.readAsText(file);
 
+
     };
+
 
 }
 
-/*----------------------------------------
+
+
+
+
+/*=========================================
 PRINT
-----------------------------------------*/
+=========================================*/
+
 
 function printCanvas(){
 
-    const win = window.open("");
 
-    win.document.write(
+    let image =
+    getExportImage(3);
 
-        "<img src='"
 
-        +canvas.toDataURL({
 
-            format:"png",
+    let win =
+    window.open("");
 
-            multiplier:2
 
-        })
 
-        +"' style='width:100%'>"
+    win.document.write(`
 
-    );
+        <html>
+
+        <body style="margin:0">
+
+        <img src="${image}"
+        style="width:100%">
+
+
+        </body>
+
+        </html>
+
+    `);
+
+
 
     win.document.close();
 
-    win.focus();
 
     win.print();
 
+
 }
 
-/*----------------------------------------
+
+
+
+
+/*=========================================
 BUTTONS
-----------------------------------------*/
+=========================================*/
 
-document.getElementById("exportPNG")
-.onclick = exportPNG;
 
-document.getElementById("exportPDF")
-.onclick = exportPDF;
+[
+["exportPNG",exportPNG],
+["exportPDF",exportPDF],
+["exportJPG",exportJPG],
+["exportSVG",exportSVG],
+["saveProject",saveProject],
+["loadProject",loadProject],
+["printCanvas",printCanvas]
 
-document.getElementById("saveProject")
-.onclick = saveProject;
+]
+.forEach(([id,fn])=>{
 
-document.getElementById("loadProject")
-.onclick = loadProject;
 
-/*----------------------------------------
-GLOBAL ACCESS
-----------------------------------------*/
+let btn=document.getElementById(id);
 
-window.exportTools = {
 
-    exportPNG,
+if(btn)
 
-    exportJPG,
+btn.onclick=fn;
 
-    exportSVG,
 
-    exportPDF,
+});
 
-    exportHighResPNG,
 
-    exportPrintPNG,
 
-    saveProject,
 
-    loadProject,
 
-    printCanvas
+/*=========================================
+GLOBAL
+=========================================*/
+
+
+window.exportTools={
+
+
+exportPNG,
+
+exportJPG,
+
+exportSVG,
+
+exportPDF,
+
+exportHighResPNG,
+
+exportPrintPNG,
+
+saveProject,
+
+loadProject,
+
+printCanvas
+
 
 };
