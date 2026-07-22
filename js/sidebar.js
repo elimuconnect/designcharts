@@ -403,12 +403,12 @@ function insertBarChart() {
 }
 
 function insertPieChart() {
-    if (window.ChartEngine && window.ChartEngine.addBarChart) {
-        window.ChartEngine.addBarChart(
+    if (window.ChartEngine && window.ChartEngine.addPieChart) {
+        window.ChartEngine.addPieChart(
             {
-                labels: ["Exceeding", "Meeting", "Approaching", "Below"],
+                labels: ["Exceeding Expectations", "Meeting Expectations", "Approaching Expectations", "Below Expectations"],
                 values: [40, 35, 15, 10],
-                color: "#2E7D32"
+                colors: ["#2E7D32", "#1565C0", "#F57C00", "#C62828"]
             },
             { title: "CBC Competency Levels", width: 480, height: 320 }
         );
@@ -416,8 +416,8 @@ function insertPieChart() {
 }
 
 function insertLineChart() {
-    if (window.ChartEngine && window.ChartEngine.addBarChart) {
-        window.ChartEngine.addBarChart(
+    if (window.ChartEngine && window.ChartEngine.addLineChart) {
+        window.ChartEngine.addLineChart(
             {
                 labels: ["Jan", "Feb", "Mar", "Apr", "May"],
                 values: [60, 68, 75, 82, 90],
