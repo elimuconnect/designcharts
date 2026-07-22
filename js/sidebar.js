@@ -327,40 +327,47 @@ if (sidebarButtons.logos) sidebarButtons.logos.onclick = () => openTool("logos")
 SIDEBAR TOGGLE HANDLERS (COLLAPSE / EXPAND)
 =========================================*/
 
-document.addEventListener("DOMContentLoaded", () => {
-    // Left Navigation Sidebar Toggle
-    const toggleLeftBtn = document.getElementById("toggleLeftSidebar");
-    const navSidebar = document.querySelector(".sidebar");
+document.addEventListener("DOMContentLoaded", function() {
+    const leftToggle = document.getElementById("toggleLeftSidebar");
+    const rightToggle = document.getElementById("toggleRightSidebar");
 
-    if (toggleLeftBtn && navSidebar) {
-        toggleLeftBtn.addEventListener("click", () => {
-            navSidebar.classList.toggle("collapsed");
-            toggleLeftBtn.innerHTML = navSidebar.classList.contains("collapsed") 
-                ? "Sidebar ▶" 
-                : "◀ Sidebar";
+    const leftPanel = document.querySelector(".left-container") || document.querySelector(".sidebar");
+    const rightPanel = document.querySelector(".properties-panel") || document.querySelector(".properties");
 
-            // Recalculate canvas position after transition completes
+    // Helper to safely trigger canvas recalculation across both global and object methods
+    const triggerCanvasResize = () => {
+        setTimeout(() => {
+            if (typeof fitPage === "function") fitPage();
+            if (typeof centerWorkspaceCanvas === "function") centerWorkspaceCanvas();
             if (window.canvasEditor && typeof window.canvasEditor.fitPage === "function") {
-                setTimeout(() => window.canvasEditor.fitPage(), 300);
+                window.canvasEditor.fitPage();
             }
+        }, 300);
+    };
+
+    // Left Sidebar Toggle
+    if (leftToggle && leftPanel) {
+        leftToggle.addEventListener("click", function() {
+            leftPanel.classList.toggle("collapsed");
+            
+            // Update button arrow icon
+            const isCollapsed = leftPanel.classList.contains("collapsed");
+            leftToggle.innerHTML = isCollapsed ? "▶" : "◀";
+
+            triggerCanvasResize();
         });
     }
 
-    // Right Properties Sidebar Toggle
-    const toggleRightBtn = document.getElementById("toggleRightSidebar");
-    const rightProperties = document.querySelector(".properties");
+    // Right Sidebar Toggle (Single Consolidated Listener)
+    if (rightToggle && rightPanel) {
+        rightToggle.addEventListener("click", function() {
+            rightPanel.classList.toggle("collapsed");
 
-    if (toggleRightBtn && rightProperties) {
-        toggleRightBtn.addEventListener("click", () => {
-            rightProperties.classList.toggle("collapsed");
-            toggleRightBtn.innerHTML = rightProperties.classList.contains("collapsed") 
-                ? "Properties ◀" 
-                : "Properties ▶";
+            // Update button label/arrow
+            const isCollapsed = rightPanel.classList.contains("collapsed");
+            rightToggle.innerHTML = isCollapsed ? "Properties ◀" : "Properties ▶";
 
-            // Recalculate canvas position after transition completes
-            if (window.canvasEditor && typeof window.canvasEditor.fitPage === "function") {
-                setTimeout(() => window.canvasEditor.fitPage(), 300);
-            }
+            triggerCanvasResize();
         });
     }
 });
@@ -369,4 +376,6 @@ document.addEventListener("DOMContentLoaded", () => {
 START
 =========================================*/
 
-openTool("templates");
+if (typeof openTool === "function") {
+    openTool("templates");
+}
