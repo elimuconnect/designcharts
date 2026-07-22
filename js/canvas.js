@@ -65,6 +65,7 @@ window.addEventListener(
 );
 
 
+
 function initCanvas(){
 
     canvas = new fabric.Canvas(
@@ -87,15 +88,11 @@ function initCanvas(){
     );
 
 
-    canvas.setControlsVisibility({
+    if (canvas.upperCanvasEl) {
 
-        mt:true,
-        mb:true,
-        ml:true,
-        mr:true,
-        mtr:true
+        canvas.upperCanvasEl.style.touchAction = "none";
 
-    });
+    }
 
 
     applyPaperSize(currentPaper);
@@ -116,10 +113,7 @@ function initCanvas(){
 
     refreshLayers();
 
-
 }
-
-
 
 /*=========================================================
     PAPER SIZE MANAGEMENT
@@ -617,23 +611,14 @@ selectionChanged
 );
 
 
-
 canvas.on(
 "object:added",
 ()=>{
 
-if(!isHistoryAction){
-
-saveHistory();
+    refreshLayers();
 
 }
-
-refreshLayers();
-
-}
-
 );
-
 
 
 canvas.on(
@@ -762,122 +747,87 @@ function deleteSelected(){
 
 
 
-function duplicateSelected(){
+async function duplicateSelected(){
 
-const obj = canvas.getActiveObject();
-
-if(!obj)return;
-
-
-obj.clone(cloned=>{
-
-cloned.set({
-left:cloned.left+30,
-top:cloned.top+30,
-evented:true
-});
-
-
-if(cloned.type==="activeSelection"){
-
-cloned.canvas=canvas;
-
-cloned.forEachObject(o=>{
-canvas.add(o);
-});
-
-cloned.setCoords();
-
-}else{
-
-canvas.add(cloned);
-
-}
-
-
-
-canvas.setActiveObject(cloned);
-
-canvas.requestRenderAll();
-
-refreshLayers();
-
-saveHistory();
-
-
-});
-
-}
-
-
-function copySelected(){
-
-
-    const obj =
-    canvas.getActiveObject();
-
+    const obj = canvas.getActiveObject();
 
     if(!obj) return;
 
 
+    const cloned = await obj.clone();
 
-    obj.clone(cloned=>{
 
-        clipboard=cloned;
+    cloned.set({
+
+        left: obj.left + 30,
+
+        top: obj.top + 30,
+
+        evented:true
 
     });
 
+
+    canvas.add(cloned);
+
+    canvas.setActiveObject(cloned);
+
+    canvas.requestRenderAll();
+
+    refreshLayers();
+
+    saveHistory();
+
+}
+
+
+async function copySelected(){
+
+    const obj = canvas.getActiveObject();
+
+    if(!obj) return;
+
+
+    clipboard = await obj.clone();
 
 }
 
 
 
-
-function pasteSelected(){
-
+async function pasteSelected(){
 
     if(!clipboard) return;
 
 
-
-    clipboard.clone(cloned=>{
-
-
-        cloned.set({
-
-            left:cloned.left+30,
-
-            top:cloned.top+30,
-
-            evented:true
-
-        });
+    const cloned = await clipboard.clone();
 
 
+    cloned.set({
 
-        canvas.add(cloned);
+        left: clipboard.left + 30,
 
+        top: clipboard.top + 30,
 
-
-        canvas.setActiveObject(
-            cloned
-        );
-
-
-        canvas.requestRenderAll();
-
-
-        refreshLayers();
-
-
-        saveHistory();
-
+        evented:true
 
     });
 
 
-}
+    canvas.add(cloned);
 
+
+    canvas.setActiveObject(cloned);
+
+
+    canvas.requestRenderAll();
+
+
+    refreshLayers();
+
+
+    saveHistory();
+
+}
 
 
 
