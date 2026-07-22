@@ -109,6 +109,7 @@ function pasteObject() {
         canvas.add(clone);
         canvas.setActiveObject(clone);
         canvas.renderAll();
+
         saveState();
     });
 }
@@ -133,6 +134,7 @@ function duplicateObject() {
         canvas.add(clone);
         canvas.setActiveObject(clone);
         canvas.renderAll();
+
         saveState();
     });
 }
@@ -150,6 +152,7 @@ function deleteObject() {
     canvas.remove(obj);
     canvas.discardActiveObject();
     canvas.renderAll();
+
     saveState();
 }
 
@@ -165,6 +168,7 @@ function bringToFront() {
 
     canvas.bringToFront(obj);
     canvas.renderAll();
+
     saveState();
 }
 
@@ -176,6 +180,7 @@ function sendToBack() {
 
     canvas.sendToBack(obj);
     canvas.renderAll();
+
     saveState();
 }
 
@@ -267,6 +272,7 @@ function toggleLock() {
     });
 
     canvas.renderAll();
+
     saveState();
 }
 
@@ -296,10 +302,10 @@ function resetZoom() {
 }
 
 /*=========================================
-AUTO HISTORY & EVENT LISTENERS
+AUTO HISTORY & CANVAS EVENT ATTACHMENT
 =========================================*/
 
-function setupCanvasListeners() {
+function attachCanvasEvents() {
     if (typeof canvas === "undefined" || !canvas) return;
 
     canvas.on("object:added", function() {
@@ -388,12 +394,12 @@ BUTTON CONNECTOR
 });
 
 /*=========================================
-INITIALIZATION
+INITIAL HISTORY & LIFECYCLE
 =========================================*/
 
 window.addEventListener("load", function() {
     setTimeout(function() {
-        setupCanvasListeners();
+        attachCanvasEvents();
         saveState();
-    }, 300);
+    }, 500);
 });
