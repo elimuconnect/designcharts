@@ -21,8 +21,8 @@ window.ChartEngine = {
         let left = targetOpts.left !== undefined ? targetOpts.left : padding;
         let top = targetOpts.top !== undefined ? targetOpts.top : padding;
 
-        const maxWidth = canvasWidth - left - padding;
-        const maxHeight = canvasHeight - top - padding;
+        const maxWidth = Math.max(100, canvasWidth - left - padding);
+        const maxHeight = Math.max(100, canvasHeight - top - padding);
 
         let width = targetOpts.width || 500;
         let height = targetOpts.height || 350;
@@ -99,8 +99,9 @@ window.ChartEngine = {
         }
 
         // Render Bars & Labels
-        const maxValue = Math.max(...data.values, 100);
-        const barSpacing = plotWidth / data.labels.length;
+        const maxDataVal = Math.max(...data.values, 10);
+        const maxValue = Math.ceil(maxDataVal * 1.1); // Add 10% headroom
+        const barSpacing = plotWidth / (data.labels.length || 1);
         const barWidth = barSpacing * 0.55;
 
         data.values.forEach((val, index) => {
@@ -112,7 +113,7 @@ window.ChartEngine = {
                 left: barX,
                 top: barY,
                 width: barWidth,
-                height: barH,
+                height: Math.max(barH, 1),
                 fill: data.color || "#1565C0",
                 rx: 3,
                 ry: 3
@@ -127,7 +128,7 @@ window.ChartEngine = {
                 originX: "center"
             });
 
-            const xLabel = new fabric.Text(data.labels[index], {
+            const xLabel = new fabric.Text(data.labels[index] || "", {
                 left: barX + barWidth / 2,
                 top: margin.top + plotHeight + 8,
                 fontSize: 12,
@@ -142,6 +143,8 @@ window.ChartEngine = {
         const chartGroup = new fabric.Group(chartElements, {
             left: bounds.left,
             top: bounds.top,
+            originX: "left",
+            originY: "top",
             customType: "Bar Chart",
             name: options.title || "Bar Chart"
         });
@@ -197,10 +200,11 @@ window.ChartEngine = {
             chartElements.push(title);
         }
 
-        const centerX = chartW * 0.38;
+        const centerX = chartW * 0.35;
         const centerY = chartH * 0.55;
         const radius = Math.min(chartW, chartH) * 0.3;
-        const total = data.values.reduce((a, b) => a + b, 0);
+        const total = data.values.reduce((a, b) => a + b, 0) || 1;
+        const palette = data.colors || ["#1565C0", "#2E7D32", "#F57C00", "#C62828", "#7B1FA2"];
 
         let startAngle = -Math.PI / 2;
 
@@ -217,27 +221,27 @@ window.ChartEngine = {
             const pathData = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
 
             const wedge = new fabric.Path(pathData, {
-                fill: data.colors[i % data.colors.length],
+                fill: palette[i % palette.length],
                 stroke: "#ffffff",
                 strokeWidth: 1.5
             });
             chartElements.push(wedge);
 
             // Legend item
-            const legendX = chartW * 0.7;
-            const legendY = chartH * 0.3 + (i * 22);
+            const legendX = chartW * 0.65;
+            const legendY = chartH * 0.28 + (i * 22);
 
             const legendBox = new fabric.Rect({
                 left: legendX,
                 top: legendY,
                 width: 12,
                 height: 12,
-                fill: data.colors[i % data.colors.length],
+                fill: palette[i % palette.length],
                 rx: 2,
                 ry: 2
             });
 
-            const legendText = new fabric.Text(`${data.labels[i]} (${val})`, {
+            const legendText = new fabric.Text(`${data.labels[i] || "Item"} (${val})`, {
                 left: legendX + 18,
                 top: legendY - 1,
                 fontSize: 11,
@@ -252,6 +256,8 @@ window.ChartEngine = {
         const chartGroup = new fabric.Group(chartElements, {
             left: bounds.left,
             top: bounds.top,
+            originX: "left",
+            originY: "top",
             customType: "Pie Chart",
             name: options.title || "Pie Chart"
         });
@@ -316,44 +322,55 @@ window.ChartEngine = {
                 fontSize: 16,
                 fontWeight: "bold",
                 fontFamily: "Poppins",
-                fill: "#D84315",
+                fill: data.color || "#D84315",
                 originX: "center"
             });
             chartElements.push(title);
         }
 
-        const maxValue = Math.max(...data.values, 100);
-        const pointSpacing = plotWidth / (data.labels.length - 1 || 1);
+        const maxDataVal = Math.max(...data.values, 10);
+        const maxValue = Math.ceil(maxDataVal * 1.1);
+        const pointSpacing = plotWidth / Math.max(data.labels.length - 1, 1);
         const points = [];
 
+        // Calculate plot points
         data.values.forEach((val, i) => {
             const px = margin.left + i * pointSpacing;
             const py = margin.top + plotHeight - (val / maxValue) * plotHeight;
-            points.push({ x: px, y: py });
+            points.push({ x: px, y: py, val: val, label: data.labels[i] || "" });
+        });
 
-            // Plot Point Circle
+        // 1. Draw Connecting Lines first so dots render on top
+        for (let i = 0; i < points.length - 1; i++) {
+            const line = new fabric.Line(
+                [points[i].x, points[i].y, points[i + 1].x, points[i + 1].y],
+                { stroke: data.color || "#D84315", strokeWidth: 2.5 }
+            );
+            chartElements.push(line);
+        }
+
+        // 2. Draw Circles and Labels
+        points.forEach((pt) => {
             const dot = new fabric.Circle({
-                left: px,
-                top: py,
+                left: pt.x,
+                top: pt.y,
                 radius: 4,
-                fill: data.color,
+                fill: data.color || "#D84315",
                 originX: "center",
                 originY: "center"
             });
 
-            // Point Value
-            const valText = new fabric.Text(String(val), {
-                left: px,
-                top: py - 14,
+            const valText = new fabric.Text(String(pt.val), {
+                left: pt.x,
+                top: pt.y - 14,
                 fontSize: 10,
                 fontFamily: "Poppins",
                 fill: "#334155",
                 originX: "center"
             });
 
-            // X-Axis Label
-            const xLabel = new fabric.Text(data.labels[i], {
-                left: px,
+            const xLabel = new fabric.Text(pt.label, {
+                left: pt.x,
                 top: margin.top + plotHeight + 8,
                 fontSize: 11,
                 fontFamily: "Poppins",
@@ -364,18 +381,11 @@ window.ChartEngine = {
             chartElements.push(dot, valText, xLabel);
         });
 
-        // Connecting Lines
-        for (let i = 0; i < points.length - 1; i++) {
-            const line = new fabric.Line(
-                [points[i].x, points[i].y, points[i + 1].x, points[i + 1].y],
-                { stroke: data.color, strokeWidth: 2.5 }
-            );
-            chartElements.push(line);
-        }
-
         const chartGroup = new fabric.Group(chartElements, {
             left: bounds.left,
             top: bounds.top,
+            originX: "left",
+            originY: "top",
             customType: "Line Chart",
             name: options.title || "Line Chart"
         });
