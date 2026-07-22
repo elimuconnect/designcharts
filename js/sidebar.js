@@ -112,6 +112,7 @@ TEXT
 =========================================*/
 
 function showTextTools() {
+    if (!toolContent) return;
     toolContent.innerHTML = `
         <div class="tool-card fadeIn">
             <h3>Text</h3>
@@ -128,6 +129,7 @@ SHAPES
 =========================================*/
 
 function showShapeTools() {
+    if (!toolContent) return;
     toolContent.innerHTML = `
         <div class="tool-card fadeIn">
             <h3>Shapes</h3>
@@ -148,15 +150,16 @@ TEMPLATES
 =========================================*/
 
 function showTemplates() {
+    if (!toolContent) return;
     toolContent.innerHTML = `
         <div class="tool-card fadeIn">
             <h3>Educational Templates</h3>
-            <button onclick="chartTemplates.loadTemplate('math'); closeToolbox();">Mathematics</button>
-            <button onclick="chartTemplates.loadTemplate('science'); closeToolbox();">Science</button>
-            <button onclick="chartTemplates.loadTemplate('english'); closeToolbox();">English</button>
-            <button onclick="chartTemplates.loadTemplate('ict'); closeToolbox();">ICT</button>
-            <button onclick="chartTemplates.loadTemplate('agriculture'); closeToolbox();">Agriculture</button>
-            <button onclick="chartTemplates.loadTemplate('cbc'); closeToolbox();">CBC Competencies</button>
+            <button onclick="if(window.chartTemplates) chartTemplates.loadTemplate('math'); closeToolbox();">Mathematics</button>
+            <button onclick="if(window.chartTemplates) chartTemplates.loadTemplate('science'); closeToolbox();">Science</button>
+            <button onclick="if(window.chartTemplates) chartTemplates.loadTemplate('english'); closeToolbox();">English</button>
+            <button onclick="if(window.chartTemplates) chartTemplates.loadTemplate('ict'); closeToolbox();">ICT</button>
+            <button onclick="if(window.chartTemplates) chartTemplates.loadTemplate('agriculture'); closeToolbox();">Agriculture</button>
+            <button onclick="if(window.chartTemplates) chartTemplates.loadTemplate('cbc'); closeToolbox();">CBC Competencies</button>
         </div>
     `;
 }
@@ -166,6 +169,7 @@ IMAGES
 =========================================*/
 
 function showImages() {
+    if (!toolContent) return;
     toolContent.innerHTML = `
         <div class="tool-card fadeIn">
             <h3>Images</h3>
@@ -180,6 +184,7 @@ TABLES
 =========================================*/
 
 function showTables() {
+    if (!toolContent) return;
     toolContent.innerHTML = `
         <div class="tool-card fadeIn">
             <h3>Tables</h3>
@@ -195,6 +200,7 @@ ICONS
 =========================================*/
 
 function showIcons() {
+    if (!toolContent) return;
     toolContent.innerHTML = `
         <div class="tool-card fadeIn">
             <h3>Icons</h3>
@@ -209,6 +215,7 @@ CHARTS
 =========================================*/
 
 function showCharts() {
+    if (!toolContent) return;
     toolContent.innerHTML = `
         <div class="tool-card fadeIn">
             <h3>Charts</h3>
@@ -264,6 +271,7 @@ BACKGROUND
 =========================================*/
 
 function showBackgrounds() {
+    if (!toolContent) return;
     toolContent.innerHTML = `
         <div class="tool-card fadeIn">
             <h3>Background</h3>
@@ -273,7 +281,7 @@ function showBackgrounds() {
 
     setTimeout(() => {
         const picker = document.getElementById("bgPicker");
-        if (picker) {
+        if (picker && typeof canvas !== "undefined" && canvas) {
             picker.oninput = function() {
                 canvas.backgroundColor = this.value;
                 canvas.renderAll();
@@ -287,6 +295,7 @@ UPLOADS
 =========================================*/
 
 function showUploads() {
+    if (!toolContent) return;
     toolContent.innerHTML = `
         <div class="tool-card fadeIn">
             <h3>Uploads</h3>
@@ -300,6 +309,7 @@ SCHOOL LOGO
 =========================================*/
 
 function showLogos() {
+    if (!toolContent) return;
     toolContent.innerHTML = `
         <div class="tool-card fadeIn">
             <h3>School Logo</h3>
@@ -331,10 +341,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const leftToggle = document.getElementById("toggleLeftSidebar");
     const rightToggle = document.getElementById("toggleRightSidebar");
 
-    const leftPanel = document.querySelector(".left-container") || document.querySelector(".sidebar");
-    const rightPanel = document.querySelector(".properties-panel") || document.querySelector(".properties");
+    // Grab all potential targets for maximum reliability
+    const leftContainer = document.querySelector(".left-container") || document.querySelector(".sidebar");
+    const rightPanel = document.querySelector(".properties") || document.querySelector(".properties-panel") || document.getElementById("rightPropertiesPanel");
 
-    // Helper to safely trigger canvas recalculation across both global and object methods
+    // Helper to safely recalculate canvas dimensions
     const triggerCanvasResize = () => {
         setTimeout(() => {
             if (typeof fitPage === "function") fitPage();
@@ -345,25 +356,25 @@ document.addEventListener("DOMContentLoaded", function() {
         }, 300);
     };
 
-    // Left Sidebar Toggle
-    if (leftToggle && leftPanel) {
-        leftToggle.addEventListener("click", function() {
-            leftPanel.classList.toggle("collapsed");
-            
-            // Update button arrow icon
-            const isCollapsed = leftPanel.classList.contains("collapsed");
+    // Left Sidebar Toggle Handler
+    if (leftToggle && leftContainer) {
+        leftToggle.addEventListener("click", function(e) {
+            e.preventDefault();
+            leftContainer.classList.toggle("collapsed");
+
+            const isCollapsed = leftContainer.classList.contains("collapsed");
             leftToggle.innerHTML = isCollapsed ? "▶" : "◀";
 
             triggerCanvasResize();
         });
     }
 
-    // Right Sidebar Toggle (Single Consolidated Listener)
+    // Right Properties Sidebar Toggle Handler
     if (rightToggle && rightPanel) {
-        rightToggle.addEventListener("click", function() {
+        rightToggle.addEventListener("click", function(e) {
+            e.preventDefault();
             rightPanel.classList.toggle("collapsed");
 
-            // Update button label/arrow
             const isCollapsed = rightPanel.classList.contains("collapsed");
             rightToggle.innerHTML = isCollapsed ? "Properties ◀" : "Properties ▶";
 
