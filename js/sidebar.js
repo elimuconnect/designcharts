@@ -327,4 +327,48 @@ if (sidebarButtons.logos) sidebarButtons.logos.onclick = () => openTool("logos")
 START
 =========================================*/
 
+
+
+/*=========================================
+SIDEBAR TOGGLE HANDLERS
+=========================================*/
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Left Sidebar Toggle
+    const toggleLeftBtn = document.getElementById("toggleLeftSidebar");
+    const navSidebar = document.querySelector(".sidebar");
+
+    if (toggleLeftBtn && navSidebar) {
+        toggleLeftBtn.addEventListener("click", () => {
+            navSidebar.classList.toggle("collapsed");
+            toggleLeftBtn.innerHTML = navSidebar.classList.contains("collapsed") 
+                ? "Sidebar ▶" 
+                : "◀ Sidebar";
+
+            // Trigger canvas recalculation if editor exists
+            if (window.canvasEditor && typeof window.canvasEditor.fitPage === "function") {
+                setTimeout(() => window.canvasEditor.fitPage(), 300);
+            }
+        });
+    }
+
+    // Right Properties Sidebar Toggle
+    const toggleRightBtn = document.getElementById("toggleRightSidebar");
+    const rightProperties = document.querySelector(".properties");
+
+    if (toggleRightBtn && rightProperties) {
+        toggleRightBtn.addEventListener("click", () => {
+            rightProperties.classList.toggle("collapsed");
+            toggleRightBtn.innerHTML = rightProperties.classList.contains("collapsed") 
+                ? "Properties ◀" 
+                : "Properties ▶";
+
+            // Trigger canvas recalculation if editor exists
+            if (window.canvasEditor && typeof window.canvasEditor.fitPage === "function") {
+                setTimeout(() => window.canvasEditor.fitPage(), 300);
+            }
+        });
+    }
+});
+
 openTool("templates");
