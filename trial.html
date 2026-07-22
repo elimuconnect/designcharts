@@ -1,0 +1,4845 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
+<title>School Wall Chart Designer Pro</title>
+
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+rel="stylesheet">
+
+
+<!-- Core Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Application Engine Scripts (Order Matters!) -->
+<script src="js/charts.js"></script>
+
+
+<style>
+/* ==========================================
+   SCHOOL WALL CHART DESIGNER PRO
+   style.css - Collapsible Layout Edition
+========================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #1565C0;
+    --primary-dark: #0D47A1;
+    --secondary: #00ACC1;
+    --success: #2E7D32;
+    --warning: #F9A825;
+    --danger: #C62828;
+    --light: #F5F7FA;
+    --panel: #FFFFFF;
+    --border: #D9E2EC;
+    --text: #263238;
+    --shadow: 0 4px 18px rgba(0, 0, 0, .08);
+    --radius: 10px;
+    --transition: .25s;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: "Poppins", sans-serif;
+    background: #EEF3F8;
+    color: var(--text);
+}
+
+/*==============================
+APP CONTAINER & LAYOUT STRUCTURE
+==============================*/
+
+.app-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Left Wrapper containing Sidebar Navigation and Tool Panel */
+.left-container {
+    display: flex;
+    height: 100%;
+    z-index: 100;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+/* Left Navigation Sidebar */
+.sidebar {
+    width: 80px;
+    height: 100%;
+    background: #0D1B2A;
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 0;
+    gap: 15px;
+    z-index: 101;
+}
+
+/* Secondary Tool Sub-panel */
+.tool-panel {
+    width: 260px;
+    height: 100%;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Right Properties Panel */
+.properties-panel,
+.properties {
+    width: 300px;
+    height: 100%;
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 100;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+/*==============================
+COLLAPSIBLE STATES
+==============================*/
+
+/* Collapse entire Left Container */
+.left-container.collapsed,
+.sidebar.collapsed {
+    transform: translateX(-100%);
+    margin-left: -340px; /* Accounts for sidebar + tool-panel width */
+}
+
+/* Collapse Right Panel */
+.properties-panel.collapsed,
+.properties.collapsed {
+    transform: translateX(100%);
+    margin-right: -300px;
+}
+
+/* Floating Collapse Toggle Buttons */
+.collapse-btn,
+.toggle-btn-left,
+.toggle-btn-right {
+    position: absolute;
+    top: 15px;
+    z-index: 105;
+    background: var(--primary);
+    color: #FFFFFF;
+    border: 1px solid var(--primary-dark);
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.2s ease, transform 0.2s ease, left 0.3s ease, right 0.3s ease;
+}
+
+.collapse-btn:hover,
+.toggle-btn-left:hover,
+.toggle-btn-right:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+/* Position Left Toggle on the Workspace Boundary */
+#toggleLeftSidebar,
+.toggle-btn-left {
+    left: 15px;
+}
+
+/* Position Right Toggle on the Workspace Boundary */
+#toggleRightSidebar,
+.toggle-btn-right {
+    right: 15px;
+}
+
+/*==============================
+WORKSPACE & TOP TOOLBAR
+==============================*/
+
+.workspace {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    background: #EEF3F8;
+}
+
+/* Fixed Top Toolbar (Keeps controls clean without blue bar overflow) */
+.toolbar,
+.top-bar {
+    width: 100%;
+    height: 54px;
+    background: var(--primary);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    padding: 0 60px; /* Padding avoids overlap with floating toggle buttons */
+    gap: 8px;
+    overflow-x: auto;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--primary-dark);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar button,
+.top-bar button {
+    background: rgba(255, 255, 255, 0.15);
+    color: #FFFFFF;
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+}
+
+.toolbar button:hover,
+.top-bar button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Interactive Canvas Area */
+.canvas-container-wrapper,
+#canvasContainer {
+    flex: 1;
+    width: 100%;
+    height: calc(100% - 54px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    position: relative;
+}
+
+/*==============================
+GLOBAL FORM ELEMENTS & BUTTONS
+==============================*/
+
+button {
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    border-radius: 8px;
+    font-family: "Poppins", sans-serif;
+}
+
+label {
+    display: block;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    font-family: "Poppins", sans-serif;
+    transition: var(--transition);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary);
+}
+
+input[type=range] {
+    cursor: pointer;
+}
+
+input[type=color] {
+    padding: 3px;
+    height: 42px;
+    cursor: pointer;
+}
+
+/*==============================
+HEADINGS & LISTS
+==============================*/
+
+h2 {
+    color: var(--primary);
+    margin-bottom: 18px;
+}
+
+h3 {
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+hr {
+    border: none;
+    height: 1px;
+    background: #E4E7EB;
+    margin: 18px 0;
+}
+
+#layersList {
+    list-style: none;
+    margin-top: 12px;
+}
+
+#layersList li {
+    padding: 10px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+#layersList li:hover {
+    background: #E3F2FD;
+}
+
+#layersList li.active-layer {
+    border-color: var(--primary);
+    background: #E3F2FD;
+    font-weight: 600;
+}
+
+/*==============================
+SCROLLBAR & UTILITIES
+==============================*/
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #B0BEC5;
+    border-radius: 30px;
+}
+
+::-webkit-scrollbar-track {
+    background: #ECEFF1;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.shadow {
+    box-shadow: var(--shadow);
+}
+
+.round {
+    border-radius: var(--radius);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.full-width {
+    width: 100%;
+}
+
+/* Ensure App Container stretches full screen */
+.app-container {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+}
+
+/* Force Top Bar Visibility */
+.top-bar, .toolbar {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    background-color: #1565C0 !important;
+    color: #ffffff !important;
+    padding: 0 15px !important;
+    gap: 10px !important;
+    z-index: 200 !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+/* Canvas Wrapper takes remaining height under top bar */
+.canvas-container-wrapper {
+    flex: 1 !important;
+    width: 100% !important;
+    height: calc(100vh - 50px) !important;
+    overflow: auto !important;
+    position: relative !important;
+}
+
+/* Properties Panel Collapsing Fix */
+.properties, 
+.properties-panel {
+    width: 320px;
+    min-width: 320px;
+    height: 100%;
+    background: #ffffff;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 150;
+    flex-shrink: 0;
+}
+
+/* Hard Collapse Class Rules (Overrides external CSS) */
+.properties.collapsed,
+.properties-panel.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    padding: 0 !important;
+    margin-right: -320px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+    pointer-events: none !important;
+}
+
+.left-container.collapsed,
+.sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    margin-left: -340px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+    pointer-events: none !important;
+}
+
+/*=========================================
+    SCHOOL WALL CHART DESIGNER PRO
+    layout.css
+==========================================*/
+
+/*==============================
+TOP BAR
+==============================*/
+
+.topbar{
+
+    height:70px;
+
+    background:#ffffff;
+
+    border-bottom:1px solid #D9E2EC;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 20px;
+
+    box-shadow:0 3px 12px rgba(0,0,0,.08);
+
+    z-index:1000;
+
+}
+
+.brand{
+
+    font-size:22px;
+
+    font-weight:700;
+
+    color:#1565C0;
+
+    white-space:nowrap;
+
+}
+
+/*==============================
+TOP TOOLBAR
+==============================*/
+
+.toolbar{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+
+.toolbar button{
+
+    background:#1565C0;
+
+    color:#fff;
+
+    padding:9px 16px;
+
+    font-size:14px;
+
+}
+
+.toolbar button:hover{
+
+    background:#0D47A1;
+
+}
+
+/*==============================
+RIGHT TOOLBAR
+==============================*/
+
+.toolbar-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    min-width:320px;
+
+}
+
+.toolbar-right select{
+
+    width:90px;
+
+}
+
+.toolbar-right input[type=range]{
+
+    width:120px;
+
+}
+
+#zoomValue{
+
+    min-width:55px;
+
+    text-align:center;
+
+    font-weight:600;
+
+    color:#1565C0;
+
+}
+
+/*==============================
+MAIN APP
+==============================*/
+
+.app{
+
+    display:flex;
+
+    height:calc(100vh - 70px);
+
+    overflow:hidden;
+
+}
+
+/*==============================
+TOOL PANEL
+==============================*/
+
+.tool-panel{
+
+    width:320px;
+
+    min-width:320px;
+
+    background:#fff;
+
+    border-right:1px solid #D9E2EC;
+
+    padding:20px;
+
+    overflow:auto;
+
+}
+
+/*==============================
+WORKSPACE
+==============================*/
+
+.workspace{
+
+    flex:1;
+
+    background:#DDE5EE;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    overflow:auto;
+
+    position:relative;
+
+}
+
+/*==============================
+CANVAS
+==============================*/
+
+#canvasWrapper{
+
+    background:#fff;
+
+    padding:25px;
+
+    margin:40px;
+
+    border-radius:8px;
+
+    box-shadow:0 10px 35px rgba(0,0,0,.18);
+
+}
+
+#designerCanvas{
+
+    display:block;
+
+    background:#fff;
+
+    border:1px solid #D9D9D9;
+
+}
+
+/*==============================
+RIGHT PROPERTIES PANEL
+==============================*/
+
+.properties{
+
+    width:320px;
+
+    min-width:320px;
+
+    background:#fff;
+
+    border-left:1px solid #D9E2EC;
+
+    padding:20px;
+
+    overflow:auto;
+
+}
+
+.properties input,
+
+.properties select{
+
+    margin-bottom:12px;
+
+}
+
+/*==============================
+ALIGN BUTTONS
+==============================*/
+
+.alignButtons{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:8px;
+
+}
+
+.alignButtons button{
+
+    background:#1565C0;
+
+    color:white;
+
+    padding:10px;
+
+}
+
+.alignButtons button:hover{
+
+    background:#0D47A1;
+
+}
+
+/*==============================
+ACTION BUTTONS
+==============================*/
+
+.properties button{
+
+    width:100%;
+
+    margin-top:10px;
+
+    padding:11px;
+
+}
+
+#deleteObject{
+
+    background:#C62828;
+
+    color:#fff;
+
+}
+
+#deleteObject:hover{
+
+    background:#B71C1C;
+
+}
+
+/*==============================
+LAYERS
+==============================*/
+
+#layersList{
+
+    min-height:120px;
+
+}
+
+/*==============================
+RESPONSIVE
+==============================*/
+
+@media(max-width:1200px){
+
+.tool-panel{
+
+    width:280px;
+
+    min-width:280px;
+
+}
+
+.properties{
+
+    width:280px;
+
+    min-width:280px;
+
+}
+
+}
+
+@media(max-width:900px){
+
+.app{
+
+    flex-direction:column;
+
+}
+
+.tool-panel{
+
+    display:none;
+
+}
+
+.properties{
+
+    display:none;
+
+}
+
+.workspace{
+
+    width:100%;
+
+}
+
+.toolbar{
+
+    overflow:auto;
+
+}
+
+}
+
+/*=========================================
+    SCHOOL WALL CHART DESIGNER PRO
+    sidebar.css
+==========================================*/
+
+/*==============================
+LEFT SIDEBAR
+==============================*/
+
+.sidebar {
+    width: 90px;
+    min-width: 90px;
+    background: #0F172A;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 18px 8px;
+    gap: 10px;
+    overflow-y: auto;
+    border-right: 1px solid #1E293B;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 20px;
+}
+
+/*==============================
+SIDEBAR BUTTONS
+==============================*/
+
+.sidebar button {
+    width: 70px;
+    height: 70px;
+    border: none;
+    background: transparent;
+    color: #CBD5E1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all .25s ease;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.sidebar button span {
+    margin-top: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.sidebar button:hover {
+    background: #2563EB;
+    color: #fff;
+    transform: scale(1.05);
+}
+
+.sidebar button.active {
+    background: #1565C0;
+    color: #fff;
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(21, 101, 192, .35);
+}
+
+.sidebar button:active {
+    transform: scale(.96);
+}
+
+/*==============================
+TOOL PANEL CONTAINER & COLLAPSE
+==============================*/
+
+.tool-panel {
+    width: 320px;
+    min-width: 320px;
+    background: #FFFFFF;
+    border-right: 1px solid #D9E2EC;
+    padding: 20px;
+    overflow-y: auto;
+    transition: width 0.25s ease, min-width 0.25s ease, padding 0.25s ease, border 0.25s ease;
+}
+
+/* Collapses panel completely so canvas can take full screen space */
+.tool-panel.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border-right: none !important;
+    overflow: hidden !important;
+}
+
+/*==============================
+TOOL PANEL CONTENT
+==============================*/
+
+#toolContent {
+    min-height: 450px;
+}
+
+/*==============================
+TOOL CARD
+==============================*/
+
+.tool-card {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 18px;
+    animation: fade .25s ease;
+}
+
+.tool-card h3 {
+    margin-bottom: 15px;
+    color: #1565C0;
+    font-size: 18px;
+}
+
+.tool-card p {
+    font-size: 14px;
+    color: #64748B;
+    line-height: 1.6;
+}
+
+.tool-card small {
+    color: #94A3B8;
+}
+
+/*==============================
+CARD BUTTONS
+==============================*/
+
+.tool-card button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #1565C0;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: .25s;
+}
+
+.tool-card button:hover {
+    background: #0D47A1;
+}
+
+.tool-card button:last-child {
+    margin-bottom: 0;
+}
+
+/*==============================
+CARD INPUTS
+==============================*/
+
+.tool-card input,
+.tool-card select {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 10px;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-family: "Poppins", sans-serif;
+}
+
+/*==============================
+IMAGE PREVIEW
+==============================*/
+
+.image-thumb {
+    width: 100%;
+    border-radius: 10px;
+    display: block;
+    margin-bottom: 12px;
+}
+
+/*==============================
+SHAPE GRID
+==============================*/
+
+.shape-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.shape-item {
+    height: 80px;
+    border: 1px solid #CBD5E1;
+    border-radius: 10px;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: .25s;
+    font-size: 30px;
+}
+
+.shape-item:hover {
+    background: #E3F2FD;
+    border-color: #1565C0;
+    transform: scale(1.04);
+}
+
+/*==============================
+TEMPLATE GRID
+==============================*/
+
+.template-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+.template {
+    min-height: 170px;
+    background: #fff;
+    border: 1px solid #CBD5E1;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: .25s;
+}
+
+.template:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .12);
+}
+
+.template img {
+    width: 100%;
+    height: 130px;
+    object-fit: cover;
+    display: block;
+}
+
+.template h4 {
+    padding: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #334155;
+}
+
+/*==============================
+FADE ANIMATION
+==============================*/
+
+.fadeIn {
+    animation: fade .25s ease;
+}
+
+@keyframes fade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/*==============================
+RESPONSIVE
+==============================*/
+
+@media (max-width: 1200px) {
+    .sidebar {
+        width: 80px;
+        min-width: 80px;
+    }
+    .sidebar button {
+        width: 62px;
+        height: 62px;
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 900px) {
+    .sidebar {
+        width: 70px;
+        min-width: 70px;
+    }
+    .sidebar button {
+        width: 54px;
+        height: 54px;
+        font-size: 18px;
+    }
+    .sidebar button span {
+        display: none;
+    }
+}
+/*=========================================
+    SCHOOL WALL CHART DESIGNER PRO
+    properties.css
+==========================================*/
+
+/*==============================
+PROPERTIES PANEL
+==============================*/
+
+.properties{
+
+    width:320px;
+
+    min-width:320px;
+
+    background:#FFFFFF;
+
+    border-left:1px solid #D9E2EC;
+
+    display:flex;
+
+    flex-direction:column;
+
+    overflow-y:auto;
+
+    padding:20px;
+
+}
+
+/*==============================
+SCROLLBAR
+==============================*/
+
+.properties::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+.properties::-webkit-scrollbar-thumb{
+
+    background:#CBD5E1;
+
+    border-radius:20px;
+
+}
+
+/*==============================
+TITLE
+==============================*/
+
+.properties h2{
+
+    color:#1565C0;
+
+    font-size:24px;
+
+    margin-bottom:20px;
+
+}
+
+.properties h3{
+
+    color:#1565C0;
+
+    font-size:18px;
+
+    margin:18px 0 10px;
+
+}
+
+/*==============================
+LABELS
+==============================*/
+
+.properties label{
+
+    display:block;
+
+    margin-top:12px;
+
+    margin-bottom:6px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    color:#475569;
+
+}
+
+/*==============================
+INPUTS
+==============================*/
+
+.properties input,
+
+.properties select,
+
+.properties textarea{
+
+    width:100%;
+
+    padding:10px;
+
+    border:1px solid #CBD5E1;
+
+    border-radius:8px;
+
+    background:white;
+
+    font-family:"Poppins",sans-serif;
+
+    font-size:14px;
+
+    margin-bottom:12px;
+
+    transition:.25s;
+
+}
+
+.properties input:focus,
+
+.properties select:focus,
+
+.properties textarea:focus{
+
+    outline:none;
+
+    border-color:#1565C0;
+
+    box-shadow:0 0 0 3px rgba(21,101,192,.15);
+
+}
+
+/*==============================
+COLOR PICKER
+==============================*/
+
+.properties input[type=color]{
+
+    padding:3px;
+
+    height:45px;
+
+    cursor:pointer;
+
+}
+
+/*==============================
+RANGE
+==============================*/
+
+.properties input[type=range]{
+
+    padding:0;
+
+    cursor:pointer;
+
+}
+
+/*==============================
+ALIGNMENT
+==============================*/
+
+.alignButtons{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:8px;
+
+    margin-top:10px;
+
+}
+
+.alignButtons button{
+
+    height:42px;
+
+    background:#1565C0;
+
+    color:white;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    font-size:18px;
+
+}
+
+.alignButtons button:hover{
+
+    background:#0D47A1;
+
+}
+
+/*==============================
+ACTION BUTTONS
+==============================*/
+
+.properties button{
+
+    width:100%;
+
+    padding:11px;
+
+    margin-top:10px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#1565C0;
+
+    color:white;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+.properties button:hover{
+
+    background:#0D47A1;
+
+}
+
+/*==============================
+DELETE BUTTON
+==============================*/
+
+#deleteObject{
+
+    background:#D32F2F;
+
+}
+
+#deleteObject:hover{
+
+    background:#B71C1C;
+
+}
+
+/*==============================
+DIVIDER
+==============================*/
+
+.properties hr{
+
+    border:none;
+
+    height:1px;
+
+    background:#E2E8F0;
+
+    margin:20px 0;
+
+}
+
+/*==============================
+LAYERS
+==============================*/
+
+#layersList{
+
+    list-style:none;
+
+    margin-top:10px;
+
+    padding:0;
+
+}
+
+#layersList li{
+
+    padding:10px;
+
+    border:1px solid #CBD5E1;
+
+    border-radius:8px;
+
+    background:#F8FAFC;
+
+    margin-bottom:8px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    font-size:14px;
+
+}
+
+#layersList li:hover{
+
+    background:#E3F2FD;
+
+    border-color:#1565C0;
+
+}
+
+/*==============================
+SECTION CARD
+==============================*/
+
+.property-card{
+
+    background:#F8FAFC;
+
+    border:1px solid #E2E8F0;
+
+    border-radius:10px;
+
+    padding:15px;
+
+    margin-bottom:18px;
+
+}
+
+/*==============================
+RESPONSIVE
+==============================*/
+
+@media(max-width:1200px){
+
+    .properties{
+
+        width:280px;
+
+        min-width:280px;
+
+    }
+
+}
+
+@media(max-width:900px){
+
+    .properties{
+
+        display:none;
+
+    }
+
+}
+/*=========================================
+    SCHOOL WALL CHART DESIGNER PRO
+    canvas.css
+==========================================*/
+
+
+
+/*==============================
+WORKSPACE CANVAS CONTAINER
+==============================*/
+
+.workspace {
+    position: relative;
+    display: flex;
+    justify-content: safe center; /* Safe fallback prevents left-side cutoff */
+    align-items: flex-start;
+    overflow: auto;
+    padding: 60px; /* Essential margin around large chart paper */
+    background: #DFE7EF;
+    background-image:
+        linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,.04) 1px, transparent 1px);
+    background-size: 25px 25px;
+}
+
+/* Force the Fabric.js canvas wrapper to maintain full size and center properly */
+.workspace .canvas-container {
+    margin: 0 auto !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+}
+
+/*==============================
+CANVAS WRAPPER
+==============================*/
+
+#canvasWrapper{
+
+    position:relative;
+
+    margin:60px;
+
+    padding:25px;
+
+    background:#FFFFFF;
+
+    border-radius:8px;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.15),
+        0 0 0 1px rgba(0,0,0,.08);
+
+    transform-origin:center center;
+
+    transition:transform .25s ease;
+
+}
+
+/*==============================
+FABRIC CANVAS
+==============================*/
+
+#designerCanvas{
+
+    display:block;
+
+    background:#FFFFFF;
+
+    border:1px solid #D6D6D6;
+
+}
+
+/*==============================
+SAFE MARGIN
+==============================*/
+
+.canvas-safe-area{
+
+    position:absolute;
+
+    inset:20px;
+
+    border:2px dashed rgba(33,150,243,.25);
+
+    pointer-events:none;
+
+}
+
+/*==============================
+PRINT MARGIN
+==============================*/
+
+.canvas-print-area{
+
+    position:absolute;
+
+    inset:8px;
+
+    border:1px dashed rgba(255,0,0,.25);
+
+    pointer-events:none;
+
+}
+
+/*==============================
+PAGE LABEL
+==============================*/
+
+.paper-label{
+
+    position:absolute;
+
+    top:-42px;
+
+    left:0;
+
+    padding:6px 14px;
+
+    background:#1565C0;
+
+    color:#FFFFFF;
+
+    border-radius:6px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+/*==============================
+GRID
+==============================*/
+
+.hide-grid{
+
+    background-image:none !important;
+
+}
+
+/*==============================
+DISPLAY PAPER SIZES
+==============================*/
+
+.paper-a4{
+
+    width:794px;
+
+    height:1123px;
+
+}
+
+.paper-a3{
+
+    width:1123px;
+
+    height:1587px;
+
+}
+
+.paper-a2{
+
+    width:1587px;
+
+    height:2245px;
+
+}
+
+.paper-a1{
+
+    width:2245px;
+
+    height:3179px;
+
+}
+
+.paper-a0{
+
+    width:3179px;
+
+    height:4494px;
+
+}
+
+/*==============================
+LANDSCAPE
+==============================*/
+
+.landscape{
+
+    transform:none;
+
+}
+
+/*==============================
+SELECTION
+==============================*/
+
+.canvas-object-selected{
+
+    outline:2px dashed #1565C0;
+
+}
+
+/*==============================
+ALIGNMENT GUIDES
+==============================*/
+
+.guide-horizontal{
+
+    position:absolute;
+
+    left:0;
+
+    width:100%;
+
+    height:1px;
+
+    background:#FF1744;
+
+    pointer-events:none;
+
+    display:none;
+
+}
+
+.guide-vertical{
+
+    position:absolute;
+
+    top:0;
+
+    width:1px;
+
+    height:100%;
+
+    background:#FF1744;
+
+    pointer-events:none;
+
+    display:none;
+
+}
+
+/*==============================
+CENTER POINT
+==============================*/
+
+.center-point{
+
+    position:absolute;
+
+    left:50%;
+
+    top:50%;
+
+    width:10px;
+
+    height:10px;
+
+    background:#1565C0;
+
+    border-radius:50%;
+
+    transform:translate(-50%,-50%);
+
+    pointer-events:none;
+
+    display:none;
+
+}
+
+/*==============================
+LOADING
+==============================*/
+
+.canvas-loading{
+
+    position:absolute;
+
+    inset:0;
+
+    display:none;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:rgba(255,255,255,.85);
+
+    font-size:22px;
+
+    font-weight:700;
+
+    color:#1565C0;
+
+}
+
+/*==============================
+ZOOM
+==============================*/
+
+.zooming{
+
+    transition:transform .2s ease;
+
+}
+
+/*==============================
+RESPONSIVE
+==============================*/
+
+@media(max-width:900px){
+
+    #canvasWrapper{
+
+        margin:20px;
+
+        padding:15px;
+
+    }
+
+}
+
+
+
+#layersPanel{
+
+width:250px;
+
+background:white;
+
+border-left:1px solid #ddd;
+
+padding:10px;
+
+}
+
+
+
+.layer-item{
+
+display:flex;
+
+justify-content:space-between;
+
+padding:10px;
+
+margin-bottom:5px;
+
+background:#f2f6ff;
+
+cursor:pointer;
+
+border-radius:8px;
+
+}
+
+
+.layer-item:hover{
+
+background:#dbeafe;
+
+}
+</style>
+</head>
+  
+<body>
+
+<!-- ===========================
+TOP BAR
+=========================== -->
+
+<header class="topbar">
+
+<div class="brand">
+  🎓 School Wall Chart Designer
+</div>
+
+<div id="layersPanel"></div>
+
+<div class="toolbar">
+  <button id="newBtn">New</button>
+  <button id="saveBtn">Save</button>
+  <button id="loadBtn">Open</button>
+  <button id="undoBtn">Undo</button>
+  <button id="redoBtn">Redo</button>
+  <button id="copyBtn">Copy</button>
+  <button id="pasteBtn">Paste</button>
+  <button id="duplicateBtn">Duplicate</button>
+  <button id="exportPNG">PNG</button>
+  <button id="exportPDF">PDF</button>
+</div>
+
+<div class="toolbar-right">
+  <select id="paperSize">
+    <option>A4</option>
+    <option>A3</option>
+    <option>A2</option>
+    <option>A1</option>
+    <option>A0</option>
+  </select>
+
+  <select id="orientation">
+    <option value="portrait">Portrait</option>
+    <option value="landscape">Landscape</option>
+  </select>
+
+  <input type="range" id="zoomSlider" min="20" max="300" value="100">
+  <span id="zoomValue">100%</span>
+</div>
+
+</header>
+
+<!-- ===========================
+MAIN APP LAYOUT
+=========================== -->
+
+<div class="app">
+
+  <!-- LEFT SIDEBAR TOGGLE BUTTON -->
+  <button id="toggleLeftSidebar" class="collapse-btn" title="Toggle Sidebar">
+    ◀ Sidebar
+  </button>
+
+  <!-- LEFT SIDEBAR NAV -->
+  <nav class="sidebar">
+    <button id="toolTemplates">⭐ <span>Templates</span></button>
+    <button id="toolText">📝 <span>Text</span></button>
+    <button id="toolImages">🖼️ <span>Images</span></button>
+    <button id="toolShapes">⬜ <span>Shapes</span></button>
+    <button id="toolTables">📊 <span>Tables</span></button>
+    <button id="toolIcons">😀 <span>Icons</span></button>
+    <button id="toolCharts">📈 <span>Charts</span></button>
+    <button id="toolBackground">🎨 <span>Background</span></button>
+    <button id="toolUploads">⬆️ <span>Uploads</span></button>
+    <button id="toolLogos">🏫 <span>School Logo</span></button>
+  </nav>
+
+  <!-- TOOL PANEL -->
+  <section class="tool-panel">
+    <h2>Tool Box</h2>
+    <div id="toolContent">
+      Select a tool from the left.
+    </div>
+  </section>
+
+  <!-- CANVAS WORKSPACE -->
+  <section class="workspace">
+    <div id="canvasWrapper">
+      <canvas id="designerCanvas"></canvas>
+    </div>
+  </section>
+
+  <!-- RIGHT PANEL -->
+  <aside class="properties">
+    
+    <!-- RIGHT SIDEBAR TOGGLE BUTTON -->
+    <button id="toggleRightSidebar" class="collapse-btn" title="Toggle Properties">
+      Properties ▶
+    </button>
+
+    <h2>Properties</h2>
+
+    <label>Text</label>
+    <input id="objectText">
+
+    <label>Font</label>
+    <select id="fontFamily">
+      <option>Poppins</option>
+      <option>Arial</option>
+      <option>Verdana</option>
+      <option>Georgia</option>
+    </select>
+
+    <label>Size</label>
+    <input type="number" id="fontSize" value="36">
+
+    <label>Color</label>
+    <input type="color" id="textColor">
+
+    <label>Background</label>
+    <input type="color" id="backgroundColor">
+
+    <label>Opacity</label>
+    <input type="range" id="opacity" min="0" max="100" value="100">
+
+    <hr>
+
+    <h3>Alignment</h3>
+    <div class="alignButtons">
+      <button id="leftBtn">⬅</button>
+      <button id="centerBtn">⬌</button>
+      <button id="rightBtn">➡</button>
+      <button id="topBtn">⬆</button>
+      <button id="middleBtn">⬍</button>
+      <button id="bottomBtn">⬇</button>
+    </div>
+
+    <hr>
+
+    <h3>Layer</h3>
+    <button id="frontBtn">Bring Front</button>
+    <button id="backBtn">Send Back</button>
+    <button id="deleteObject">Delete</button>
+
+    <hr>
+
+    <h3>Objects</h3>
+    <ul id="layersList"></ul>
+
+  </aside>
+
+</div>
+
+<script>
+/*=========================================================
+    SCHOOL WALL CHART DESIGNER PRO
+    canvas.js - Fully Fixed & Optimized
+=========================================================*/
+
+"use strict";
+
+/*=========================================================
+    GLOBALS
+=========================================================*/
+
+let canvas = null;
+let clipboard = null;
+let currentPaper = "A4";
+let currentOrientation = "portrait";
+let currentZoom = 1;
+
+// History control flag to prevent event feedback loops
+let isHistoryAction = false;
+let history = [];
+let historyIndex = -1;
+
+/*=========================================================
+    PAPER SIZES (96 DPI Editing Sizes)
+=========================================================*/
+
+const PAPER_SIZES = {
+    A4: { width: 794, height: 1123 },
+    A3: { width: 1123, height: 1587 },
+    A2: { width: 1587, height: 2245 },
+    A1: { width: 2245, height: 3179 },
+    A0: { width: 3179, height: 4494 }
+};
+
+/*=========================================================
+    AUTO-CENTER & FIT HELPERS
+=========================================================*/
+
+function centerWorkspaceCanvas() {
+    const workspace = document.querySelector('.workspace');
+    if (workspace) {
+        // Automatically scroll to center the wall chart in view
+        workspace.scrollLeft = (workspace.scrollWidth - workspace.clientWidth) / 2;
+        workspace.scrollTop = (workspace.scrollHeight - workspace.clientHeight) / 2;
+    }
+}
+
+/*=========================================================
+    INITIALIZE
+=========================================================*/
+
+window.addEventListener("DOMContentLoaded", initCanvas);
+
+function initCanvas() {
+    canvas = new fabric.Canvas("designerCanvas", {
+        preserveObjectStacking: true,
+        selection: true,
+        fireRightClick: true,
+        stopContextMenu: true,
+        backgroundColor: "#ffffff"
+    });
+
+    applyPaperSize(currentPaper);
+    registerCanvasEvents();
+    registerToolbarEvents();
+    registerPropertyEvents();
+
+    // Save initial canvas state for History
+    saveHistory();
+
+    canvas.renderAll();
+    refreshLayers();
+}
+
+/*=========================================================
+    PAPER SIZE & ORIENTATION
+=========================================================*/
+
+function applyPaperSize(size) {
+    currentPaper = size;
+    let width = PAPER_SIZES[size].width;
+    let height = PAPER_SIZES[size].height;
+
+    if (currentOrientation === "landscape") {
+        const temp = width;
+        width = height;
+        height = temp;
+    }
+
+    canvas.setDimensions({ width, height });
+    canvas.requestRenderAll();
+
+    // Automatically fit any page format (A4 to A0) inside the workspace view
+    requestAnimationFrame(() => {
+        fitPage();
+        centerWorkspaceCanvas();
+    });
+}
+
+function setOrientation(mode) {
+    currentOrientation = mode;
+    applyPaperSize(currentPaper);
+}
+
+/*=========================================================
+    ZOOM CONTROLS
+=========================================================*/
+
+function setZoom(value) {
+    value = Math.max(0.05, Math.min(value, 3)); // Lower floor (0.05) to accommodate huge A0 charts
+    currentZoom = value;
+
+    // Zoom from center of viewport
+    const center = new fabric.Point(canvas.getWidth() / 2, canvas.getHeight() / 2);
+    canvas.zoomToPoint(center, value);
+    canvas.requestRenderAll();
+
+    const slider = document.getElementById("zoomSlider");
+    if (slider) slider.value = value * 100;
+
+    const label = document.getElementById("zoomValue");
+    if (label) label.textContent = Math.round(value * 100) + "%";
+
+    centerWorkspaceCanvas();
+}
+
+function fitPage() {
+    const workspace = document.querySelector(".workspace");
+    if (!workspace || !canvas) return;
+
+    const padding = 80;
+    const zoomX = (workspace.clientWidth - padding) / canvas.getWidth();
+    const zoomY = (workspace.clientHeight - padding) / canvas.getHeight();
+    let zoom = Math.min(zoomX, zoomY);
+
+    // Caps zoom at 100% max, but lets large charts (A2/A1/A0) zoom out as far as needed to fit
+    setZoom(zoom);
+}
+
+function resetZoom() {
+    setZoom(1);
+}
+
+/*=========================================================
+    BACKGROUND & CLEAR
+=========================================================*/
+
+function setCanvasBackground(color) {
+    if (!canvas) return;
+    canvas.backgroundColor = color;
+    canvas.requestRenderAll();
+    saveHistory();
+}
+
+function clearCanvas() {
+    if (!confirm("Create a new project? Unsaved work will be lost.")) return;
+
+    // Safely remove objects without destroying background or handlers
+    canvas.discardActiveObject();
+    canvas.getObjects().slice().forEach(obj => canvas.remove(obj));
+    
+    canvas.backgroundColor = "#ffffff";
+    applyPaperSize(currentPaper);
+    canvas.requestRenderAll();
+    
+    saveHistory();
+    refreshLayers();
+}
+
+/*=========================================================
+    EVENT REGISTRATIONS
+=========================================================*/
+
+function registerToolbarEvents() {
+    const paper = document.getElementById("paperSize");
+    if (paper) paper.addEventListener("change", e => applyPaperSize(e.target.value));
+
+    const orientation = document.getElementById("orientation");
+    if (orientation) orientation.addEventListener("change", e => setOrientation(e.target.value));
+
+    const zoom = document.getElementById("zoomSlider");
+    if (zoom) zoom.addEventListener("input", e => setZoom(e.target.value / 100));
+
+    // Fit & Reset Zoom UI Handlers
+    const fitBtn = document.getElementById("fitBtn");
+    if (fitBtn) fitBtn.addEventListener("click", fitPage);
+
+    const resetZoomBtn = document.getElementById("resetZoomBtn");
+    if (resetZoomBtn) resetZoomBtn.addEventListener("click", resetZoom);
+
+    const newBtn = document.getElementById("newBtn");
+    if (newBtn) newBtn.addEventListener("click", clearCanvas);
+
+    const undoBtn = document.getElementById("undoBtn");
+    if (undoBtn) undoBtn.onclick = undo;
+
+    const redoBtn = document.getElementById("redoBtn");
+    if (redoBtn) redoBtn.onclick = redo;
+
+    // Action buttons
+    const actions = [
+        ["deleteObject", deleteSelected],
+        ["duplicateBtn", duplicateSelected],
+        ["copyBtn", copySelected],
+        ["pasteBtn", pasteSelected],
+        ["frontBtn", bringForward],
+        ["backBtn", sendBackward]
+    ];
+
+    actions.forEach(([id, fn]) => {
+        const btn = document.getElementById(id);
+        if (btn) btn.addEventListener("click", fn);
+    });
+
+    // Alignment buttons
+    [
+        ["leftBtn", "left"],
+        ["centerBtn", "center"],
+        ["rightBtn", "right"],
+        ["topBtn", "top"],
+        ["middleBtn", "middle"],
+        ["bottomBtn", "bottom"]
+    ].forEach(([id, pos]) => {
+        const btn = document.getElementById(id);
+        if (btn) btn.addEventListener("click", () => alignObject(pos));
+    });
+}
+
+function registerCanvasEvents() {
+    canvas.on("selection:created", selectionChanged);
+    canvas.on("selection:updated", selectionChanged);
+    canvas.on("selection:cleared", selectionChanged);
+
+    canvas.on("object:modified", saveHistory);
+
+    // Mouse wheel zoom
+    canvas.on("mouse:wheel", opt => {
+        let zoom = canvas.getZoom();
+        zoom *= 0.999 ** opt.e.deltaY;
+        zoom = Math.min(3, Math.max(0.05, zoom));
+        setZoom(zoom);
+        opt.e.preventDefault();
+        opt.e.stopPropagation();
+    });
+}
+
+function selectionChanged() {
+    updateProperties();
+    refreshLayers();
+}
+
+/*=========================================================
+    OBJECT EDITING & SHORTCUTS
+=========================================================*/
+
+function deleteSelected() {
+    const activeObjects = canvas.getActiveObjects();
+    if (!activeObjects.length) return;
+
+    activeObjects.forEach(obj => canvas.remove(obj));
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+    saveHistory();
+}
+
+function duplicateSelected() {
+    const obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    obj.clone(cloned => {
+        canvas.discardActiveObject();
+        cloned.set({
+            left: cloned.left + 20,
+            top: cloned.top + 20,
+            evented: true
+        });
+
+        if (cloned.type === "activeSelection") {
+            cloned.canvas = canvas;
+            cloned.forEachObject(o => canvas.add(o));
+            cloned.setCoords();
+        } else {
+            canvas.add(cloned);
+        }
+
+        canvas.setActiveObject(cloned);
+        canvas.requestRenderAll();
+        saveHistory();
+    });
+}
+
+function copySelected() {
+    const obj = canvas.getActiveObject();
+    if (!obj) return;
+    obj.clone(cloned => {
+        clipboard = cloned;
+    });
+}
+
+function pasteSelected() {
+    if (!clipboard) return;
+
+    clipboard.clone(cloned => {
+        canvas.discardActiveObject();
+        cloned.set({
+            left: cloned.left + 20,
+            top: cloned.top + 20,
+            evented: true
+        });
+
+        if (cloned.type === "activeSelection") {
+            cloned.canvas = canvas;
+            cloned.forEachObject(o => canvas.add(o));
+            cloned.setCoords();
+        } else {
+            canvas.add(cloned);
+        }
+
+        clipboard.top += 20;
+        clipboard.left += 20;
+
+        canvas.setActiveObject(cloned);
+        canvas.requestRenderAll();
+        saveHistory();
+    });
+}
+
+function bringForward() {
+    const obj = canvas.getActiveObject();
+    if (obj) {
+        canvas.bringForward(obj);
+        canvas.requestRenderAll();
+        saveHistory();
+    }
+}
+
+function sendBackward() {
+    const obj = canvas.getActiveObject();
+    if (obj) {
+        canvas.sendBackwards(obj);
+        canvas.requestRenderAll();
+        saveHistory();
+    }
+}
+
+function centerObject() {
+    const obj = canvas.getActiveObject();
+    if (!obj) return;
+    obj.center();
+    obj.setCoords();
+    canvas.requestRenderAll();
+    saveHistory();
+}
+
+function moveSelected(dx, dy) {
+    const obj = canvas.getActiveObject();
+    if (!obj) return;
+    obj.left += dx;
+    obj.top += dy;
+    obj.setCoords();
+    canvas.requestRenderAll();
+}
+
+/* Keyboard Shortcuts */
+document.addEventListener("keydown", e => {
+    if (!canvas) return;
+
+    const active = document.activeElement;
+    if (active && ["INPUT", "TEXTAREA", "SELECT"].includes(active.tagName)) {
+        return;
+    }
+
+    if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        deleteSelected();
+    }
+
+    if (e.ctrlKey || e.metaKey) {
+        const key = e.key.toLowerCase();
+        if (key === "d") { e.preventDefault(); duplicateSelected(); }
+        if (key === "c") { e.preventDefault(); copySelected(); }
+        if (key === "v") { e.preventDefault(); pasteSelected(); }
+        if (key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+        if (key === "y" || (key === "z" && e.shiftKey)) { e.preventDefault(); redo(); }
+    }
+
+    const step = e.shiftKey ? 10 : 1;
+    switch (e.key) {
+        case "ArrowLeft": e.preventDefault(); moveSelected(-step, 0); break;
+        case "ArrowRight": e.preventDefault(); moveSelected(step, 0); break;
+        case "ArrowUp": e.preventDefault(); moveSelected(0, -step); break;
+        case "ArrowDown": e.preventDefault(); moveSelected(0, step); break;
+    }
+});
+
+/*=========================================================
+    ALIGNMENT & PROPERTIES
+=========================================================*/
+
+function alignObject(position) {
+    const obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    const w = canvas.getWidth();
+    const h = canvas.getHeight();
+
+    let targetX = obj.left;
+    let targetY = obj.top;
+    let originX = "left";
+    let originY = "top";
+
+    switch (position) {
+        case "left":
+            targetX = 0;
+            originX = "left";
+            break;
+        case "center":
+            targetX = w / 2;
+            originX = "center";
+            break;
+        case "right":
+            targetX = w;
+            originX = "right";
+            break;
+        case "top":
+            targetY = 0;
+            originY = "top";
+            break;
+        case "middle":
+            targetY = h / 2;
+            originY = "center";
+            break;
+        case "bottom":
+            targetY = h;
+            originY = "bottom";
+            break;
+    }
+
+    obj.setPositionByOrigin(
+        new fabric.Point(targetX, targetY),
+        originX,
+        originY
+    );
+
+    obj.setCoords();
+    canvas.requestRenderAll();
+    saveHistory();
+}
+
+function updateProperties() {
+    const obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    const text = document.getElementById("objectText");
+    const font = document.getElementById("fontFamily");
+    const size = document.getElementById("fontSize");
+    const color = document.getElementById("textColor");
+    const opacity = document.getElementById("opacity");
+
+    if (text) text.value = obj.text !== undefined ? obj.text : "";
+    if (font && obj.fontFamily) font.value = obj.fontFamily;
+    if (size && obj.fontSize) size.value = obj.fontSize;
+    if (color && obj.fill) color.value = obj.fill;
+    if (opacity) opacity.value = Math.round((obj.opacity ?? 1) * 100);
+}
+
+/*=========================================================
+    LAYERS PANEL
+=========================================================*/
+
+function getLayerLabel(obj) {
+    if (obj.name) return obj.name;
+    if (obj.customType) return obj.customType;
+
+    switch (obj.type) {
+        case "i-text":
+        case "textbox":
+        case "text":
+            if (obj.text) {
+                const cleanText = obj.text.trim();
+                return cleanText.length > 15 ? cleanText.substring(0, 15) + "..." : cleanText;
+            }
+            return "Text Block";
+        case "rect":
+            return "Rectangle";
+        case "circle":
+            return "Circle";
+        case "triangle":
+            return "Triangle";
+        case "image":
+            return "Image / Logo";
+        case "group":
+            return "Grouped Object";
+        case "path":
+            return "Drawing / Shape";
+        default:
+            return obj.type ? obj.type.charAt(0).toUpperCase() + obj.type.slice(1) : "Object";
+    }
+}
+
+function refreshLayers() {
+    const list = document.getElementById("layersList");
+    if (!list || !canvas) return;
+
+    list.innerHTML = "";
+    const objects = canvas.getObjects().slice().reverse();
+
+    objects.forEach((obj) => {
+        const li = document.createElement("li");
+        li.textContent = getLayerLabel(obj);
+
+        if (canvas.getActiveObject() === obj) {
+            li.classList.add("active-layer");
+        }
+
+        li.onclick = () => {
+            canvas.setActiveObject(obj);
+            canvas.requestRenderAll();
+        };
+        list.appendChild(li);
+    });
+}
+
+function registerPropertyEvents() {
+    const text = document.getElementById("objectText");
+    if (text) {
+        text.addEventListener("input", () => {
+            const obj = canvas.getActiveObject();
+            if (obj && obj.text !== undefined) {
+                obj.set("text", text.value);
+                canvas.requestRenderAll();
+            }
+        });
+    }
+
+    const font = document.getElementById("fontFamily");
+    if (font) {
+        font.addEventListener("change", () => {
+            const obj = canvas.getActiveObject();
+            if (obj) {
+                obj.set("fontFamily", font.value);
+                canvas.requestRenderAll();
+            }
+        });
+    }
+
+    const size = document.getElementById("fontSize");
+    if (size) {
+        size.addEventListener("input", () => {
+            const obj = canvas.getActiveObject();
+            if (obj) {
+                obj.set("fontSize", Number(size.value));
+                canvas.requestRenderAll();
+            }
+        });
+    }
+
+    const color = document.getElementById("textColor");
+    if (color) {
+        color.addEventListener("input", () => {
+            const obj = canvas.getActiveObject();
+            if (obj) {
+                obj.set("fill", color.value);
+                canvas.requestRenderAll();
+            }
+        });
+    }
+
+    const bg = document.getElementById("backgroundColor");
+    if (bg) {
+        bg.addEventListener("input", () => setCanvasBackground(bg.value));
+    }
+
+    const opacity = document.getElementById("opacity");
+    if (opacity) {
+        opacity.addEventListener("input", () => {
+            const obj = canvas.getActiveObject();
+            if (obj) {
+                obj.set("opacity", opacity.value / 100);
+                canvas.requestRenderAll();
+            }
+        });
+    }
+}
+
+/*=========================================================
+    HISTORY (UNDO / REDO)
+=========================================================*/
+
+function saveHistory() {
+    if (isHistoryAction || !canvas) return;
+
+    history = history.slice(0, historyIndex + 1);
+    history.push(JSON.stringify(canvas));
+    historyIndex++;
+}
+
+function undo() {
+    if (historyIndex <= 0) return;
+
+    isHistoryAction = true;
+    historyIndex--;
+
+    canvas.loadFromJSON(history[historyIndex], () => {
+        canvas.renderAll();
+        refreshLayers();
+        isHistoryAction = false;
+    });
+}
+
+function redo() {
+    if (historyIndex >= history.length - 1) return;
+
+    isHistoryAction = true;
+    historyIndex++;
+
+    canvas.loadFromJSON(history[historyIndex], () => {
+        canvas.renderAll();
+        refreshLayers();
+        isHistoryAction = false;
+    });
+}
+
+/*=========================================================
+    WINDOW RESIZE & PUBLIC API
+=========================================================*/
+
+window.addEventListener("resize", () => {
+    if (canvas) {
+        canvas.calcOffset();
+        fitPage();
+    }
+});
+
+window.canvasEditor = {
+    get canvas() { return canvas; },
+    applyPaperSize,
+    setOrientation,
+    setZoom,
+    fitPage,
+    resetZoom,
+    centerWorkspaceCanvas,
+    setCanvasBackground,
+    clearCanvas,
+    deleteSelected,
+    duplicateSelected,
+    copySelected,
+    pasteSelected,
+    bringForward,
+    sendBackward,
+    centerObject,
+    alignObject,
+    updateProperties,
+    refreshLayers,
+    saveHistory,
+    undo,
+    redo
+};
+
+/*=========================================================
+    SCHOOL WALL CHART DESIGNER PRO
+    editor.js
+=========================================================*/
+
+"use strict";
+
+/*=========================================================
+    IMAGE INPUT SETUP
+=========================================================*/
+
+const imageInput = document.createElement("input");
+imageInput.type = "file";
+imageInput.accept = "image/*";
+
+/*=========================================================
+    COMMON ADD FUNCTION
+=========================================================*/
+
+function addObject(obj) {
+    if (typeof canvas === "undefined" || !canvas) {
+        console.error("Fabric canvas instance is not defined.");
+        return;
+    }
+
+    canvas.add(obj);
+    canvas.setActiveObject(obj);
+    canvas.requestRenderAll();
+
+    if (typeof saveHistory === "function") {
+        saveHistory();
+    }
+
+    if (typeof refreshLayers === "function") {
+        refreshLayers();
+    }
+}
+
+/*=========================================================
+    PART 1: BASIC ELEMENTS
+=========================================================*/
+
+function addTitle() {
+    addObject(
+        new fabric.Textbox("MAIN TITLE", {
+            left: 120,
+            top: 80,
+            width: 900,
+            fontFamily: "Poppins",
+            fontSize: 64,
+            fontWeight: "bold",
+            fill: "#1565C0",
+            editable: true,
+            name: "Main Title"
+        })
+    );
+}
+
+function addSubtitle() {
+    addObject(
+        new fabric.Textbox("Subtitle", {
+            left: 120,
+            top: 180,
+            width: 800,
+            fontFamily: "Poppins",
+            fontSize: 36,
+            fill: "#333333",
+            name: "Subtitle"
+        })
+    );
+}
+
+function addParagraph() {
+    addObject(
+        new fabric.Textbox(
+`Type your educational content here.
+
+This text automatically wraps.
+
+Perfect for school wall charts.`,
+            {
+                left: 120,
+                top: 280,
+                width: 900,
+                fontFamily: "Poppins",
+                fontSize: 28,
+                lineHeight: 1.35,
+                fill: "#222222",
+                name: "Paragraph"
+            }
+        )
+    );
+}
+
+function addTextbox() {
+    addObject(
+        new fabric.Textbox("Text", {
+            left: 150,
+            top: 150,
+            width: 300,
+            fontFamily: "Poppins",
+            fontSize: 30,
+            fill: "#000000",
+            name: "Text Box"
+        })
+    );
+}
+
+function addRectangle() {
+    addObject(
+        new fabric.Rect({
+            left: 180,
+            top: 180,
+            width: 300,
+            height: 180,
+            fill: "#90CAF9",
+            stroke: "#1565C0",
+            strokeWidth: 2,
+            rx: 12,
+            ry: 12,
+            name: "Rectangle"
+        })
+    );
+}
+
+function addCircle() {
+    addObject(
+        new fabric.Circle({
+            left: 200,
+            top: 200,
+            radius: 80,
+            fill: "#4CAF50",
+            stroke: "#2E7D32",
+            strokeWidth: 2,
+            name: "Circle"
+        })
+    );
+}
+
+function addEllipse() {
+    addObject(
+        new fabric.Ellipse({
+            left: 220,
+            top: 220,
+            rx: 120,
+            ry: 70,
+            fill: "#FFF176",
+            stroke: "#F9A825",
+            strokeWidth: 2,
+            name: "Ellipse"
+        })
+    );
+}
+
+function addTriangle() {
+    addObject(
+        new fabric.Triangle({
+            left: 220,
+            top: 220,
+            width: 180,
+            height: 180,
+            fill: "#EF5350",
+            stroke: "#C62828",
+            strokeWidth: 2,
+            name: "Triangle"
+        })
+    );
+}
+
+function addLine() {
+    addObject(
+        new fabric.Line([0, 0, 300, 0], {
+            left: 200,
+            top: 250,
+            stroke: "#000000",
+            strokeWidth: 4,
+            name: "Line"
+        })
+    );
+}
+
+function addArrow() {
+    const arrow = new fabric.Group(
+        [
+            new fabric.Line([0, 0, 220, 0], {
+                stroke: "#E53935",
+                strokeWidth: 5
+            }),
+            new fabric.Triangle({
+                width: 25,
+                height: 25,
+                fill: "#E53935",
+                left: 210,
+                top: -10,
+                angle: 90
+            })
+        ],
+        {
+            left: 180,
+            top: 300,
+            name: "Arrow"
+        }
+    );
+
+    addObject(arrow);
+}
+
+function addImage() {
+    imageInput.click();
+}
+
+imageInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        const imgObj = new Image();
+        imgObj.src = e.target.result;
+        imgObj.onload = function () {
+            const fabricImg = new fabric.Image(imgObj);
+            fabricImg.scaleToWidth(350);
+            fabricImg.set({
+                left: 150,
+                top: 120,
+                name: "Image"
+            });
+            addObject(fabricImg);
+        };
+    };
+
+    reader.readAsDataURL(file);
+    // Reset value so re-uploading the same image triggers 'change'
+    this.value = "";
+});
+
+/*=========================================================
+    PART 2: ADVANCED ELEMENTS
+=========================================================*/
+
+function addRoundedBox() {
+    addObject(
+        new fabric.Rect({
+            left: 150,
+            top: 150,
+            width: 350,
+            height: 180,
+            rx: 25,
+            ry: 25,
+            fill: "#E3F2FD",
+            stroke: "#1565C0",
+            strokeWidth: 3,
+            name: "Rounded Box"
+        })
+    );
+}
+
+function addDiamond() {
+    addObject(
+        new fabric.Rect({
+            left: 220,
+            top: 180,
+            width: 170,
+            height: 170,
+            angle: 45,
+            fill: "#FFF59D",
+            stroke: "#F9A825",
+            strokeWidth: 3,
+            name: "Diamond"
+        })
+    );
+}
+
+function addCallout() {
+    const rect = new fabric.Rect({
+        width: 320,
+        height: 150,
+        rx: 15,
+        ry: 15,
+        fill: "#FFFDE7",
+        stroke: "#F9A825",
+        strokeWidth: 2
+    });
+
+    const tri = new fabric.Triangle({
+        width: 35,
+        height: 35,
+        fill: "#FFFDE7",
+        stroke: "#F9A825",
+        strokeWidth: 2,
+        angle: 180,
+        left: 75,
+        top: 180
+    });
+
+    const txt = new fabric.Textbox("Callout", {
+        width: 280,
+        left: 20,
+        top: 20,
+        fontSize: 28,
+        fontFamily: "Poppins",
+        fill: "#333333"
+    });
+
+    addObject(
+        new fabric.Group([rect, tri, txt], {
+            left: 180,
+            top: 180,
+            name: "Callout"
+        })
+    );
+}
+
+function addNumberBox() {
+    const circle = new fabric.Circle({
+        radius: 35,
+        fill: "#1565C0"
+    });
+
+    const num = new fabric.Text("1", {
+        left: 25,
+        top: 18,
+        fill: "#FFFFFF",
+        fontWeight: "bold",
+        fontSize: 30
+    });
+
+    const text = new fabric.Textbox("Learning Point", {
+        left: 90,
+        top: 18,
+        width: 280,
+        fontSize: 28,
+        fontFamily: "Poppins",
+        fill: "#222222"
+    });
+
+    addObject(
+        new fabric.Group([circle, num, text], {
+            left: 120,
+            top: 120,
+            name: "Number Box"
+        })
+    );
+}
+
+function addTable(rows = 4, cols = 4) {
+    const objects = [];
+    const cellW = 170;
+    const cellH = 70;
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            objects.push(
+                new fabric.Rect({
+                    left: c * cellW,
+                    top: r * cellH,
+                    width: cellW,
+                    height: cellH,
+                    fill: r === 0 ? "#1565C0" : "#FFFFFF",
+                    stroke: "#333333"
+                })
+            );
+
+            objects.push(
+                new fabric.Text(r === 0 ? "Heading" : "", {
+                    left: c * cellW + 15,
+                    top: r * cellH + 20,
+                    fill: r === 0 ? "#FFFFFF" : "#000000",
+                    fontSize: 22,
+                    fontFamily: "Poppins"
+                })
+            );
+        }
+    }
+
+    addObject(
+        new fabric.Group(objects, {
+            left: 100,
+            top: 120,
+            name: "Table"
+        })
+    );
+}
+
+function addLogoPlaceholder() {
+    const circle = new fabric.Circle({
+        radius: 70,
+        fill: "#ECEFF1",
+        stroke: "#90A4AE",
+        strokeWidth: 2
+    });
+
+    const txt = new fabric.Text("LOGO", {
+        left: 36,
+        top: 55,
+        fontSize: 24,
+        fontWeight: "bold",
+        fill: "#455A64"
+    });
+
+    addObject(
+        new fabric.Group([circle, txt], {
+            left: 120,
+            top: 100,
+            name: "School Logo"
+        })
+    );
+}
+
+function addContentBox() {
+    const rect = new fabric.Rect({
+        width: 500,
+        height: 260,
+        fill: "#FFFFFF",
+        stroke: "#1565C0",
+        strokeWidth: 3,
+        rx: 12,
+        ry: 12
+    });
+
+    const title = new fabric.Text("CONTENT TITLE", {
+        left: 20,
+        top: 15,
+        fontSize: 32,
+        fontWeight: "bold",
+        fill: "#1565C0"
+    });
+
+    const body = new fabric.Textbox(
+`• Point One
+• Point Two
+• Point Three`,
+        {
+            left: 20,
+            top: 70,
+            width: 450,
+            fontSize: 26,
+            fontFamily: "Poppins",
+            fill: "#333333"
+        }
+    );
+
+    addObject(
+        new fabric.Group([rect, title, body], {
+            left: 120,
+            top: 120,
+            name: "Content Box"
+        })
+    );
+}
+
+function addDivider() {
+    addObject(
+        new fabric.Line([0, 0, 900, 0], {
+            left: 80,
+            top: 200,
+            stroke: "#1565C0",
+            strokeWidth: 6,
+            name: "Divider"
+        })
+    );
+}
+
+/*=========================================================
+    BUTTON EVENT BINDINGS
+=========================================================*/
+
+const editorButtons = [
+    ["addTitle", addTitle],
+    ["addSubtitle", addSubtitle],
+    ["addParagraph", addParagraph],
+    ["addTextbox", addTextbox],
+    ["addRectangle", addRectangle],
+    ["addCircle", addCircle],
+    ["addEllipse", addEllipse],
+    ["addTriangle", addTriangle],
+    ["addLine", addLine],
+    ["addArrow", addArrow],
+    ["addImage", addImage],
+    ["addRoundedBox", addRoundedBox],
+    ["addDiamond", addDiamond],
+    ["addCallout", addCallout],
+    ["addNumberBox", addNumberBox],
+    ["addTable", () => addTable(4, 4)],
+    ["addLogoPlaceholder", addLogoPlaceholder],
+    ["addContentBox", addContentBox],
+    ["addDivider", addDivider]
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+    editorButtons.forEach(([id, fn]) => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.addEventListener("click", fn);
+        }
+    });
+});
+
+/*=========================================================
+    GLOBAL PUBLIC API EXPOSE
+=========================================================*/
+
+window.editor = {
+    addTitle,
+    addSubtitle,
+    addParagraph,
+    addTextbox,
+    addRectangle,
+    addCircle,
+    addEllipse,
+    addTriangle,
+    addLine,
+    addArrow,
+    addImage,
+    addRoundedBox,
+    addDiamond,
+    addCallout,
+    addNumberBox,
+    addTable,
+    addLogoPlaceholder,
+    addContentBox,
+    addDivider
+};
+
+
+/*==================================================
+    SCHOOL WALL CHART DESIGNER PRO
+    templates.js
+==================================================*/
+
+
+/*=========================================
+CLEAR DESIGN
+=========================================*/
+
+function clearDesign(){
+
+    if(!confirm("Replace the current design?")) return;
+
+
+    canvas.getObjects().forEach(obj=>{
+        canvas.remove(obj);
+    });
+
+
+    canvas.backgroundColor="#ffffff";
+
+    canvas.discardActiveObject();
+
+    canvas.requestRenderAll();
+
+
+    if(typeof refreshLayers==="function")
+        refreshLayers();
+
+
+    if(typeof saveHistory==="function")
+        saveHistory();
+
+}
+
+
+
+/*=========================================
+CORE ADD FUNCTION
+=========================================*/
+
+function addTemplateObjects(...objects){
+
+    objects.forEach(obj=>{
+
+        if(obj)
+            canvas.add(obj);
+
+    });
+
+
+    canvas.requestRenderAll();
+
+
+    if(typeof refreshLayers==="function")
+        refreshLayers();
+
+
+    if(typeof saveHistory==="function")
+        saveHistory();
+
+}
+
+
+
+
+/*=========================================
+TEXT HELPERS
+=========================================*/
+
+
+function createTitle(text,color="#1565C0"){
+
+    return new fabric.Textbox(text,{
+
+        left:100,
+
+        top:60,
+
+        width:canvas.width-200,
+
+        fontSize:70,
+
+        fontWeight:"bold",
+
+        fill:color,
+
+        textAlign:"center",
+
+        fontFamily:"Poppins"
+
+    });
+
+}
+
+
+
+function createSectionTitle(text,color){
+
+    return new fabric.Textbox(text,{
+
+        left:80,
+
+        top:220,
+
+        width:700,
+
+        fontSize:50,
+
+        fontWeight:"bold",
+
+        fill:color,
+
+        fontFamily:"Poppins"
+
+    });
+
+}
+
+
+
+
+function createBody(text,left,top,width){
+
+    return new fabric.Textbox(text,{
+
+        left,
+
+        top,
+
+        width,
+
+        fontSize:30,
+
+        lineHeight:1.4,
+
+        fill:"#222",
+
+        fontFamily:"Poppins"
+
+    });
+
+}
+
+
+
+/*=========================================
+SHAPE HELPERS
+=========================================*/
+
+
+function createBox(left,top,width,height,color="#E3F2FD",stroke="#1565C0"){
+
+    return new fabric.Rect({
+
+        left,
+
+        top,
+
+        width,
+
+        height,
+
+        fill:color,
+
+        stroke,
+
+        strokeWidth:3,
+
+        rx:20,
+
+        ry:20
+
+    });
+
+}
+
+
+
+function createImagePlaceholder(
+    text="Insert Image",
+    left=900,
+    top=250
+){
+
+    return [
+
+        createBox(
+            left,
+            top,
+            500,
+            600
+        ),
+
+        new fabric.Text(
+            text,
+            {
+                left:left+100,
+                top:top+260,
+                fontSize:40,
+                fill:"#1565C0",
+                fontFamily:"Poppins"
+            }
+        )
+
+    ];
+
+}
+
+
+
+
+
+/*=========================================
+HEADER
+=========================================*/
+
+
+function createHeader(color="#1565C0"){
+
+    return new fabric.Rect({
+
+        left:0,
+
+        top:0,
+
+        width:canvas.width,
+
+        height:140,
+
+        fill:color,
+
+        selectable:false
+
+    });
+
+}
+
+
+
+
+
+function createFooter(){
+
+    return [
+
+        new fabric.Rect({
+
+            left:0,
+
+            top:canvas.height-70,
+
+            width:canvas.width,
+
+            height:70,
+
+            fill:"#1565C0",
+
+            selectable:false
+
+        }),
+
+
+        new fabric.Text(
+
+            "School Wall Chart Designer Pro",
+
+            {
+
+                left:40,
+
+                top:canvas.height-50,
+
+                fill:"white",
+
+                fontSize:26,
+
+                fontFamily:"Poppins"
+
+            }
+
+        )
+
+    ];
+
+}
+
+
+
+
+
+/*=========================================
+TEMPLATE BUILDERS
+=========================================*/
+
+
+function createFractionsTemplate(){
+
+
+    clearDesign();
+
+
+    let footer=createFooter();
+
+
+    addTemplateObjects(
+
+        createHeader("#1565C0"),
+
+
+        createTitle(
+            "FRACTIONS",
+            "#ffffff"
+        ),
+
+
+        createSectionTitle(
+            "Understanding Fractions",
+            "#1565C0"
+        ),
+
+
+        createBody(
+
+`✓ Numerator
+
+✓ Denominator
+
+✓ Equivalent Fractions
+
+✓ Adding Fractions
+
+✓ Comparing Fractions`,
+
+80,
+
+320,
+
+700
+
+        ),
+
+
+        ...createImagePlaceholder(
+            "Fraction Diagram",
+            900,
+            250
+        ),
+
+
+        ...footer
+
+    );
+
+}
+
+
+
+
+function createAnglesTemplate(){
+
+
+    clearDesign();
+
+
+    addTemplateObjects(
+
+        createHeader("#EF6C00"),
+
+
+        createTitle(
+            "ANGLES",
+            "#ffffff"
+        ),
+
+
+        createBody(
+
+`Types of Angles
+
+• Acute Angle
+
+• Right Angle
+
+• Obtuse Angle
+
+• Straight Angle
+
+• Reflex Angle`,
+
+100,
+
+250,
+
+700
+
+        ),
+
+
+        ...createImagePlaceholder(
+            "Angle Drawing",
+            900,
+            250
+        ),
+
+
+        ...createFooter()
+
+    );
+
+
+}
+
+
+
+
+
+function createPlantsTemplate(){
+
+
+    clearDesign();
+
+
+    addTemplateObjects(
+
+        createHeader("#2E7D32"),
+
+
+        createTitle(
+            "PLANTS",
+            "#ffffff"
+        ),
+
+
+        createBody(
+
+`Plant Parts
+
+✓ Roots
+
+✓ Stem
+
+✓ Leaves
+
+✓ Flowers
+
+✓ Seeds`,
+
+100,
+
+250,
+
+700
+
+        ),
+
+
+        ...createImagePlaceholder(
+            "Plant Image",
+            900,
+            250
+        ),
+
+
+        ...createFooter()
+
+    );
+
+}
+
+
+
+
+
+/*=========================================
+TEMPLATE LIBRARY
+=========================================*/
+
+
+const TEMPLATE_LIBRARY=[
+
+
+{
+
+id:"math-fractions",
+
+title:"Fractions",
+
+category:"Mathematics",
+
+preview:"templates/math/fractions.png",
+
+load:createFractionsTemplate
+
+},
+
+
+{
+
+id:"math-angles",
+
+title:"Angles",
+
+category:"Mathematics",
+
+preview:"templates/math/angles.png",
+
+load:createAnglesTemplate
+
+},
+
+
+{
+
+id:"science-plants",
+
+title:"Plants",
+
+category:"Science",
+
+preview:"templates/science/plants.png",
+
+load:createPlantsTemplate
+
+}
+
+
+];
+
+
+
+
+
+/*=========================================
+LOAD TEMPLATE
+=========================================*/
+
+
+function loadTemplate(id){
+
+    let template=TEMPLATE_LIBRARY.find(
+        t=>t.id===id
+    );
+
+
+    if(template){
+
+        template.load();
+
+    }
+
+}
+
+
+
+
+
+/*=========================================
+EXPORT
+=========================================*/
+
+
+window.chartTemplates={
+
+
+loadTemplate,
+
+
+TEMPLATE_LIBRARY,
+
+
+createFractionsTemplate,
+
+
+createAnglesTemplate,
+
+
+createPlantsTemplate
+
+
+};
+
+/*==================================================
+    SCHOOL WALL CHART DESIGNER PRO
+    toolbar.js
+==================================================*/
+
+let clipboardObject = null;
+
+/*=========================================
+HISTORY SYSTEM
+=========================================*/
+
+let undoStack = [];
+let redoStack = [];
+let historyLock = false;
+
+function saveState() {
+    if (typeof canvas === "undefined" || !canvas || historyLock)
+        return;
+
+    undoStack.push(
+        JSON.stringify(
+            canvas.toJSON([
+                "id",
+                "name",
+                "locked"
+            ])
+        )
+    );
+
+    if (undoStack.length > 60) {
+        undoStack.shift();
+    }
+
+    redoStack = [];
+}
+
+function loadState(state) {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    historyLock = true;
+
+    canvas.loadFromJSON(
+        state,
+        function() {
+            canvas.renderAll();
+            historyLock = false;
+
+            if (typeof refreshLayers === "function")
+                refreshLayers();
+        }
+    );
+}
+
+function undo() {
+    if (undoStack.length <= 1)
+        return;
+
+    let current = undoStack.pop();
+    redoStack.push(current);
+
+    loadState(
+        undoStack[undoStack.length - 1]
+    );
+}
+
+function redo() {
+    if (redoStack.length === 0)
+        return;
+
+    let state = redoStack.pop();
+    undoStack.push(state);
+
+    loadState(state);
+}
+
+/*=========================================
+COPY
+=========================================*/
+
+function copyObject() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    let obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    obj.clone(function(clone) {
+        clipboardObject = clone;
+    });
+}
+
+/*=========================================
+PASTE
+=========================================*/
+
+function pasteObject() {
+    if (typeof canvas === "undefined" || !canvas || !clipboardObject)
+        return;
+
+    clipboardObject.clone(function(clone) {
+        canvas.discardActiveObject();
+
+        clone.set({
+            left: clone.left + 40,
+            top: clone.top + 40,
+            evented: true,
+            id: crypto.randomUUID()
+        });
+
+        canvas.add(clone);
+        canvas.setActiveObject(clone);
+        canvas.renderAll();
+
+        saveState();
+    });
+}
+
+/*=========================================
+DUPLICATE
+=========================================*/
+
+function duplicateObject() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    let obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    obj.clone(function(clone) {
+        clone.set({
+            left: obj.left + 40,
+            top: obj.top + 40,
+            id: crypto.randomUUID()
+        });
+
+        canvas.add(clone);
+        canvas.setActiveObject(clone);
+        canvas.renderAll();
+
+        saveState();
+    });
+}
+
+/*=========================================
+DELETE
+=========================================*/
+
+function deleteObject() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    let obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    canvas.remove(obj);
+    canvas.discardActiveObject();
+    canvas.renderAll();
+
+    saveState();
+}
+
+/*=========================================
+LAYERS
+=========================================*/
+
+function bringToFront() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    let obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    canvas.bringToFront(obj);
+    canvas.renderAll();
+
+    saveState();
+}
+
+function sendToBack() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    let obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    canvas.sendToBack(obj);
+    canvas.renderAll();
+
+    saveState();
+}
+
+/*=========================================
+ALIGNMENT
+=========================================*/
+
+function alignLeft() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    let obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    obj.left = 20;
+    obj.setCoords();
+    canvas.renderAll();
+}
+
+function alignCenter() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    let obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    obj.centerH();
+    obj.setCoords();
+    canvas.renderAll();
+}
+
+function alignRight() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    let obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    obj.left = canvas.width - obj.getScaledWidth() - 20;
+    obj.setCoords();
+    canvas.renderAll();
+}
+
+function alignTop() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    let obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    obj.top = 20;
+    obj.setCoords();
+    canvas.renderAll();
+}
+
+function alignMiddle() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    let obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    obj.centerV();
+    obj.setCoords();
+    canvas.renderAll();
+}
+
+function alignBottom() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    let obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    obj.top = canvas.height - obj.getScaledHeight() - 20;
+    obj.setCoords();
+    canvas.renderAll();
+}
+
+/*=========================================
+LOCK OBJECT
+=========================================*/
+
+function toggleLock() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    let obj = canvas.getActiveObject();
+    if (!obj) return;
+
+    obj.locked = !obj.locked;
+
+    obj.set({
+        selectable: !obj.locked,
+        evented: !obj.locked
+    });
+
+    canvas.renderAll();
+
+    saveState();
+}
+
+/*=========================================
+ZOOM
+=========================================*/
+
+function zoomIn() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    canvas.setZoom(canvas.getZoom() + 0.1);
+    canvas.renderAll();
+}
+
+function zoomOut() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    canvas.setZoom(canvas.getZoom() - 0.1);
+    canvas.renderAll();
+}
+
+function resetZoom() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    canvas.setZoom(1);
+    canvas.renderAll();
+}
+
+/*=========================================
+AUTO HISTORY & CANVAS EVENT ATTACHMENT
+=========================================*/
+
+function attachCanvasEvents() {
+    if (typeof canvas === "undefined" || !canvas) return;
+
+    canvas.on("object:added", function() {
+        saveState();
+    });
+
+    canvas.on("object:modified", function() {
+        saveState();
+    });
+
+    canvas.on("object:removed", function() {
+        saveState();
+    });
+}
+
+/*=========================================
+KEYBOARD SHORTCUTS
+=========================================*/
+
+document.addEventListener("keydown", function(e) {
+    if (e.ctrlKey && e.key === "c") {
+        e.preventDefault();
+        copyObject();
+    }
+
+    if (e.ctrlKey && e.key === "v") {
+        e.preventDefault();
+        pasteObject();
+    }
+
+    if (e.ctrlKey && e.key === "d") {
+        e.preventDefault();
+        duplicateObject();
+    }
+
+    if (e.ctrlKey && e.key === "z") {
+        e.preventDefault();
+        undo();
+    }
+
+    if (e.ctrlKey && e.key === "y") {
+        e.preventDefault();
+        redo();
+    }
+
+    if (e.key === "Delete") {
+        deleteObject();
+    }
+
+    if (e.key === "Escape") {
+        if (typeof canvas !== "undefined" && canvas) {
+            canvas.discardActiveObject();
+            canvas.renderAll();
+        }
+    }
+});
+
+/*=========================================
+BUTTON CONNECTOR
+=========================================*/
+
+[
+    ["undoBtn", undo],
+    ["redoBtn", redo],
+    ["copyBtn", copyObject],
+    ["pasteBtn", pasteObject],
+    ["duplicateBtn", duplicateObject],
+    ["deleteBtn", deleteObject],
+    ["frontBtn", bringToFront],
+    ["backBtn", sendToBack],
+    ["lockBtn", toggleLock],
+    ["zoomInBtn", zoomIn],
+    ["zoomOutBtn", zoomOut],
+    ["resetZoomBtn", resetZoom],
+    ["leftBtn", alignLeft],
+    ["centerBtn", alignCenter],
+    ["rightBtn", alignRight],
+    ["topBtn", alignTop],
+    ["middleBtn", alignMiddle],
+    ["bottomBtn", alignBottom]
+].forEach(([id, fn]) => {
+    let btn = document.getElementById(id);
+    if (btn) {
+        btn.onclick = fn;
+    }
+});
+
+/*=========================================
+INITIAL HISTORY & LIFECYCLE
+=========================================*/
+
+window.addEventListener("load", function() {
+    setTimeout(function() {
+        attachCanvasEvents();
+        saveState();
+    }, 500);
+});
+/*==================================================
+    SCHOOL WALL CHART DESIGNER PRO
+    export.js
+==================================================*/
+
+
+"use strict";
+
+
+const PDF =
+window.jspdf ? window.jspdf.jsPDF : null;
+
+
+
+
+/*=========================================
+DOWNLOAD HELPER
+=========================================*/
+
+
+function downloadFile(dataURL,filename){
+
+
+    const link=document.createElement("a");
+
+
+    link.href=dataURL;
+
+
+    link.download=filename;
+
+
+    document.body.appendChild(link);
+
+
+    link.click();
+
+
+    document.body.removeChild(link);
+
+
+}
+
+
+
+
+
+/*=========================================
+TIMESTAMP
+=========================================*/
+
+
+function timestamp(){
+
+
+    const d=new Date();
+
+
+    return (
+
+        d.getFullYear()
+        +
+        "-"
+        +
+        String(d.getMonth()+1).padStart(2,"0")
+        +
+        "-"
+        +
+        String(d.getDate()).padStart(2,"0")
+        +
+        "-"
+        +
+        Date.now()
+
+    );
+
+
+}
+
+
+
+
+
+/*=========================================
+EXPORT IMAGE
+=========================================*/
+
+
+function getExportImage(multiplier=3){
+
+
+    if(!canvas)
+        return null;
+
+
+
+    return canvas.toDataURL({
+
+        format:"png",
+
+        multiplier,
+
+        enableRetinaScaling:true
+
+    });
+
+
+}
+
+
+
+
+
+/*=========================================
+PNG EXPORT
+=========================================*/
+
+
+function exportPNG(){
+
+
+    let image=getExportImage(3);
+
+
+    if(!image)return;
+
+
+    downloadFile(
+
+        image,
+
+        "Wall-Chart-"+timestamp()+".png"
+
+    );
+
+
+}
+
+
+
+
+
+/*=========================================
+JPG EXPORT
+=========================================*/
+
+
+function exportJPG(){
+
+
+    let image=canvas.toDataURL({
+
+        format:"jpeg",
+
+        quality:1,
+
+        multiplier:3
+
+    });
+
+
+
+    downloadFile(
+
+        image,
+
+        "Wall-Chart-"+timestamp()+".jpg"
+
+    );
+
+
+}
+
+
+
+
+
+/*=========================================
+SVG EXPORT
+=========================================*/
+
+
+function exportSVG(){
+
+
+    if(!canvas)
+        return;
+
+
+
+    let svg=canvas.toSVG();
+
+
+
+    let blob=new Blob(
+
+        [svg],
+
+        {
+            type:"image/svg+xml"
+        }
+
+    );
+
+
+
+    let url=
+    URL.createObjectURL(blob);
+
+
+
+    let link=document.createElement("a");
+
+
+    link.href=url;
+
+
+    link.download=
+    "Wall-Chart-"+timestamp()+".svg";
+
+
+    link.click();
+
+
+
+    URL.revokeObjectURL(url);
+
+
+}
+
+
+
+
+
+/*=========================================
+PDF EXPORT
+=========================================*/
+
+
+function exportPDF(){
+
+
+    if(!PDF || !canvas)
+        return;
+
+
+
+    let image=
+    getExportImage(4);
+
+
+
+    let orientation =
+    canvas.width > canvas.height
+    ?
+    "landscape"
+    :
+    "portrait";
+
+
+
+    let pdf=new PDF({
+
+        orientation,
+
+        unit:"mm",
+
+        format:"a1"
+
+    });
+
+
+
+    let width =
+    pdf.internal.pageSize.getWidth();
+
+
+    let height =
+    pdf.internal.pageSize.getHeight();
+
+
+
+    pdf.addImage(
+
+        image,
+
+        "PNG",
+
+        0,
+
+        0,
+
+        width,
+
+        height
+
+    );
+
+
+
+    pdf.save(
+
+        "Wall-Chart-"+timestamp()+".pdf"
+
+    );
+
+
+}
+
+
+
+
+
+/*=========================================
+HIGH RES EXPORT
+=========================================*/
+
+
+function exportHighResPNG(){
+
+
+    downloadFile(
+
+        getExportImage(6),
+
+        "Wall-Chart-HD-"+timestamp()+".png"
+
+    );
+
+
+}
+
+
+
+
+function exportPrintPNG(){
+
+
+    downloadFile(
+
+        getExportImage(8),
+
+        "Wall-Chart-Print-"+timestamp()+".png"
+
+    );
+
+
+}
+
+
+
+
+
+/*=========================================
+SAVE PROJECT
+=========================================*/
+
+
+function saveProject(){
+
+
+    if(!canvas)
+        return;
+
+
+
+    let project={
+
+
+        app:
+        "School Wall Chart Designer Pro",
+
+
+        version:"1.0",
+
+
+        created:
+        new Date(),
+
+
+        paper:
+        currentPaper,
+
+
+        orientation:
+        currentOrientation,
+
+
+        zoom:
+        currentZoom,
+
+
+        canvas:
+
+        canvas.toJSON([
+
+            "id",
+
+            "name",
+
+            "customType",
+
+            "locked"
+
+        ])
+
+    };
+
+
+
+    let blob=new Blob(
+
+        [
+
+            JSON.stringify(
+                project,
+                null,
+                2
+            )
+
+        ],
+
+        {
+            type:"application/json"
+        }
+
+    );
+
+
+
+    let url=
+    URL.createObjectURL(blob);
+
+
+
+    let link=document.createElement("a");
+
+
+    link.href=url;
+
+
+    link.download=
+    "Project-"+timestamp()+".json";
+
+
+    link.click();
+
+
+
+    URL.revokeObjectURL(url);
+
+
+}
+
+
+
+
+
+/*=========================================
+LOAD PROJECT
+=========================================*/
+
+
+function loadProject(){
+
+
+    let input=
+    document.createElement("input");
+
+
+    input.type="file";
+
+
+    input.accept=".json";
+
+
+    input.click();
+
+
+
+    input.onchange=function(e){
+
+
+        let file=e.target.files[0];
+
+
+        if(!file)
+            return;
+
+
+
+        let reader=new FileReader();
+
+
+
+        reader.onload=function(){
+
+
+            let project=
+            JSON.parse(reader.result);
+
+
+
+            if(project.paper){
+
+                currentPaper=
+                project.paper;
+
+            }
+
+
+
+            if(project.orientation){
+
+                currentOrientation=
+                project.orientation;
+
+            }
+
+
+
+            if(project.canvas){
+
+
+                canvas.loadFromJSON(
+
+                    project.canvas,
+
+                    function(){
+
+
+                        canvas.renderAll();
+
+
+
+                        if(typeof refreshLayers==="function")
+
+                            refreshLayers();
+
+
+
+                        if(typeof saveHistory==="function")
+
+                            saveHistory();
+
+
+                    }
+
+                );
+
+
+            }
+
+
+        };
+
+
+        reader.readAsText(file);
+
+
+    };
+
+
+}
+
+
+
+
+
+/*=========================================
+PRINT
+=========================================*/
+
+
+function printCanvas(){
+
+
+    let image=
+    getExportImage(4);
+
+
+
+    let win=
+    window.open("");
+
+
+
+    win.document.write(`
+
+    <html>
+
+    <body style="margin:0">
+
+    <img src="${image}"
+    style="width:100%">
+
+
+    </body>
+
+    </html>
+
+    `);
+
+
+
+    win.document.close();
+
+
+    win.focus();
+
+
+    win.print();
+
+
+}
+
+
+
+
+
+/*=========================================
+BUTTON EVENTS
+=========================================*/
+
+
+[
+["exportPNG",exportPNG],
+["exportJPG",exportJPG],
+["exportSVG",exportSVG],
+["exportPDF",exportPDF],
+["saveProject",saveProject],
+["loadProject",loadProject],
+["printCanvas",printCanvas]
+
+]
+.forEach(([id,fn])=>{
+
+
+    let btn=
+    document.getElementById(id);
+
+
+    if(btn)
+
+        btn.onclick=fn;
+
+
+});
+
+
+
+
+
+/*=========================================
+GLOBAL API
+=========================================*/
+
+
+window.exportTools={
+
+
+exportPNG,
+
+exportJPG,
+
+exportSVG,
+
+exportPDF,
+
+exportHighResPNG,
+
+exportPrintPNG,
+
+saveProject,
+
+loadProject,
+
+printCanvas
+
+
+};
+
+
+
+
+
+
+
+</script>
+
+
+</body>
+</html>
