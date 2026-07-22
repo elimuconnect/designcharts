@@ -3,13 +3,14 @@
     layout.css
 ==========================================*/
 
+
 /*==============================
 TOP BAR
 ==============================*/
 
 .topbar{
 
-    height:70px;
+    height:54px;
 
     background:#ffffff;
 
@@ -19,19 +20,23 @@ TOP BAR
 
     align-items:center;
 
-    justify-content:space-between;
+    gap:15px;
 
-    padding:0 20px;
+    padding:0 15px;
 
     box-shadow:0 3px 12px rgba(0,0,0,.08);
 
     z-index:1000;
 
+    overflow:hidden;
+
 }
+
+
 
 .brand{
 
-    font-size:22px;
+    font-size:20px;
 
     font-weight:700;
 
@@ -41,9 +46,14 @@ TOP BAR
 
 }
 
+
+
+
+
 /*==============================
 TOP TOOLBAR
 ==============================*/
+
 
 .toolbar{
 
@@ -53,7 +63,13 @@ TOP TOOLBAR
 
     gap:8px;
 
+    flex:1;
+
+    overflow-x:auto;
+
 }
+
+
 
 .toolbar button{
 
@@ -61,11 +77,15 @@ TOP TOOLBAR
 
     color:#fff;
 
-    padding:9px 16px;
+    padding:8px 14px;
 
-    font-size:14px;
+    font-size:13px;
+
+    white-space:nowrap;
 
 }
+
+
 
 .toolbar button:hover{
 
@@ -73,9 +93,14 @@ TOP TOOLBAR
 
 }
 
+
+
+
+
 /*==============================
 RIGHT TOOLBAR
 ==============================*/
+
 
 .toolbar-right{
 
@@ -83,23 +108,29 @@ RIGHT TOOLBAR
 
     align-items:center;
 
-    gap:12px;
+    gap:10px;
 
-    min-width:320px;
+    white-space:nowrap;
 
 }
+
+
 
 .toolbar-right select{
 
-    width:90px;
+    width:85px;
 
 }
+
+
 
 .toolbar-right input[type=range]{
 
     width:120px;
 
 }
+
+
 
 #zoomValue{
 
@@ -113,29 +144,41 @@ RIGHT TOOLBAR
 
 }
 
+
+
+
+
 /*==============================
 MAIN APP
 ==============================*/
 
-.app{
+
+.app-container{
 
     display:flex;
 
-    height:calc(100vh - 70px);
+    height:calc(100vh - 54px);
+
+    width:100%;
 
     overflow:hidden;
 
 }
 
+
+
+
+
 /*==============================
 TOOL PANEL
 ==============================*/
 
+
 .tool-panel{
 
-    width:320px;
+    width:260px;
 
-    min-width:320px;
+    min-width:260px;
 
     background:#fff;
 
@@ -143,17 +186,24 @@ TOOL PANEL
 
     padding:20px;
 
-    overflow:auto;
+    overflow-y:auto;
 
 }
+
+
+
+
 
 /*==============================
 WORKSPACE
 ==============================*/
 
+
 .workspace{
 
     flex:1;
+
+    height:100%;
 
     background:#DDE5EE;
 
@@ -169,23 +219,38 @@ WORKSPACE
 
 }
 
+
+
+
+
 /*==============================
 CANVAS
 ==============================*/
+
 
 #canvasWrapper{
 
     background:#fff;
 
-    padding:25px;
+    padding:20px;
 
-    margin:40px;
+    margin:20px;
 
     border-radius:8px;
 
     box-shadow:0 10px 35px rgba(0,0,0,.18);
 
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
 }
+
+
+
+
 
 #designerCanvas{
 
@@ -197,9 +262,14 @@ CANVAS
 
 }
 
+
+
+
+
 /*==============================
 RIGHT PROPERTIES PANEL
 ==============================*/
+
 
 .properties{
 
@@ -207,15 +277,21 @@ RIGHT PROPERTIES PANEL
 
     min-width:320px;
 
+    height:100%;
+
     background:#fff;
 
     border-left:1px solid #D9E2EC;
 
     padding:20px;
 
-    overflow:auto;
+    overflow-y:auto;
 
 }
+
+
+
+
 
 .properties input,
 
@@ -225,9 +301,14 @@ RIGHT PROPERTIES PANEL
 
 }
 
+
+
+
+
 /*==============================
 ALIGN BUTTONS
 ==============================*/
+
 
 .alignButtons{
 
@@ -239,6 +320,8 @@ ALIGN BUTTONS
 
 }
 
+
+
 .alignButtons button{
 
     background:#1565C0;
@@ -249,15 +332,22 @@ ALIGN BUTTONS
 
 }
 
+
+
 .alignButtons button:hover{
 
     background:#0D47A1;
 
 }
 
+
+
+
+
 /*==============================
 ACTION BUTTONS
 ==============================*/
+
 
 .properties button{
 
@@ -269,6 +359,10 @@ ACTION BUTTONS
 
 }
 
+
+
+
+
 #deleteObject{
 
     background:#C62828;
@@ -277,15 +371,22 @@ ACTION BUTTONS
 
 }
 
+
+
 #deleteObject:hover{
 
     background:#B71C1C;
 
 }
 
+
+
+
+
 /*==============================
 LAYERS
 ==============================*/
+
 
 #layersList{
 
@@ -293,19 +394,26 @@ LAYERS
 
 }
 
+
+
+
+
 /*==============================
 RESPONSIVE
 ==============================*/
 
+
 @media(max-width:1200px){
+
 
 .tool-panel{
 
-    width:280px;
+    width:240px;
 
-    min-width:280px;
+    min-width:240px;
 
 }
+
 
 .properties{
 
@@ -315,27 +423,39 @@ RESPONSIVE
 
 }
 
+
 }
+
+
+
+
 
 @media(max-width:900px){
 
-.app{
+
+.app-container{
 
     flex-direction:column;
 
 }
 
+
+
 .tool-panel{
 
     display:none;
 
 }
 
+
+
 .properties{
 
     display:none;
 
 }
+
+
 
 .workspace{
 
@@ -343,10 +463,13 @@ RESPONSIVE
 
 }
 
+
+
 .toolbar{
 
     overflow:auto;
 
 }
+
 
 }
