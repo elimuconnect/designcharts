@@ -364,15 +364,15 @@ toolContent.innerHTML=`
 
 <h3>Charts</h3>
 
-<button onclick="insertPieChart()">
-
-Pie Chart
-
-</button>
-
 <button onclick="insertBarChart()">
 
 Bar Chart
+
+</button>
+
+<button onclick="insertPieChart()">
+
+Pie Chart
 
 </button>
 
@@ -386,6 +386,46 @@ Line Chart
 
 `;
 
+}
+
+/* Chart Handlers connected to ChartEngine */
+function insertBarChart() {
+    if (window.ChartEngine && window.ChartEngine.addBarChart) {
+        window.ChartEngine.addBarChart(
+            {
+                labels: ["Term 1", "Term 2", "Term 3"],
+                values: [78, 85, 92],
+                color: "#1565C0"
+            },
+            { title: "Subject Performance", width: 480, height: 320 }
+        );
+    }
+}
+
+function insertPieChart() {
+    if (window.ChartEngine && window.ChartEngine.addBarChart) {
+        window.ChartEngine.addBarChart(
+            {
+                labels: ["Exceeding", "Meeting", "Approaching", "Below"],
+                values: [40, 35, 15, 10],
+                color: "#2E7D32"
+            },
+            { title: "CBC Competency Levels", width: 480, height: 320 }
+        );
+    }
+}
+
+function insertLineChart() {
+    if (window.ChartEngine && window.ChartEngine.addBarChart) {
+        window.ChartEngine.addBarChart(
+            {
+                labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+                values: [60, 68, 75, 82, 90],
+                color: "#D84315"
+            },
+            { title: "Monthly Attendance (%)", width: 480, height: 320 }
+        );
+    }
 }
 
 /*=========================================
