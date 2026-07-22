@@ -33,6 +33,19 @@ const PAPER_SIZES = {
 };
 
 /*=========================================================
+    AUTO-CENTER & FIT HELPERS
+=========================================================*/
+
+function centerWorkspaceCanvas() {
+    const workspace = document.querySelector('.workspace');
+    if (workspace) {
+        // Automatically scroll to center the wall chart in view
+        workspace.scrollLeft = (workspace.scrollWidth - workspace.clientWidth) / 2;
+        workspace.scrollTop = (workspace.scrollHeight - workspace.clientHeight) / 2;
+    }
+}
+
+/*=========================================================
     INITIALIZE
 =========================================================*/
 
@@ -76,6 +89,12 @@ function applyPaperSize(size) {
 
     canvas.setDimensions({ width, height });
     canvas.requestRenderAll();
+
+    // Automatically fit any page format (A4 to A0) inside the workspace view
+    requestAnimationFrame(() => {
+        fitPage();
+        centerWorkspaceCanvas();
+    });
 }
 
 function setOrientation(mode) {
@@ -84,14 +103,14 @@ function setOrientation(mode) {
 }
 
 /*=========================================================
-    ZOOM CONTROLS (Issue 5 Fixed)
+    ZOOM CONTROLS
 =========================================================*/
 
 function setZoom(value) {
-    value = Math.max(0.2, Math.min(value, 3));
+    value = Math.max(0.05, Math.min(value, 3)); // Lower floor (0.05) to accommodate huge A0 charts
     currentZoom = value;
 
-    // Zoom from center of viewport instead of top-left
+    // Zoom from center of viewport
     const center = new fabric.Point(canvas.getWidth() / 2, canvas.getHeight() / 2);
     canvas.zoomToPoint(center, value);
     canvas.requestRenderAll();
@@ -101,18 +120,20 @@ function setZoom(value) {
 
     const label = document.getElementById("zoomValue");
     if (label) label.textContent = Math.round(value * 100) + "%";
+
+    centerWorkspaceCanvas();
 }
 
 function fitPage() {
     const workspace = document.querySelector(".workspace");
     if (!workspace || !canvas) return;
 
-    const padding = 120;
+    const padding = 80;
     const zoomX = (workspace.clientWidth - padding) / canvas.getWidth();
     const zoomY = (workspace.clientHeight - padding) / canvas.getHeight();
     let zoom = Math.min(zoomX, zoomY);
 
-    if (zoom > 1) zoom = 1;
+    // Caps zoom at 100% max, but lets large charts (A2/A1/A0) zoom out as far as needed to fit
     setZoom(zoom);
 }
 
@@ -121,7 +142,7 @@ function resetZoom() {
 }
 
 /*=========================================================
-    BACKGROUND & CLEAR (Issue 1 Fixed)
+    BACKGROUND & CLEAR
 =========================================================*/
 
 function setCanvasBackground(color) {
@@ -147,7 +168,7 @@ function clearCanvas() {
 }
 
 /*=========================================================
-    EVENT REGISTRATIONS (Issue 6 Fixed)
+    EVENT REGISTRATIONS
 =========================================================*/
 
 function registerToolbarEvents() {
@@ -210,15 +231,13 @@ function registerCanvasEvents() {
     canvas.on("selection:updated", selectionChanged);
     canvas.on("selection:cleared", selectionChanged);
 
-    // Issue 2 Fix: Only track user modifications in events.
-    // Batch insertions (paste, templates) invoke saveHistory() directly on completion.
     canvas.on("object:modified", saveHistory);
 
     // Mouse wheel zoom
     canvas.on("mouse:wheel", opt => {
         let zoom = canvas.getZoom();
         zoom *= 0.999 ** opt.e.deltaY;
-        zoom = Math.min(3, Math.max(0.2, zoom));
+        zoom = Math.min(3, Math.max(0.05, zoom));
         setZoom(zoom);
         opt.e.preventDefault();
         opt.e.stopPropagation();
@@ -241,7 +260,7 @@ function deleteSelected() {
     activeObjects.forEach(obj => canvas.remove(obj));
     canvas.discardActiveObject();
     canvas.requestRenderAll();
-    saveHistory(); // Save once for batch delete
+    saveHistory();
 }
 
 function duplicateSelected() {
@@ -266,7 +285,7 @@ function duplicateSelected() {
 
         canvas.setActiveObject(cloned);
         canvas.requestRenderAll();
-        saveHistory(); // Issue 2: Save history after duplicate action completes
+        saveHistory();
     });
 }
 
@@ -302,7 +321,7 @@ function pasteSelected() {
 
         canvas.setActiveObject(cloned);
         canvas.requestRenderAll();
-        saveHistory(); // Issue 2: Save history once after entire paste completes
+        saveHistory();
     });
 }
 
@@ -375,7 +394,7 @@ document.addEventListener("keydown", e => {
 });
 
 /*=========================================================
-    ALIGNMENT & PROPERTIES (Issue 4 Fixed)
+    ALIGNMENT & PROPERTIES
 =========================================================*/
 
 function alignObject(position) {
@@ -384,8 +403,6 @@ function alignObject(position) {
 
     const w = canvas.getWidth();
     const h = canvas.getHeight();
-    const objWidth = obj.getScaledWidth();
-    const objHeight = obj.getScaledHeight();
 
     let targetX = obj.left;
     let targetY = obj.top;
@@ -419,7 +436,6 @@ function alignObject(position) {
             break;
     }
 
-    // Origin-aware position updating
     obj.setPositionByOrigin(
         new fabric.Point(targetX, targetY),
         originX,
@@ -449,7 +465,7 @@ function updateProperties() {
 }
 
 /*=========================================================
-    LAYERS PANEL (Issue 3 Fixed)
+    LAYERS PANEL
 =========================================================*/
 
 function getLayerLabel(obj) {
@@ -487,8 +503,6 @@ function refreshLayers() {
     if (!list || !canvas) return;
 
     list.innerHTML = "";
-    
-    // Reverse array display so top layer renders at top of list
     const objects = canvas.getObjects().slice().reverse();
 
     objects.forEach((obj) => {
@@ -612,7 +626,10 @@ function redo() {
 =========================================================*/
 
 window.addEventListener("resize", () => {
-    if (canvas) canvas.calcOffset();
+    if (canvas) {
+        canvas.calcOffset();
+        fitPage();
+    }
 });
 
 window.canvasEditor = {
@@ -622,6 +639,7 @@ window.canvasEditor = {
     setZoom,
     fitPage,
     resetZoom,
+    centerWorkspaceCanvas,
     setCanvasBackground,
     clearCanvas,
     deleteSelected,
