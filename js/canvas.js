@@ -764,54 +764,50 @@ function deleteSelected(){
 
 function duplicateSelected(){
 
-    const obj =
-    canvas.getActiveObject();
+const obj = canvas.getActiveObject();
+
+if(!obj)return;
 
 
-    if(!obj) return;
+obj.clone(cloned=>{
+
+cloned.set({
+left:cloned.left+30,
+top:cloned.top+30,
+evented:true
+});
 
 
+if(cloned.type==="activeSelection"){
 
-    obj.clone(cloned=>{
+cloned.canvas=canvas;
 
+cloned.forEachObject(o=>{
+canvas.add(o);
+});
 
-        cloned.set({
+cloned.setCoords();
 
-            left:cloned.left+30,
+}else{
 
-            top:cloned.top+30,
-
-            evented:true
-
-        });
-
-
-
-        canvas.add(cloned);
-
-
-        canvas.setActiveObject(
-            cloned
-        );
-
-
-        canvas.requestRenderAll();
-
-
-        refreshLayers();
-
-
-        saveHistory();
-
-
-
-    });
-
+canvas.add(cloned);
 
 }
 
 
 
+canvas.setActiveObject(cloned);
+
+canvas.requestRenderAll();
+
+refreshLayers();
+
+saveHistory();
+
+
+});
+
+}
 
 
 function copySelected(){
