@@ -881,32 +881,32 @@ function sendBackward(){
 
 
 
-
 function centerObject(){
 
-
-    const obj =
-    canvas.getActiveObject();
+const obj = canvas.getActiveObject();
 
 
-    if(!obj)return;
+if(!obj) return;
 
 
+obj.set({
 
-    obj.center();
+left:(canvas.width - obj.getScaledWidth()) / 2,
+
+top:(canvas.height - obj.getScaledHeight()) / 2
+
+});
 
 
-    obj.setCoords();
+obj.setCoords();
 
 
-    canvas.requestRenderAll();
+canvas.requestRenderAll();
 
 
-    saveHistory();
-
+saveHistory();
 
 }
-
 
 
 
@@ -973,16 +973,16 @@ return;
 
 
 
-
 if(
 e.key==="Delete" ||
 e.key==="Backspace"
 ){
 
+e.preventDefault();
+
 deleteSelected();
 
 }
-
 
 
 
@@ -1121,7 +1121,9 @@ break;
 case "center":
 
 obj.set({
-left:w/2
+
+left:(w - obj.getScaledWidth()) / 2
+
 });
 
 break;
@@ -1151,7 +1153,9 @@ break;
 case "middle":
 
 obj.set({
-top:h/2
+
+top:(h - obj.getScaledHeight()) / 2
+
 });
 
 break;
@@ -1559,18 +1563,14 @@ historyIndex--;
 
 
 canvas.loadFromJSON(
-history[historyIndex],
-()=>{
-
+history[historyIndex]
+).then(()=>{
 
 canvas.renderAll();
 
-
 refreshLayers();
 
-
 isHistoryAction=false;
-
 
 });
 
@@ -1599,21 +1599,16 @@ historyIndex++;
 
 
 canvas.loadFromJSON(
-history[historyIndex],
-()=>{
-
+history[historyIndex]
+).then(()=>{
 
 canvas.renderAll();
 
-
 refreshLayers();
-
 
 isHistoryAction=false;
 
-
 });
-
 
 }
 
