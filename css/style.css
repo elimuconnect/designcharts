@@ -1,6 +1,6 @@
 /* ==========================================
    SCHOOL WALL CHART DESIGNER PRO
-   style.css - Fixed Collapsible Layout Edition
+   style.css - Collapsible Layout Edition
 ========================================== */
 
 * {
@@ -27,116 +27,12 @@
 
 html,
 body {
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     font-family: "Poppins", sans-serif;
     background: #EEF3F8;
     color: var(--text);
-}
-
-/*==============================
-UNIFIED TOP NAVIGATION BAR
-==============================*/
-
-/* Outer Header Container (Spans full page width smoothly) */
-.topbar,
-header {
-    width: 100vw;
-    height: 52px;
-    background-color: var(--primary);
-    color: #FFFFFF;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
-    position: relative;
-    border-radius: 0;
-    flex-shrink: 0;
-}
-
-.brand {
-    font-weight: 600;
-    font-size: 15px;
-    color: #FFFFFF;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-}
-
-/* Inner Toolbar Container (Strips second blue box layer) */
-.toolbar,
-.top-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow-x: auto;
-    white-space: nowrap;
-}
-
-.toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: transparent !important;
-    color: #FFFFFF;
-}
-
-/* Header Buttons & Form Elements */
-.topbar button,
-.toolbar button {
-    background: rgba(255, 255, 255, 0.15);
-    color: #FFFFFF;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: 500;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.topbar button:hover,
-.toolbar button:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.topbar select,
-.toolbar-right select {
-    background: rgba(255, 255, 255, 0.15);
-    color: #FFFFFF;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 5px 8px;
-    border-radius: 6px;
-    font-size: 13px;
-    outline: none;
-    cursor: pointer;
-}
-
-.topbar select option,
-.toolbar-right select option {
-    background: var(--primary);
-    color: #FFFFFF;
-}
-
-.topbar input[type="range"] {
-    accent-color: #FFFFFF;
-    cursor: pointer;
-    width: 90px;
-}
-
-#zoomValue {
-    font-size: 12px;
-    font-weight: 600;
-    min-width: 40px;
 }
 
 /*==============================
@@ -146,20 +42,22 @@ APP CONTAINER & LAYOUT STRUCTURE
 .app-container {
     display: flex;
     width: 100vw;
-    height: calc(100vh - 52px);
+    height: 100vh;
     position: relative;
     overflow: hidden;
 }
 
-/* Left Wrapper (Sidebar + Tool Panel) */
+/* Left Wrapper containing Sidebar Navigation and Tool Panel */
 .left-container {
     display: flex;
     height: 100%;
     z-index: 100;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0;
 }
 
+/* Left Navigation Sidebar */
 .sidebar {
     width: 80px;
     height: 100%;
@@ -173,6 +71,7 @@ APP CONTAINER & LAYOUT STRUCTURE
     z-index: 101;
 }
 
+/* Secondary Tool Sub-panel */
 .tool-panel {
     width: 260px;
     height: 100%;
@@ -182,71 +81,40 @@ APP CONTAINER & LAYOUT STRUCTURE
     overflow-y: auto;
 }
 
-/* Workspace Container */
-.workspace {
-    flex: 1;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-    background: #EEF3F8;
-}
-
-.canvas-container-wrapper,
-#canvasContainer {
-    flex: 1;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: auto;
-    position: relative;
-}
-
 /* Right Properties Panel */
 .properties-panel,
 .properties {
     width: 300px;
-    min-width: 300px;
     height: 100%;
     background: var(--panel);
     border-left: 1px solid var(--border);
     padding: 20px;
     overflow-y: auto;
     z-index: 100;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0;
 }
 
 /*==============================
-COLLAPSIBLE STATES & TOGGLES
+COLLAPSIBLE STATES
 ==============================*/
 
+/* Collapse entire Left Container */
 .left-container.collapsed,
 .sidebar.collapsed {
-    width: 0 !important;
-    min-width: 0 !important;
-    margin-left: -340px !important;
-    opacity: 0;
-    overflow: hidden;
-    pointer-events: none;
+    transform: translateX(-100%);
+    margin-left: -340px; /* Accounts for sidebar + tool-panel width */
 }
 
+/* Collapse Right Panel */
 .properties-panel.collapsed,
 .properties.collapsed {
-    width: 0 !important;
-    min-width: 0 !important;
-    margin-right: -300px !important;
-    padding: 0 !important;
-    opacity: 0;
-    overflow: hidden;
-    border: none !important;
-    pointer-events: none;
+    transform: translateX(100%);
+    margin-right: -300px;
 }
 
-/* Floating Toggle Buttons */
+/* Floating Collapse Toggle Buttons */
 .collapse-btn,
 .toggle-btn-left,
 .toggle-btn-right {
@@ -266,7 +134,7 @@ COLLAPSIBLE STATES & TOGGLES
     align-items: center;
     justify-content: center;
     gap: 6px;
-    transition: background 0.2s ease, transform 0.2s ease;
+    transition: background 0.2s ease, transform 0.2s ease, left 0.3s ease, right 0.3s ease;
 }
 
 .collapse-btn:hover,
@@ -276,18 +144,78 @@ COLLAPSIBLE STATES & TOGGLES
     transform: translateY(-1px);
 }
 
+/* Position Left Toggle on the Workspace Boundary */
 #toggleLeftSidebar,
 .toggle-btn-left {
     left: 15px;
 }
 
+/* Position Right Toggle on the Workspace Boundary */
 #toggleRightSidebar,
 .toggle-btn-right {
     right: 15px;
 }
 
 /*==============================
-GLOBAL FORM ELEMENTS & UTILITIES
+WORKSPACE & TOP TOOLBAR
+==============================*/
+
+.workspace {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    background: #EEF3F8;
+}
+
+/* Fixed Top Toolbar (Keeps controls clean without blue bar overflow) */
+.toolbar,
+.top-bar {
+    width: 100%;
+    height: 54px;
+    background: var(--primary);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    padding: 0 60px; /* Padding avoids overlap with floating toggle buttons */
+    gap: 8px;
+    overflow-x: auto;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--primary-dark);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar button,
+.top-bar button {
+    background: rgba(255, 255, 255, 0.15);
+    color: #FFFFFF;
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+}
+
+.toolbar button:hover,
+.top-bar button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Interactive Canvas Area */
+.canvas-container-wrapper,
+#canvasContainer {
+    flex: 1;
+    width: 100%;
+    height: calc(100% - 54px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    position: relative;
+}
+
+/*==============================
+GLOBAL FORM ELEMENTS & BUTTONS
 ==============================*/
 
 button {
@@ -334,9 +262,18 @@ input[type=color] {
     cursor: pointer;
 }
 
-h2, h3 {
+/*==============================
+HEADINGS & LISTS
+==============================*/
+
+h2 {
     color: var(--primary);
-    margin-bottom: 12px;
+    margin-bottom: 18px;
+}
+
+h3 {
+    color: var(--primary);
+    margin-bottom: 10px;
 }
 
 hr {
@@ -371,6 +308,10 @@ hr {
     font-weight: 600;
 }
 
+/*==============================
+SCROLLBAR & UTILITIES
+==============================*/
+
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -387,4 +328,92 @@ hr {
 
 .hidden {
     display: none !important;
+}
+
+.shadow {
+    box-shadow: var(--shadow);
+}
+
+.round {
+    border-radius: var(--radius);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.full-width {
+    width: 100%;
+}
+
+/* Ensure App Container stretches full screen */
+.app-container {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+}
+
+/* Force Top Bar Visibility */
+.top-bar, .toolbar {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 50px !important;
+    min-height: 50px !important;
+    background-color: #1565C0 !important;
+    color: #ffffff !important;
+    padding: 0 15px !important;
+    gap: 10px !important;
+    z-index: 200 !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+/* Canvas Wrapper takes remaining height under top bar */
+.canvas-container-wrapper {
+    flex: 1 !important;
+    width: 100% !important;
+    height: calc(100vh - 50px) !important;
+    overflow: auto !important;
+    position: relative !important;
+}
+
+/* Properties Panel Collapsing Fix */
+.properties, 
+.properties-panel {
+    width: 320px;
+    min-width: 320px;
+    height: 100%;
+    background: #ffffff;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 150;
+    flex-shrink: 0;
+}
+
+/* Hard Collapse Class Rules (Overrides external CSS) */
+.properties.collapsed,
+.properties-panel.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    padding: 0 !important;
+    margin-right: -320px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+    pointer-events: none !important;
+}
+
+.left-container.collapsed,
+.sidebar.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    margin-left: -340px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+    pointer-events: none !important;
 }
