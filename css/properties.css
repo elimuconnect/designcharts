@@ -3,15 +3,20 @@
     properties.css
 ==========================================*/
 
+
 /*==============================
 PROPERTIES PANEL
 ==============================*/
 
+
 .properties{
+
 
     width:320px;
 
     min-width:320px;
+
+    height:100%;
 
     background:#FFFFFF;
 
@@ -25,11 +30,36 @@ PROPERTIES PANEL
 
     padding:20px;
 
+    flex-shrink:0;
+
+    transition:.3s ease;
+
+
 }
+
+
+
+
+/*==============================
+COLLAPSE
+==============================*/
+
+
+.properties.collapsed{
+
+
+    transform:translateX(320px);
+
+}
+
+
+
+
 
 /*==============================
 SCROLLBAR
 ==============================*/
+
 
 .properties::-webkit-scrollbar{
 
@@ -37,19 +67,28 @@ SCROLLBAR
 
 }
 
+
 .properties::-webkit-scrollbar-thumb{
+
 
     background:#CBD5E1;
 
     border-radius:20px;
 
+
 }
+
+
+
+
 
 /*==============================
 TITLE
 ==============================*/
 
+
 .properties h2{
+
 
     color:#1565C0;
 
@@ -57,9 +96,13 @@ TITLE
 
     margin-bottom:20px;
 
+
 }
 
+
+
 .properties h3{
+
 
     color:#1565C0;
 
@@ -67,13 +110,20 @@ TITLE
 
     margin:18px 0 10px;
 
+
 }
+
+
+
+
 
 /*==============================
 LABELS
 ==============================*/
 
+
 .properties label{
+
 
     display:block;
 
@@ -87,17 +137,24 @@ LABELS
 
     color:#475569;
 
+
 }
+
+
+
+
 
 /*==============================
 INPUTS
 ==============================*/
+
 
 .properties input,
 
 .properties select,
 
 .properties textarea{
+
 
     width:100%;
 
@@ -117,7 +174,11 @@ INPUTS
 
     transition:.25s;
 
+
 }
+
+
+
 
 .properties input:focus,
 
@@ -125,19 +186,27 @@ INPUTS
 
 .properties textarea:focus{
 
+
     outline:none;
 
     border-color:#1565C0;
 
     box-shadow:0 0 0 3px rgba(21,101,192,.15);
 
+
 }
+
+
+
+
 
 /*==============================
 COLOR PICKER
 ==============================*/
 
+
 .properties input[type=color]{
+
 
     padding:3px;
 
@@ -145,25 +214,39 @@ COLOR PICKER
 
     cursor:pointer;
 
+
 }
+
+
+
+
 
 /*==============================
 RANGE
 ==============================*/
 
+
 .properties input[type=range]{
+
 
     padding:0;
 
     cursor:pointer;
 
+
 }
+
+
+
+
 
 /*==============================
 ALIGNMENT
 ==============================*/
 
+
 .alignButtons{
+
 
     display:grid;
 
@@ -173,9 +256,14 @@ ALIGNMENT
 
     margin-top:10px;
 
+
 }
 
+
+
+
 .alignButtons button{
+
 
     height:42px;
 
@@ -193,19 +281,30 @@ ALIGNMENT
 
     font-size:18px;
 
+
 }
+
+
 
 .alignButtons button:hover{
 
+
     background:#0D47A1;
 
+
 }
+
+
+
+
 
 /*==============================
 ACTION BUTTONS
 ==============================*/
 
+
 .properties button{
+
 
     width:100%;
 
@@ -227,35 +326,57 @@ ACTION BUTTONS
 
     transition:.25s;
 
+
 }
+
+
 
 .properties button:hover{
 
+
     background:#0D47A1;
 
+
 }
+
+
+
+
 
 /*==============================
 DELETE BUTTON
 ==============================*/
 
+
 #deleteObject{
+
 
     background:#D32F2F;
 
+
 }
+
+
 
 #deleteObject:hover{
 
+
     background:#B71C1C;
 
+
 }
+
+
+
+
 
 /*==============================
 DIVIDER
 ==============================*/
 
+
 .properties hr{
+
 
     border:none;
 
@@ -265,13 +386,20 @@ DIVIDER
 
     margin:20px 0;
 
+
 }
+
+
+
+
 
 /*==============================
 LAYERS
 ==============================*/
 
+
 #layersList{
+
 
     list-style:none;
 
@@ -279,9 +407,14 @@ LAYERS
 
     padding:0;
 
+
 }
 
+
+
+
 #layersList li{
+
 
     padding:10px;
 
@@ -299,21 +432,49 @@ LAYERS
 
     font-size:14px;
 
+
 }
 
+
+
+
+
 #layersList li:hover{
+
 
     background:#E3F2FD;
 
     border-color:#1565C0;
 
+
 }
 
+
+
+
+#layersList li.active-layer{
+
+
+    background:#E3F2FD;
+
+    border-color:#1565C0;
+
+    font-weight:600;
+
+
+}
+
+
+
+
+
 /*==============================
-SECTION CARD
+PROPERTY CARD
 ==============================*/
 
+
 .property-card{
+
 
     background:#F8FAFC;
 
@@ -325,30 +486,50 @@ SECTION CARD
 
     margin-bottom:18px;
 
+
 }
+
+
+
+
 
 /*==============================
 RESPONSIVE
 ==============================*/
 
+
 @media(max-width:1200px){
 
-    .properties{
 
-        width:280px;
+.properties{
 
-        min-width:280px;
 
-    }
+    width:280px;
+
+    min-width:280px;
+
 
 }
 
+
+}
+
+
+
+
+
 @media(max-width:900px){
 
-    .properties{
 
-        display:none;
+.properties{
 
-    }
+
+    width:260px;
+
+    min-width:260px;
+
+
+}
+
 
 }
