@@ -1,14 +1,9 @@
-/* =========================================================
+/* ==========================================
    SCHOOL WALL CHART DESIGNER PRO
-   Unified Core Stylesheet (style.css, layout, sidebar, canvas, properties)
-========================================================= */
+   style.css - Collapsible Layout Edition
+========================================== */
 
-/* =========================================================
-   1. RESET & DESIGN TOKENS
-========================================================= */
-*,
-*::before,
-*::after {
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -21,24 +16,13 @@
     --success: #2E7D32;
     --warning: #F9A825;
     --danger: #C62828;
-    --danger-dark: #B71C1C;
-    
-    --bg-main: #EEF3F8;
-    --bg-workspace: #DFE7EF;
-    --bg-dark: #0F172A;
-    --bg-card: #F8FAFC;
-    
+    --light: #F5F7FA;
     --panel: #FFFFFF;
     --border: #D9E2EC;
-    --border-dark: #CBD5E1;
     --text: #263238;
-    --text-muted: #64748B;
-    
-    --shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+    --shadow: 0 4px 18px rgba(0, 0, 0, .08);
     --radius: 10px;
-    --radius-sm: 8px;
-    --transition: 0.25s ease;
+    --transition: .25s;
 }
 
 html,
@@ -47,28 +31,120 @@ body {
     height: 100%;
     overflow: hidden;
     font-family: "Poppins", sans-serif;
-    background: var(--bg-main);
+    background: #EEF3F8;
     color: var(--text);
 }
 
-/* =========================================================
-   2. GLOBAL FORM CONTROLS & BASE ELEMENTS
-========================================================= */
+/*==============================
+COLLAPSIBLE SIDEBARS & LAYOUT
+==============================*/
+
+.app-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Base Panel Transitions */
+.sidebar, 
+.properties-panel {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                padding 0.3s ease;
+    z-index: 100;
+    background: var(--panel);
+    border-color: var(--border);
+    flex-shrink: 0;
+}
+
+/* Collapsed Left Sidebar (Slides off-screen left) */
+.sidebar.collapsed {
+    transform: translateX(-100%);
+    width: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    overflow: hidden;
+    border: none !important;
+}
+
+/* Collapsed Right Sidebar (Slides off-screen right) */
+.properties-panel.collapsed {
+    transform: translateX(100%);
+    width: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    overflow: hidden;
+    border: none !important;
+}
+
+/* Floating Collapse Toggle Buttons */
+.collapse-btn {
+    position: absolute;
+    top: 15px;
+    z-index: 101;
+    background: var(--panel);
+    color: var(--primary);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.collapse-btn:hover {
+    background: var(--primary);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+/* Positioning for Toggle Controls */
+#toggleLeftSidebar {
+    left: 15px;
+}
+
+#toggleRightSidebar {
+    right: 15px;
+}
+
+/* Dynamic Main Workspace Fill */
+.workspace {
+    flex: 1;
+    height: 100%;
+    overflow: auto;
+    position: relative;
+    transition: width 0.3s ease;
+}
+
+/*==============================
+GLOBAL BUTTON
+==============================*/
+
 button {
     border: none;
     cursor: pointer;
-    font-family: "Poppins", sans-serif;
     transition: var(--transition);
-    border-radius: var(--radius-sm);
+    border-radius: 8px;
+    font-family: "Poppins", sans-serif;
 }
+
+/*==============================
+FORM ELEMENTS
+==============================*/
 
 label {
     display: block;
     margin-top: 14px;
     margin-bottom: 6px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
-    color: #475569;
 }
 
 input,
@@ -76,13 +152,10 @@ select,
 textarea {
     width: 100%;
     padding: 10px;
-    border: 1px solid var(--border-dark);
-    border-radius: var(--radius-sm);
-    background: var(--panel);
-    font-family: "Poppins", sans-serif;
-    font-size: 14px;
-    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
     outline: none;
+    font-family: "Poppins", sans-serif;
     transition: var(--transition);
 }
 
@@ -90,614 +163,118 @@ input:focus,
 select:focus,
 textarea:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.15);
 }
 
-input[type="range"] {
-    padding: 0;
+/*==============================
+RANGE
+==============================*/
+
+input[type=range] {
     cursor: pointer;
 }
 
-input[type="color"] {
+/*==============================
+COLOR PICKER
+==============================*/
+
+input[type=color] {
     padding: 3px;
-    height: 45px;
+    height: 42px;
     cursor: pointer;
 }
+
+/*==============================
+HEADINGS
+==============================*/
 
 h2 {
     color: var(--primary);
-    font-size: 24px;
     margin-bottom: 18px;
 }
 
 h3 {
     color: var(--primary);
-    font-size: 18px;
-    margin: 18px 0 10px;
+    margin-bottom: 10px;
 }
+
+/*==============================
+LINE
+==============================*/
 
 hr {
     border: none;
     height: 1px;
-    background: #E2E8F0;
-    margin: 20px 0;
+    background: #E4E7EB;
+    margin: 18px 0;
 }
 
-/* Scrollbar styling */
+/*==============================
+LAYER LIST
+==============================*/
+
+#layersList {
+    list-style: none;
+    margin-top: 12px;
+}
+
+#layersList li {
+    padding: 10px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+#layersList li:hover {
+    background: #E3F2FD;
+}
+
+#layersList li.active-layer {
+    border-color: var(--primary);
+    background: #E3F2FD;
+    font-weight: 600;
+}
+
+/*==============================
+SCROLLBAR
+==============================*/
+
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
     background: #B0BEC5;
-    border-radius: 20px;
+    border-radius: 30px;
 }
 
 ::-webkit-scrollbar-track {
     background: #ECEFF1;
 }
 
-/* =========================================================
-   3. APP LAYOUT & TOPBAR
-========================================================= */
-.topbar {
-    height: 70px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
-    z-index: 1000;
+/*==============================
+UTILITY
+==============================*/
+
+.hidden {
+    display: none !important;
 }
 
-.brand {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--primary);
-    white-space: nowrap;
+.shadow {
+    box-shadow: var(--shadow);
 }
 
-.toolbar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.round {
+    border-radius: var(--radius);
 }
 
-.toolbar button {
-    background: var(--primary);
-    color: #FFF;
-    padding: 9px 16px;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.toolbar button:hover {
-    background: var(--primary-dark);
-}
-
-.toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 320px;
-}
-
-.toolbar-right select {
-    width: 90px;
-    margin-bottom: 0;
-}
-
-.toolbar-right input[type="range"] {
-    width: 120px;
-    margin-bottom: 0;
-}
-
-#zoomValue {
-    min-width: 55px;
+.text-center {
     text-align: center;
-    font-weight: 600;
-    color: var(--primary);
 }
 
-.app {
-    display: flex;
-    height: calc(100vh - 70px);
-    overflow: hidden;
-}
-
-/* =========================================================
-   4. LEFT SIDEBAR & TOOL PANEL
-========================================================= */
-.sidebar {
-    width: 90px;
-    min-width: 90px;
-    background: var(--bg-dark);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 18px 8px;
-    gap: 10px;
-    overflow-y: auto;
-    border-right: 1px solid #1E293B;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-    background: #475569;
-}
-
-.sidebar button {
-    width: 70px;
-    height: 70px;
-    border: none;
-    background: transparent;
-    color: #CBD5E1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all var(--transition);
-    font-size: 22px;
-    flex-shrink: 0;
-}
-
-.sidebar button span {
-    margin-top: 5px;
-    font-size: 10px;
-    font-weight: 600;
-    text-align: center;
-    line-height: 1.2;
-}
-
-.sidebar button:hover {
-    background: #2563EB;
-    color: #FFF;
-    transform: scale(1.05);
-}
-
-.sidebar button.active {
-    background: var(--primary);
-    color: #FFF;
-    transform: scale(1.05);
-    box-shadow: 0 8px 20px rgba(21, 101, 192, 0.35);
-}
-
-.sidebar button:active {
-    transform: scale(0.96);
-}
-
-.tool-panel {
-    width: 320px;
-    min-width: 320px;
-    background: var(--panel);
-    border-right: 1px solid var(--border);
-    padding: 20px;
-    overflow-y: auto;
-}
-
-#toolContent {
-    min-height: 450px;
-}
-
-.tool-card {
-    background: var(--bg-card);
-    border: 1px solid #E2E8F0;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 18px;
-    animation: fade var(--transition);
-}
-
-.tool-card h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: var(--primary);
-    font-size: 18px;
-}
-
-.tool-card p {
-    font-size: 14px;
-    color: var(--text-muted);
-    line-height: 1.6;
-}
-
-.tool-card small {
-    color: #94A3B8;
-}
-
-.tool-card button {
+.full-width {
     width: 100%;
-    padding: 12px;
-    margin-bottom: 10px;
-    background: var(--primary);
-    color: #FFF;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-}
-
-.tool-card button:hover {
-    background: var(--primary-dark);
-}
-
-.tool-card button:last-child {
-    margin-bottom: 0;
-}
-
-.image-thumb {
-    width: 100%;
-    border-radius: 10px;
-    display: block;
-    margin-bottom: 12px;
-}
-
-.shape-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-}
-
-.shape-item {
-    height: 80px;
-    border: 1px solid var(--border-dark);
-    border-radius: 10px;
-    background: var(--panel);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: var(--transition);
-    font-size: 30px;
-}
-
-.shape-item:hover {
-    background: #E3F2FD;
-    border-color: var(--primary);
-    transform: scale(1.04);
-}
-
-.template-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 15px;
-}
-
-.template {
-    min-height: 170px;
-    background: var(--panel);
-    border: 1px solid var(--border-dark);
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.template:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-}
-
-.template img {
-    width: 100%;
-    height: 130px;
-    object-fit: cover;
-    display: block;
-}
-
-.template h4 {
-    padding: 10px;
-    font-size: 15px;
-    font-weight: 600;
-    color: #334155;
-}
-
-/* =========================================================
-   5. WORKSPACE & CANVAS
-========================================================= */
-.workspace {
-    flex: 1;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    overflow: auto;
-    background: var(--bg-workspace);
-    background-image:
-        linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
-    background-size: 25px 25px;
-}
-
-#canvasWrapper {
-    position: relative;
-    margin: 60px;
-    padding: 25px;
-    background: var(--panel);
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(0, 0, 0, 0.08);
-    transform-origin: center center;
-    transition: transform var(--transition);
-}
-
-#designerCanvas {
-    display: block;
-    background: var(--panel);
-    border: 1px solid #D6D6D6;
-}
-
-.canvas-safe-area {
-    position: absolute;
-    inset: 20px;
-    border: 2px dashed rgba(33, 150, 243, 0.25);
-    pointer-events: none;
-}
-
-.canvas-print-area {
-    position: absolute;
-    inset: 8px;
-    border: 1px dashed rgba(255, 0, 0, 0.25);
-    pointer-events: none;
-}
-
-.paper-label {
-    position: absolute;
-    top: -42px;
-    left: 0;
-    padding: 6px 14px;
-    background: var(--primary);
-    color: #FFFFFF;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.hide-grid {
-    background-image: none !important;
-}
-
-/* Print Paper Formats */
-.paper-a4 { width: 794px; height: 1123px; }
-.paper-a3 { width: 1123px; height: 1587px; }
-.paper-a2 { width: 1587px; height: 2245px; }
-.paper-a1 { width: 2245px; height: 3179px; }
-.paper-a0 { width: 3179px; height: 4494px; }
-
-.landscape { transform: none; }
-
-.canvas-object-selected { outline: 2px dashed var(--primary); }
-
-.guide-horizontal {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: #FF1744;
-    pointer-events: none;
-    display: none;
-}
-
-.guide-vertical {
-    position: absolute;
-    top: 0;
-    width: 1px;
-    height: 100%;
-    background: #FF1744;
-    pointer-events: none;
-    display: none;
-}
-
-.center-point {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 10px;
-    height: 10px;
-    background: var(--primary);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    display: none;
-}
-
-.canvas-loading {
-    position: absolute;
-    inset: 0;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.85);
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--primary);
-}
-
-.zooming { transition: transform 0.2s ease; }
-
-/* =========================================================
-   6. RIGHT PROPERTIES & LAYERS PANEL
-========================================================= */
-.properties {
-    width: 320px;
-    min-width: 320px;
-    background: var(--panel);
-    border-left: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    padding: 20px;
-}
-
-.property-card {
-    background: var(--bg-card);
-    border: 1px solid #E2E8F0;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 18px;
-}
-
-.alignButtons {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-top: 10px;
-}
-
-.alignButtons button {
-    height: 42px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-size: 18px;
-}
-
-.alignButtons button:hover {
-    background: var(--primary-dark);
-}
-
-.properties button {
-    width: 100%;
-    padding: 11px;
-    margin-top: 10px;
-    border: none;
-    border-radius: var(--radius-sm);
-    background: var(--primary);
-    color: white;
-    font-weight: 600;
-}
-
-.properties button:hover {
-    background: var(--primary-dark);
-}
-
-#deleteObject {
-    background: var(--danger);
-}
-
-#deleteObject:hover {
-    background: var(--danger-dark);
-}
-
-/* Layers Management */
-#layersPanel {
-    width: 100%;
-    background: var(--panel);
-    padding: 10px 0;
-}
-
-#layersList,
-.layer-list {
-    list-style: none;
-    margin-top: 10px;
-    padding: 0;
-    min-height: 120px;
-}
-
-#layersList li,
-.layer-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    border: 1px solid var(--border-dark);
-    border-radius: var(--radius-sm);
-    background: var(--bg-card);
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: var(--transition);
-    font-size: 14px;
-}
-
-#layersList li:hover,
-.layer-item:hover {
-    background: #E3F2FD;
-    border-color: var(--primary);
-}
-
-/* =========================================================
-   7. UTILITIES & ANIMATIONS
-========================================================= */
-.hidden { display: none !important; }
-.shadow { box-shadow: var(--shadow); }
-.round { border-radius: var(--radius); }
-.text-center { text-align: center; }
-.full-width { width: 100%; }
-
-.fadeIn { animation: fade 0.25s ease; }
-
-@keyframes fade {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* =========================================================
-   8. MEDIA QUERIES
-========================================================= */
-@media (max-width: 1200px) {
-    .tool-panel,
-    .properties {
-        width: 280px;
-        min-width: 280px;
-    }
-
-    .sidebar {
-        width: 80px;
-        min-width: 80px;
-    }
-
-    .sidebar button {
-        width: 62px;
-        height: 62px;
-        font-size: 20px;
-    }
-}
-
-@media (max-width: 900px) {
-    .app {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 70px;
-        min-width: 70px;
-    }
-
-    .sidebar button {
-        width: 54px;
-        height: 54px;
-        font-size: 18px;
-    }
-
-    .sidebar button span {
-        display: none;
-    }
-
-    .tool-panel,
-    .properties {
-        display: none;
-    }
-
-    .workspace {
-        width: 100%;
-    }
-
-    .toolbar {
-        overflow-x: auto;
-    }
-
-    #canvasWrapper {
-        margin: 20px;
-        padding: 15px;
-    }
 }
