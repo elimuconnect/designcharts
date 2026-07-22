@@ -4,63 +4,105 @@
 ==========================================*/
 
 
-
 /*==============================
 WORKSPACE CANVAS CONTAINER
 ==============================*/
 
-.workspace {
-    position: relative;
-    display: flex;
-    justify-content: safe center; /* Safe fallback prevents left-side cutoff */
-    align-items: flex-start;
-    overflow: auto;
-    padding: 60px; /* Essential margin around large chart paper */
-    background: #DFE7EF;
+
+.workspace{
+
+
+    position:relative;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    overflow:auto;
+
+    padding:40px;
+
+    background:#DFE7EF;
+
+
     background-image:
-        linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,0,0,.04) 1px, transparent 1px);
-    background-size: 25px 25px;
+
+    linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px),
+
+    linear-gradient(90deg, rgba(0,0,0,.04) 1px, transparent 1px);
+
+
+    background-size:25px 25px;
+
+
 }
 
-/* Force the Fabric.js canvas wrapper to maintain full size and center properly */
-.workspace .canvas-container {
-    margin: 0 auto !important;
-    flex-shrink: 0 !important;
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+
+
+
+
+/* Fabric.js generated container */
+
+
+.workspace .canvas-container{
+
+
+    margin:auto !important;
+
+    flex-shrink:0 !important;
+
+    box-shadow:
+
+    0 12px 30px rgba(15,23,42,.18);
+
+
 }
+
+
+
+
 
 /*==============================
 CANVAS WRAPPER
 ==============================*/
 
+
 #canvasWrapper{
+
 
     position:relative;
 
-    margin:60px;
-
-    padding:25px;
+    padding:20px;
 
     background:#FFFFFF;
 
     border-radius:8px;
 
+
     box-shadow:
-        0 10px 30px rgba(0,0,0,.15),
-        0 0 0 1px rgba(0,0,0,.08);
+
+    0 10px 30px rgba(0,0,0,.15),
+
+    0 0 0 1px rgba(0,0,0,.08);
+
 
     transform-origin:center center;
 
-    transition:transform .25s ease;
-
 }
+
+
+
+
 
 /*==============================
 FABRIC CANVAS
 ==============================*/
 
+
 #designerCanvas{
+
 
     display:block;
 
@@ -68,13 +110,20 @@ FABRIC CANVAS
 
     border:1px solid #D6D6D6;
 
+
 }
 
+
+
+
+
 /*==============================
-SAFE MARGIN
+SAFE AREA
 ==============================*/
 
+
 .canvas-safe-area{
+
 
     position:absolute;
 
@@ -84,13 +133,20 @@ SAFE MARGIN
 
     pointer-events:none;
 
+
 }
 
+
+
+
+
 /*==============================
-PRINT MARGIN
+PRINT AREA
 ==============================*/
 
+
 .canvas-print-area{
+
 
     position:absolute;
 
@@ -100,47 +156,69 @@ PRINT MARGIN
 
     pointer-events:none;
 
+
 }
+
+
+
+
 
 /*==============================
 PAGE LABEL
 ==============================*/
 
+
 .paper-label{
+
 
     position:absolute;
 
-    top:-42px;
+    top:-35px;
 
     left:0;
+
 
     padding:6px 14px;
 
     background:#1565C0;
 
-    color:#FFFFFF;
+    color:white;
 
     border-radius:6px;
+
 
     font-size:13px;
 
     font-weight:600;
 
+
 }
+
+
+
+
 
 /*==============================
 GRID
 ==============================*/
 
+
 .hide-grid{
+
 
     background-image:none !important;
 
+
 }
 
+
+
+
+
 /*==============================
-DISPLAY PAPER SIZES
+PAPER SIZES
 ==============================*/
+
 
 .paper-a4{
 
@@ -150,6 +228,8 @@ DISPLAY PAPER SIZES
 
 }
 
+
+
 .paper-a3{
 
     width:1123px;
@@ -157,6 +237,8 @@ DISPLAY PAPER SIZES
     height:1587px;
 
 }
+
+
 
 .paper-a2{
 
@@ -166,6 +248,8 @@ DISPLAY PAPER SIZES
 
 }
 
+
+
 .paper-a1{
 
     width:2245px;
@@ -173,6 +257,8 @@ DISPLAY PAPER SIZES
     height:3179px;
 
 }
+
+
 
 .paper-a0{
 
@@ -182,31 +268,51 @@ DISPLAY PAPER SIZES
 
 }
 
+
+
+
+
 /*==============================
 LANDSCAPE
 ==============================*/
 
+
 .landscape{
 
-    transform:none;
+
+    transform:rotate(90deg);
+
 
 }
+
+
+
+
 
 /*==============================
 SELECTION
 ==============================*/
 
+
 .canvas-object-selected{
+
 
     outline:2px dashed #1565C0;
 
+
 }
+
+
+
+
 
 /*==============================
 ALIGNMENT GUIDES
 ==============================*/
 
+
 .guide-horizontal{
+
 
     position:absolute;
 
@@ -222,9 +328,14 @@ ALIGNMENT GUIDES
 
     display:none;
 
+
 }
 
+
+
+
 .guide-vertical{
+
 
     position:absolute;
 
@@ -240,13 +351,20 @@ ALIGNMENT GUIDES
 
     display:none;
 
+
 }
+
+
+
+
 
 /*==============================
 CENTER POINT
 ==============================*/
 
+
 .center-point{
+
 
     position:absolute;
 
@@ -258,27 +376,38 @@ CENTER POINT
 
     height:10px;
 
+
     background:#1565C0;
 
     border-radius:50%;
 
+
     transform:translate(-50%,-50%);
+
 
     pointer-events:none;
 
     display:none;
 
+
 }
+
+
+
+
 
 /*==============================
 LOADING
 ==============================*/
 
+
 .canvas-loading{
+
 
     position:absolute;
 
     inset:0;
+
 
     display:none;
 
@@ -286,7 +415,9 @@ LOADING
 
     align-items:center;
 
+
     background:rgba(255,255,255,.85);
+
 
     font-size:22px;
 
@@ -294,30 +425,45 @@ LOADING
 
     color:#1565C0;
 
+
 }
+
+
+
+
 
 /*==============================
 ZOOM
 ==============================*/
 
+
 .zooming{
+
 
     transition:transform .2s ease;
 
+
 }
+
+
+
+
 
 /*==============================
 RESPONSIVE
 ==============================*/
 
+
 @media(max-width:900px){
 
-    #canvasWrapper{
 
-        margin:20px;
+#canvasWrapper{
 
-        padding:15px;
 
-    }
+    padding:15px;
+
+
+}
+
 
 }
