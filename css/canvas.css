@@ -3,30 +3,31 @@
     canvas.css
 ==========================================*/
 
+
+
 /*==============================
-WORKSPACE
+WORKSPACE CANVAS CONTAINER
 ==============================*/
 
-.workspace{
-
-    position:relative;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:flex-start;
-
-    overflow:auto;
-
-    background:#DFE7EF;
-
+.workspace {
+    position: relative;
+    display: flex;
+    justify-content: safe center; /* Safe fallback prevents left-side cutoff */
+    align-items: flex-start;
+    overflow: auto;
+    padding: 60px; /* Essential margin around large chart paper */
+    background: #DFE7EF;
     background-image:
         linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0,0,0,.04) 1px, transparent 1px);
+    background-size: 25px 25px;
+}
 
-    background-size:25px 25px;
-
+/* Force the Fabric.js canvas wrapper to maintain full size and center properly */
+.workspace .canvas-container {
+    margin: 0 auto !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
 }
 
 /*==============================
