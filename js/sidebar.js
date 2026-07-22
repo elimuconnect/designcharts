@@ -324,17 +324,11 @@ if (sidebarButtons.uploads) sidebarButtons.uploads.onclick = () => openTool("upl
 if (sidebarButtons.logos) sidebarButtons.logos.onclick = () => openTool("logos");
 
 /*=========================================
-START
-=========================================*/
-
-
-
-/*=========================================
-SIDEBAR TOGGLE HANDLERS
+SIDEBAR TOGGLE HANDLERS (COLLAPSE / EXPAND)
 =========================================*/
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Left Sidebar Toggle
+    // Left Navigation Sidebar Toggle
     const toggleLeftBtn = document.getElementById("toggleLeftSidebar");
     const navSidebar = document.querySelector(".sidebar");
 
@@ -345,7 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? "Sidebar ▶" 
                 : "◀ Sidebar";
 
-            // Trigger canvas recalculation if editor exists
+            // Recalculate canvas position after transition completes
             if (window.canvasEditor && typeof window.canvasEditor.fitPage === "function") {
                 setTimeout(() => window.canvasEditor.fitPage(), 300);
             }
@@ -363,12 +357,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? "Properties ◀" 
                 : "Properties ▶";
 
-            // Trigger canvas recalculation if editor exists
+            // Recalculate canvas position after transition completes
             if (window.canvasEditor && typeof window.canvasEditor.fitPage === "function") {
                 setTimeout(() => window.canvasEditor.fitPage(), 300);
             }
         });
     }
 });
+
+/*=========================================
+START
+=========================================*/
 
 openTool("templates");
