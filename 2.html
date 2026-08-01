@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DigiElimu Anatomical 3D Respiratory System</title>
 
   <!-- Polyfill for browser compatibility -->
@@ -341,19 +341,61 @@
       }
     };
 
-    const quizQuestions = [
-      { q: "What gas is absorbed into the blood inside the microscopic alveoli?", options: ["Carbon Dioxide", "Oxygen", "Nitrogen"], answer: 1 },
-      { q: "What happens to the dome-shaped diaphragm during inhalation?", options: ["Flattens downwards", "Curves upwards", "Stops moving"], answer: 0 },
-      { q: "Which anatomical feature of the left lung accommodates the heart?", options: ["Cardiac Notch", "Pleural Cavity", "Nasal Septum"], answer: 0 },
-      { q: "What color change represents blood becoming oxygenated in pulmonary exchange?", options: ["Red to Blue", "Blue to Red", "Yellow to Green"], answer: 1 },
-      { q: "What protective structural rings prevent the trachea from collapsing?", options: ["Bone rings", "C-shaped cartilage rings", "Muscle bands"], answer: 1 },
-      { q: "Where are the red blood capillaries wrapped around to exchange gases?", options: ["Trachea", "Alveoli air sacs", "Nasal cavity"], answer: 1 },
-      { q: "Which lung is slightly larger in human anatomy?", options: ["Left Lung", "Right Lung", "Both are identical"], answer: 1 },
-      { q: "How do the ribs move when you take a deep breath in?", options: ["Down and in", "Upwards and outwards", "They do not move"], answer: 1 },
-      { q: "What gas is expelled back out through the airways during exhalation?", options: ["Oxygen", "Carbon Dioxide", "Hydrogen"], answer: 1 },
-      { q: "What microscopic hair-like structures trap dust in the nasal passage?", options: ["Villi", "Cilia", "Tendon"], answer: 1 }
-    ];
 
+const quizQuestions = [
+  { q: "What gas is absorbed into the blood inside the microscopic alveoli?", options: ["Carbon Dioxide", "Oxygen", "Nitrogen"], answer: 1 },
+
+  { q: "What happens to the diaphragm during inhalation?", options: ["Flattens downward", "Moves upward", "Stops moving"], answer: 0 },
+
+  { q: "Which structure prevents food from entering the trachea?", options: ["Bronchus", "Larynx", "Epiglottis"], answer: 2 },
+
+  { q: "Which anatomical feature of the left lung accommodates the heart?", options: ["Cardiac notch", "Pleural cavity", "Nasal septum"], answer: 0 },
+
+  { q: "What color represents oxygenated blood?", options: ["Blue", "Red", "Green"], answer: 1 },
+
+  { q: "Which structure contains tiny air sacs for gas exchange?", options: ["Bronchi", "Trachea", "Alveoli"], answer: 2 },
+
+  { q: "What supports the trachea and keeps it open?", options: ["C-shaped cartilage rings", "Bones", "Muscles"], answer: 0 },
+
+  { q: "Which lung is slightly larger?", options: ["Left lung", "Right lung", "Both are equal"], answer: 1 },
+
+  { q: "What gas is mainly exhaled from the lungs?", options: ["Oxygen", "Nitrogen", "Carbon Dioxide"], answer: 2 },
+
+  { q: "Where does air first enter the respiratory system?", options: ["Nasal cavity", "Larynx", "Bronchi"], answer: 0 },
+
+  { q: "What tiny hair-like structures trap dust in the nose?", options: ["Villi", "Cilia", "Capillaries"], answer: 1 },
+
+  { q: "Which blood vessels surround the alveoli?", options: ["Veins", "Arteries", "Capillaries"], answer: 2 },
+
+  { q: "Which organ pumps blood to the lungs?", options: ["Heart", "Liver", "Kidney"], answer: 0 },
+
+  { q: "What is the windpipe also called?", options: ["Bronchus", "Trachea", "Pharynx"], answer: 1 },
+
+  { q: "Which part of the respiratory system produces the voice?", options: ["Diaphragm", "Bronchi", "Larynx"], answer: 2 },
+
+  { q: "During inhalation, the rib cage moves...", options: ["Upward and outward", "Downward", "Does not move"], answer: 0 },
+
+  { q: "How many lungs does a healthy human have?", options: ["One", "Two", "Three"], answer: 1 },
+
+  { q: "Where does oxygen enter the bloodstream?", options: ["Bronchi", "Trachea", "Alveoli"], answer: 2 },
+
+  { q: "Which muscle is mainly responsible for breathing?", options: ["Diaphragm", "Biceps", "Hamstrings"], answer: 0 },
+
+  { q: "Which passage carries air from the larynx to the bronchi?", options: ["Esophagus", "Trachea", "Pharynx"], answer: 1 },
+
+  { q: "Which structure branches into the left and right bronchi?", options: ["Larynx", "Alveoli", "Trachea"], answer: 2 },
+
+  { q: "What is the main function of the lungs?", options: ["Gas exchange", "Pump blood", "Digest food"], answer: 0 },
+
+  { q: "Which gas do humans need for respiration?", options: ["Carbon Dioxide", "Oxygen", "Helium"], answer: 1 },
+
+  { q: "What are the tiny branches of the bronchi called?", options: ["Capillaries", "Alveoli", "Bronchioles"], answer: 2 },
+
+  { q: "Which organ shares space with the left lung inside the chest?", options: ["Heart", "Stomach", "Liver"], answer: 0 }
+];
+
+
+    
     let audioEnabled = true;
     let selectedOrganGroup = null;
     let hoveredOrganGroup = null;
