@@ -1,138 +1,728 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DigiElimu 3D Digestive System</title>
-<style>
-body{margin:0;font-family:Arial;background:#eef6ff}
-header{background:#0b4ea2;color:#fff;padding:18px;text-align:center;font-size:30px}
-#viewer{width:100%;height:70vh;display:block}
-#info{padding:20px;max-width:900px;margin:auto}
-</style>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DigiElimu 3D Digestive System</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0b132b; color: #ffffff; overflow-x: hidden; }
+    
+    header {
+      background: rgba(11, 19, 43, 0.9);
+      color: #fff;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      position: relative;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+    }
+    .brand { font-size: 22px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+    .brand-tag { background: #ff9800; font-size: 11px; padding: 2px 8px; border-radius: 12px; color: #fff; text-transform: uppercase; }
+    
+    #app-container {
+      display: flex;
+      flex-direction: row;
+      height: calc(100vh - 58px);
+      width: 100vw;
+      position: relative;
+    }
+    
+    #canvas-container {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      background: radial-gradient(circle, #1a2a4a 0%, #0b132b 100%);
+    }
+    
+    #viewer { width: 100%; height: 100%; display: block; }
+    
+    /* Overlay Controls */
+    .controls-overlay {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 5;
+    }
+    .btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      backdrop-filter: blur(8px);
+    }
+    .btn:hover { background: #0b4ea2; border-color: #0b4ea2; transform: translateY(-2px); }
+    .btn.active { background: #0b4ea2; border-color: #4da6ff; }
+
+    /* Side Panel */
+    #sidebar {
+      width: 380px;
+      background: rgba(15, 23, 42, 0.95);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.4);
+      z-index: 5;
+      backdrop-filter: blur(12px);
+    }
+    .panel-header {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-weight: bold;
+      color: #4da6ff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .panel-content {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    
+    /* Organ Info */
+    .organ-title { font-size: 24px; color: #ffffff; margin-bottom: 10px; border-bottom: 2px solid #ff9800; padding-bottom: 6px; }
+    .cbc-badge { background: rgba(46, 125, 50, 0.3); border: 1px solid #2e7d32; color: #81c784; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 16px; }
+    .organ-desc { font-size: 15px; line-height: 1.7; color: #cbd5e1; margin-bottom: 20px; }
+    
+    /* Hover Label Styling */
+    .organ-hover-label {
+      background: rgba(11, 19, 43, 0.9);
+      border: 1px solid #4da6ff;
+      color: #ffffff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      pointer-events: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      backdrop-filter: blur(6px);
+      transition: opacity 0.15s ease-out;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    /* Quiz UI */
+    .quiz-container { display: none; }
+    .quiz-q { font-weight: bold; font-size: 16px; margin-bottom: 16px; color: #e2e8f0; }
+    .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+    .quiz-opt { padding: 12px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 14px; color: #e2e8f0; }
+    .quiz-opt:hover { background: rgba(255,255,255,0.15); border-color: #4da6ff; }
+    .quiz-opt.correct { background: rgba(56, 161, 105, 0.3); border-color: #38a169; color: #68d391; }
+    .quiz-opt.wrong { background: rgba(229, 62, 62, 0.3); border-color: #e53e3e; color: #fc8181; }
+    
+    .score-card { text-align: center; padding: 20px; display: none; }
+    .score-num { font-size: 52px; color: #4da6ff; font-weight: bold; margin: 10px 0; }
+    
+    /* Responsive Layout */
+    @media (max-width: 850px) {
+      #app-container { flex-direction: column; }
+      #sidebar { width: 100%; height: 45vh; }
+      #canvas-container { height: 55vh; }
+    }
+  </style>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.179.1/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.179.1/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 <body>
-<header>DigiElimu Interactive 3D Digestive System</header>
-<canvas id="viewer"></canvas>
-<div id="info">
-<h2>Interactive Demo</h2>
-<p>Drag to rotate. Scroll to zoom. This starter demonstrates a 3D scene ready for real organ models.</p>
-</div>
-<script>
 
-const canvas=document.getElementById("viewer");
+  <header>
+    <div class="brand">
+      🎨 DigiElimu <span class="brand-tag">CBC Curriculum</span>
+    </div>
+    <div style="font-size: 14px; opacity: 0.9;">🫀 Interactive 3D Digestive System</div>
+  </header>
 
-const renderer=new THREE.WebGLRenderer({
-canvas:canvas,
-antialias:true
-});
+  <div id="app-container">
+    <div id="canvas-container">
+      <div class="controls-overlay">
+        <button class="btn active" id="btn-animate">🍎 Digest Food: ON</button>
+        <button class="btn active" id="btn-outline">👤 Body Outline: ON</button>
+        <button class="btn" id="btn-quiz">📝 Quiz Mode</button>
+        <button class="btn" id="btn-audio">🔊 Audio: ON</button>
+      </div>
+      <canvas id="viewer"></canvas>
+    </div>
 
-renderer.setSize(window.innerWidth,window.innerHeight*0.7);
+    <div id="sidebar">
+      <div class="panel-header">
+        <span id="panel-mode-title">📚 Information Panel</span>
+        <span style="font-size: 12px; color: #94a3b8;">🖱 Click organ to inspect</span>
+      </div>
+      
+      <!-- Info Content -->
+      <div class="panel-content" id="info-panel">
+        <div class="organ-title" id="org-title">👄 Mouth</div>
+        <div class="cbc-badge" id="org-cbc">CBC Grade 4-6 Science</div>
+        <div class="organ-desc" id="org-desc">
+          Food enters the body here. Mechanical breakdown takes place via chewing (teeth), while salivary glands secrete amylase to begin starch digestion.
+        </div>
+        <button class="btn" id="btn-reset-cam" style="display:none; width:100%; justify-content:center; margin-top:10px;">🔍 Reset Camera View</button>
+      </div>
 
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0xeef6ff);
+      <!-- Quiz Content -->
+      <div class="panel-content quiz-container" id="quiz-panel">
+        <div class="quiz-q" id="quiz-q-text">Question goes here...</div>
+        <div class="quiz-options" id="quiz-options"></div>
+      </div>
 
-const camera=new THREE.PerspectiveCamera(
-45,
-window.innerWidth/(window.innerHeight*0.7),
-0.1,
-100
-);
+      <!-- Score Content -->
+      <div class="panel-content score-card" id="score-panel">
+        🏆
+        <h2>Quiz Completed!</h2>
+        <p>Your Final Score:</p>
+        <div class="score-num" id="final-score">0 / 0</div>
+        <button class="btn" style="margin: 20px auto 0 auto;" id="btn-restart">Retry Quiz</button>
+      </div>
+    </div>
+  </div>
 
-camera.position.set(0,2,8);
+  <script type="module">
+    import * as THREE from "three";
+    import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+    import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
 
-const controls=new THREE.OrbitControls(
-camera,
-renderer.domElement
-);
+    // Offline Cache Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const swBlob = new Blob([`
+          const CACHE_NAME = 'digielimu-v3';
+          self.addEventListener('install', e => e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['./']))));
+          self.addEventListener('fetch', e => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+        `], { type: 'text/javascript' });
+        navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+      });
+    }
 
-scene.add(new THREE.HemisphereLight(0xffffff,0x888888,2));
+    // Item 3: Natural Anatomical Palette & Data
+    const organData = {
+      Mouth: {
+        title: "Mouth (Oral Cavity)",
+        emoji: "👄",
+        cbc: "CBC Strand: Human Body Systems - Ingestion",
+        desc: "Food enters the body here. Mechanical breakdown takes place via chewing (teeth), while salivary glands secrete amylase to begin starch digestion.",
+        color: 0xff85a2, // Soft Pink
+        pos: new THREE.Vector3(0, 3.1, 0)
+      },
+      Oesophagus: {
+        title: "Oesophagus (Gullet)",
+        emoji: "🥢",
+        cbc: "CBC Strand: Peristalsis Movement",
+        desc: "A muscular tube connecting the mouth to the stomach. Food moves down using rhythmic wave-like contractions called peristalsis.",
+        color: 0xd4a373, // Light Tan / Flesh
+        pos: new THREE.Vector3(0, 1.7, 0)
+      },
+      Stomach: {
+        title: "Stomach",
+        emoji: "🩷",
+        cbc: "CBC Strand: Chemical Digestion & Acid",
+        desc: "A muscular, J-shaped sac that churns food with gastric juices and hydrochloric acid to break down proteins and kill harmful bacteria.",
+        color: 0xfa8072, // Salmon Pink
+        pos: new THREE.Vector3(0.4, 0.25, 0.12)
+      },
+      Liver: {
+        title: "Liver & Gallbladder",
+        emoji: "🟢",
+        cbc: "CBC Strand: Bile & Assimilation",
+        desc: "Produces bile which emulsifies fats (breaks large fat droplets into smaller droplets) for easier enzymatic digestion.",
+        color: 0x6b2d2d, // Dark Reddish-Brown
+        pos: new THREE.Vector3(-0.68, 0.55, 0.25)
+      },
+      SmallIntestine: {
+        title: "Small Intestine",
+        emoji: "🟡",
+        cbc: "CBC Strand: Absorption & Villi",
+        desc: "The primary site for final chemical digestion and nutrient absorption into the blood via tiny finger-like structures called villi.",
+        color: 0xf4e285, // Light Cream / Yellow
+        pos: new THREE.Vector3(0, -0.8, 0.18)
+      },
+      LargeIntestine: {
+        title: "Large Intestine (Colon)",
+        emoji: "🟤",
+        cbc: "CBC Strand: Water Absorption & Egestion",
+        desc: "Surrounds the small intestine. Absorbs remaining water and mineral salts from indigestible food residues, compacting waste into feces.",
+        color: 0xd6a4a4, // Light Grey / Pink
+        pos: new THREE.Vector3(0, -0.68, -0.06)
+      }
+    };
 
-const light=new THREE.DirectionalLight(0xffffff,2);
-light.position.set(4,8,5);
-scene.add(light);
+    const quizQuestions = [
+      { q: "Where does chemical digestion of starch begin?", options: ["Stomach", "Mouth", "Small Intestine"], answer: 1 },
+      { q: "What wave-like muscle movement pushes food down the gullet?", options: ["Peristalsis", "Pumping", "Absorption"], answer: 0 },
+      { q: "Which organ produces bile to help break down fats?", options: ["Stomach", "Liver", "Large Intestine"], answer: 1 },
+      { q: "Where are digested nutrients absorbed into the bloodstream?", options: ["Small Intestine", "Large Intestine", "Oesophagus"], answer: 0 },
+      { q: "What is the primary role of the Large Intestine?", options: ["Protein digestion", "Water absorption", "Chewing food"], answer: 1 }
+    ];
 
-function organ(x,y,z,color,sx,sy,sz){
+    let audioEnabled = true;
+    let selectedOrganGroup = null;
+    let hoveredOrganGroup = null;
+    let animatingFood = true;
+    let showOutline = true;
+    let foodProgress = 0;
+    let currentQuizIndex = 0;
+    let quizScore = 0;
 
-const mesh=new THREE.Mesh(
+    // Camera target positions for smooth flight transition
+    const defaultCamPos = new THREE.Vector3(0, 0.5, 7.5);
+    const defaultTarget = new THREE.Vector3(0, 0, 0);
+    let targetCamPos = defaultCamPos.clone();
+    let targetCamLook = defaultTarget.clone();
 
-new THREE.SphereGeometry(0.5,48,48),
+    // Three.js Core Setup
+    const container = document.getElementById("canvas-container");
+    const canvas = document.getElementById("viewer");
+    
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-new THREE.MeshStandardMaterial({
-color:color
-})
+    // 2D HTML Hover Label Overlay Renderer
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(container.clientWidth, container.clientHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    container.appendChild(labelRenderer.domElement);
 
-);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    camera.position.copy(defaultCamPos);
 
-mesh.position.set(x,y,z);
-mesh.scale.set(sx,sy,sz);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
 
-scene.add(mesh);
+    // Realistic Anatomical Studio Lighting
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x111122, 2.5));
+    
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.0);
+    dirLight1.position.set(5, 10, 7);
+    scene.add(dirLight1);
 
-return mesh;
+    const dirLight2 = new THREE.DirectionalLight(0x4da6ff, 1.2);
+    dirLight2.position.set(-5, -5, -5);
+    scene.add(dirLight2);
 
-}
+    const organGroup = new THREE.Group();
+    // Item 2: Scale up overall model scale by 25% for high visibility on projectors
+    organGroup.scale.set(1.25, 1.25, 1.25);
+    scene.add(organGroup);
 
-organ(0,2,0,0xff6666,.5,.5,.5);
+    const organMeshGroups = {};
 
-const oeso=new THREE.Mesh(
+    function getAnatomicalMaterial(color) {
+      return new THREE.MeshPhysicalMaterial({
+        color: color,
+        roughness: 0.35,
+        metalness: 0.05,
+        clearcoat: 0.6,
+        clearcoatRoughness: 0.2,
+        reflectivity: 0.5
+      });
+    }
 
-new THREE.CylinderGeometry(.08,.08,2,24),
+    // Item 7: Semi-transparent Body Outline (No debug wireframe boxes)
+    const bodyOutlineGroup = new THREE.Group();
+    bodyOutlineGroup.scale.set(1.25, 1.25, 1.25);
+    
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: 0x88bbff,
+      transparent: true,
+      opacity: 0.12,
+      roughness: 0.5,
+      side: THREE.DoubleSide
+    });
+    
+    const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.7, 32, 32), bodyMat);
+    headMesh.position.set(0, 2.5, -0.3);
+    
+    const torsoMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.8, 3.9, 32), bodyMat);
+    torsoMesh.position.set(0, 0.2, -0.3);
+    
+    bodyOutlineGroup.add(headMesh, torsoMesh);
+    scene.add(bodyOutlineGroup);
 
-new THREE.MeshStandardMaterial({
-color:0xff9800
-})
+    // --- 1. Mouth ---
+    const mouthGroup = new THREE.Group();
+    mouthGroup.name = "Mouth";
+    const headBase = new THREE.Mesh(new THREE.SphereGeometry(0.42, 32, 32), getAnatomicalMaterial(organData.Mouth.color));
+    headBase.scale.set(1.1, 0.85, 1);
+    const lips = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.07, 16, 32), getAnatomicalMaterial(0xe65c00));
+    lips.rotation.x = Math.PI / 2;
+    lips.position.set(0, -0.12, 0.28);
+    mouthGroup.add(headBase, lips);
+    mouthGroup.position.copy(organData.Mouth.pos);
+    organGroup.add(mouthGroup);
+    organMeshGroups["Mouth"] = mouthGroup;
 
-);
+    // --- 2. Oesophagus ---
+    const oesophagusGroup = new THREE.Group();
+    oesophagusGroup.name = "Oesophagus";
+    const oesoCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 2.3, 0.02),
+      new THREE.Vector3(0.02, 1.7, 0.01),
+      new THREE.Vector3(-0.02, 1.1, 0.0),
+      new THREE.Vector3(0.08, 0.55, 0.02)
+    ]);
+    const oesoMesh = new THREE.Mesh(new THREE.TubeGeometry(oesoCurve, 32, 0.09, 16, false), getAnatomicalMaterial(organData.Oesophagus.color));
+    oesophagusGroup.add(oesoMesh);
+    organGroup.add(oesophagusGroup);
+    organMeshGroups["Oesophagus"] = oesophagusGroup;
 
-oeso.position.y=.8;
+    // --- 3. Stomach ---
+    const stomachGroup = new THREE.Group();
+    stomachGroup.name = "Stomach";
+    const stomachMat = getAnatomicalMaterial(organData.Stomach.color);
+    const connCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.08, 0.55, 0.02),
+      new THREE.Vector3(0.15, 0.42, 0.05),
+      new THREE.Vector3(0.22, 0.35, 0.08)
+    ]);
+    const connMesh = new THREE.Mesh(new THREE.TubeGeometry(connCurve, 16, 0.07, 16, false), stomachMat);
+    const stomachMain = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), stomachMat);
+    stomachMain.scale.set(1.3, 0.85, 0.85);
+    const stomachTop = new THREE.Mesh(new THREE.SphereGeometry(0.36, 24, 24), stomachMat);
+    stomachTop.position.set(-0.25, 0.2, 0);
+    const stomachOutlet = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.09, 0.5, 24), stomachMat);
+    stomachOutlet.rotation.z = -Math.PI / 3;
+    stomachOutlet.position.set(0.35, -0.2, 0);
+    stomachGroup.add(connMesh, stomachMain, stomachTop, stomachOutlet);
+    stomachGroup.rotation.z = -0.2;
+    stomachGroup.position.copy(organData.Stomach.pos);
+    organGroup.add(stomachGroup);
+    organMeshGroups["Stomach"] = stomachGroup;
 
-scene.add(oeso);
+    // --- 4. Liver ---
+    const liverGroup = new THREE.Group();
+    liverGroup.name = "Liver";
+    const liverMat = getAnatomicalMaterial(organData.Liver.color);
+    const liverBlob = new THREE.Mesh(new THREE.SphereGeometry(0.55, 32, 32), liverMat);
+    liverBlob.scale.set(2.2, 1.1, 1.5);
+    liverBlob.rotation.z = 0.35;
+    liverBlob.rotation.y = -0.2;
+    const gallbladder = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 16), getAnatomicalMaterial(0x408000));
+    gallbladder.position.set(0.1, -0.35, 0.35);
+    liverGroup.add(liverBlob, gallbladder);
+    liverGroup.position.copy(organData.Liver.pos);
+    organGroup.add(liverGroup);
+    organMeshGroups["Liver"] = liverGroup;
 
-organ(.5,-.3,0,0xf06292,1.4,1.8,1);
+    // --- 5. Small Intestine ---
+    const smallIntestineGroup = new THREE.Group();
+    smallIntestineGroup.name = "SmallIntestine";
+    const smallIntMat = getAnatomicalMaterial(organData.SmallIntestine.color);
+    const coilPoints = [];
+    const loops = 15;
+    for (let i = 0; i <= loops; i++) {
+      const theta = i * 0.95;
+      const x = Math.sin(theta) * 0.42;
+      const y = -0.06 * i + 0.45;
+      const z = Math.cos(theta) * 0.18;
+      coilPoints.push(new THREE.Vector3(x, y, z));
+    }
+    const smallCurve = new THREE.CatmullRomCurve3(coilPoints);
+    const smallMesh = new THREE.Mesh(new THREE.TubeGeometry(smallCurve, 160, 0.085, 12, false), smallIntMat);
+    smallIntestineGroup.add(smallMesh);
+    smallIntestineGroup.position.copy(organData.SmallIntestine.pos);
+    organGroup.add(smallIntestineGroup);
+    organMeshGroups["SmallIntestine"] = smallIntestineGroup;
 
-organ(-1.2,.2,0,0x7cb342,1.8,.8,.8);
+    // --- 6. Large Intestine ---
+    const largeIntestineGroup = new THREE.Group();
+    largeIntestineGroup.name = "LargeIntestine";
+    const largeIntMat = getAnatomicalMaterial(organData.LargeIntestine.color);
+    const colonPath = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.65, -0.9, 0.05),
+      new THREE.Vector3(0.72, -0.1, 0.05),
+      new THREE.Vector3(0.65, 0.15, 0.05),
+      new THREE.Vector3(0.0, 0.22, 0.1),
+      new THREE.Vector3(-0.65, 0.15, 0.05),
+      new THREE.Vector3(-0.72, -0.5, 0.05),
+      new THREE.Vector3(-0.65, -0.9, 0.05),
+      new THREE.Vector3(-0.25, -1.1, -0.02),
+      new THREE.Vector3(0, -1.35, -0.05)
+    ]);
+    const colonMesh = new THREE.Mesh(new THREE.TubeGeometry(colonPath, 120, 0.15, 16, false), largeIntMat);
+    largeIntestineGroup.add(colonMesh);
+    largeIntestineGroup.position.copy(organData.LargeIntestine.pos);
+    organGroup.add(largeIntestineGroup);
+    organMeshGroups["LargeIntestine"] = largeIntestineGroup;
 
-organ(.2,-2,0,0xffeb3b,2.2,1.5,1.4);
+    // Item 4: Hover Labels (CSS2D Floating Element)
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'organ-hover-label';
+    labelDiv.style.opacity = '0';
+    const hoverLabelObj = new CSS2DObject(labelDiv);
+    scene.add(hoverLabelObj);
 
-const large=new THREE.Mesh(
+    // Item 6: Continuous Food Digesting Particle Path
+    const foodPath = new THREE.CatmullRomCurve3([
+      organData.Mouth.pos.clone().multiplyScalar(1.25),
+      new THREE.Vector3(0.02, 1.7, 0.01).multiplyScalar(1.25),
+      new THREE.Vector3(0.08, 0.55, 0.02).multiplyScalar(1.25),
+      organData.Stomach.pos.clone().multiplyScalar(1.25),
+      new THREE.Vector3(0.2, -0.2, 0.1).multiplyScalar(1.25),
+      organData.SmallIntestine.pos.clone().multiplyScalar(1.25),
+      new THREE.Vector3(0.65, -0.9, 0.05).multiplyScalar(1.25),
+      new THREE.Vector3(0, -1.35, -0.05).multiplyScalar(1.25)
+    ]);
 
-new THREE.TorusGeometry(2,.22,24,120),
+    const foodMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.14, 16, 16),
+      new THREE.MeshStandardMaterial({ color: 0xff3366, emissive: 0xff0055, emissiveIntensity: 0.9 })
+    );
+    scene.add(foodMesh);
 
-new THREE.MeshStandardMaterial({
-color:0x795548
-})
+    // Audio Speech Synthesis Engine
+    function speakText(text) {
+      if (!audioEnabled || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.95;
+      window.speechSynthesis.speak(utterance);
+    }
 
-);
+    // Raycasting & Pointer Interactions
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
 
-large.rotation.x=Math.PI/2;
-large.position.y=-2;
+    // Item 5: Smooth Camera Focus Implementation
+    function focusOrgan(group) {
+      selectedOrganGroup = group;
+      const data = organData[group.name];
+      
+      document.getElementById("org-title").innerText = `${data.emoji} ${data.title}`;
+      document.getElementById("org-cbc").innerText = data.cbc;
+      document.getElementById("org-desc").innerText = data.desc;
+      document.getElementById("btn-reset-cam").style.display = "flex";
 
-scene.add(large);
+      speakText(data.title + ". " + data.desc);
 
-window.addEventListener("resize",function(){
+      // Compute smooth fly-to target coordinates
+      const worldPos = new THREE.Vector3();
+      group.getWorldPosition(worldPos);
+      
+      targetCamLook.copy(worldPos);
+      targetCamPos.copy(worldPos).add(new THREE.Vector3(0, 0, 3.2));
+    }
 
-renderer.setSize(window.innerWidth,window.innerHeight*0.7);
+    function resetCamera() {
+      selectedOrganGroup = null;
+      targetCamPos.copy(defaultCamPos);
+      targetCamLook.copy(defaultTarget);
+      document.getElementById("btn-reset-cam").style.display = "none";
+    }
 
-camera.aspect=window.innerWidth/(window.innerHeight*0.7);
+    document.getElementById("btn-reset-cam").addEventListener("click", resetCamera);
 
-camera.updateProjectionMatrix();
+    window.addEventListener("pointermove", (e) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
-});
+      raycaster.setFromCamera(mouse, camera);
+      
+      const allMeshes = [];
+      Object.values(organMeshGroups).forEach(g => {
+        g.traverse(c => { if(c.isMesh) allMeshes.push(c); });
+      });
 
-function animate(){
+      const intersects = raycaster.intersectObjects(allMeshes);
 
-requestAnimationFrame(animate);
+      if (intersects.length > 0) {
+        let parentGroup = intersects[0].object.parent;
+        while (parentGroup && !organData[parentGroup.name]) {
+          parentGroup = parentGroup.parent;
+        }
+        if (parentGroup) {
+          hoveredOrganGroup = parentGroup;
+          const data = organData[parentGroup.name];
+          labelDiv.innerHTML = `${data.emoji} ${data.title.split(' ')[0]}`;
+          labelDiv.style.opacity = '1';
+          
+          const organWorldPos = new THREE.Vector3();
+          parentGroup.getWorldPosition(organWorldPos);
+          hoverLabelObj.position.copy(organWorldPos).add(new THREE.Vector3(0, 0.45, 0));
+          document.body.style.cursor = 'pointer';
+          return;
+        }
+      }
+      
+      hoveredOrganGroup = null;
+      labelDiv.style.opacity = '0';
+      document.body.style.cursor = 'default';
+    });
 
-scene.rotation.y+=0.003;
+    window.addEventListener("pointerdown", () => {
+      if (hoveredOrganGroup) {
+        focusOrgan(hoveredOrganGroup);
+      }
+    });
 
-controls.update();
+    // Item 7: Body Outline Toggle Control
+    document.getElementById("btn-outline").addEventListener("click", (e) => {
+      showOutline = !showOutline;
+      bodyOutlineGroup.visible = showOutline;
+      e.target.classList.toggle("active", showOutline);
+      e.target.innerText = showOutline ? "👤 Body Outline: ON" : "👤 Body Outline: OFF";
+    });
 
-renderer.render(scene,camera);
+    // Additional Controls
+    document.getElementById("btn-audio").addEventListener("click", (e) => {
+      audioEnabled = !audioEnabled;
+      e.target.innerText = audioEnabled ? "🔊 Audio: ON" : "🔇 Audio: OFF";
+      if (!audioEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+    });
 
-}
+    document.getElementById("btn-animate").addEventListener("click", (e) => {
+      animatingFood = !animatingFood;
+      foodMesh.visible = animatingFood;
+      e.target.classList.toggle("active", animatingFood);
+      e.target.innerText = animatingFood ? "🍎 Digest Food: ON" : "🍎 Digest Food: OFF";
+    });
 
-animate();
+    document.getElementById("btn-quiz").addEventListener("click", startQuiz);
+    document.getElementById("btn-restart").addEventListener("click", startQuiz);
 
-</script>
- 
-</body></html>
+    // Quiz Functions
+    function startQuiz() {
+      currentQuizIndex = 0;
+      quizScore = 0;
+      document.getElementById("info-panel").style.display = "none";
+      document.getElementById("score-panel").style.display = "none";
+      document.getElementById("quiz-panel").style.display = "block";
+      document.getElementById("panel-mode-title").innerText = "📝 CBC Quiz Mode";
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const q = quizQuestions[currentQuizIndex];
+      document.getElementById("quiz-q-text").innerText = `Q${currentQuizIndex + 1}: ${q.q}`;
+      const optContainer = document.getElementById("quiz-options");
+      optContainer.innerHTML = "";
+
+      speakText(q.q);
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement("div");
+        btn.className = "quiz-opt";
+        btn.innerText = opt;
+        btn.onclick = () => handleAnswer(idx, btn);
+        optContainer.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(selectedIdx, btnElement) {
+      const q = quizQuestions[currentQuizIndex];
+      const options = document.querySelectorAll(".quiz-opt");
+      options.forEach(o => o.style.pointerEvents = "none");
+
+      if (selectedIdx === q.answer) {
+        btnElement.classList.add("correct");
+        quizScore++;
+        speakText("Correct!");
+      } else {
+        btnElement.classList.add("wrong");
+        options[q.answer].classList.add("correct");
+        speakText("Incorrect!");
+      }
+
+      setTimeout(() => {
+        currentQuizIndex++;
+        if (currentQuizIndex < quizQuestions.length) {
+          loadQuestion();
+        } else {
+          showScore();
+        }
+      }, 1500);
+    }
+
+    function showScore() {
+      document.getElementById("quiz-panel").style.display = "none";
+      document.getElementById("score-panel").style.display = "block";
+      document.getElementById("final-score").innerText = `${quizScore} / ${quizQuestions.length}`;
+      speakText(`Quiz complete. Your final score is ${quizScore} out of ${quizQuestions.length}`);
+    }
+
+    function resize() {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      renderer.setSize(w, h);
+      labelRenderer.setSize(w, h);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener("resize", resize);
+
+    // Main Render Loop
+    let time = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      time += 0.02;
+
+      // Item 5: Smooth Camera Flight Animation (LERP)
+      camera.position.lerp(targetCamPos, 0.05);
+      controls.target.lerp(targetCamLook, 0.05);
+
+      // Gentle Ambient Body Rotation when idle
+      if (!selectedOrganGroup) {
+        organGroup.rotation.y += 0.0015;
+        bodyOutlineGroup.rotation.y = organGroup.rotation.y;
+      }
+
+      // Item 6: Organic System Animations
+      // Stomach contracting/expanding gently
+      if (organMeshGroups["Stomach"]) {
+        const stomachPulse = 1.0 + Math.sin(time * 2.5) * 0.04;
+        organMeshGroups["Stomach"].scale.set(stomachPulse, stomachPulse, stomachPulse);
+      }
+
+      // Intestines subtle wiggling animation
+      if (organMeshGroups["SmallIntestine"]) {
+        organMeshGroups["SmallIntestine"].rotation.z = Math.sin(time * 1.5) * 0.02;
+      }
+
+      // Item 6: Continuous Food Particle Motion
+      if (animatingFood) {
+        foodProgress += 0.0025;
+        if (foodProgress > 1) foodProgress = 0;
+        const pt = foodPath.getPoint(foodProgress);
+        foodMesh.position.copy(pt);
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
