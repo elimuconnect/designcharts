@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigiElimu Anatomical 3D Respiratory System</title>
+
+  <!-- Polyfill for browser compatibility -->
+  <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.174.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.174.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0b132b; color: #ffffff; overflow-x: hidden; }
+    
+    header {
+      background: rgba(11, 19, 43, 0.9);
+      color: #fff;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      position: relative;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+    }
+    .brand { font-size: 22px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+    .brand-tag { background: #0284c7; font-size: 11px; padding: 2px 8px; border-radius: 12px; color: #fff; text-transform: uppercase; }
+    
+    #app-container {
+      display: flex;
+      flex-direction: row;
+      height: calc(100vh - 58px);
+      width: 100vw;
+      position: relative;
+    }
+
+    #canvas-container {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      background: radial-gradient(circle, #0f2b48 0%, #0b132b 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    
+    #viewer { width: 100%; height: 100%; display: block; }
+    
+    .controls-overlay {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 5;
+    }
+    .btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      backdrop-filter: blur(8px);
+    }
+    .btn:hover { background: #0284c7; border-color: #38bdf8; transform: translateY(-2px); }
+    .btn.active { background: #0284c7; border-color: #38bdf8; }
+
+    /* Oxygen / Carbon Dioxide Real-time Gas Meter HUD */
+    .gas-meter-hud {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: 220px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 12px 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      z-index: 5;
+    }
+    .gas-meter-title { font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .gas-label { font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .meter-bar-bg { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; }
+    .meter-bar-fill { height: 100%; width: 50%; transition: width 0.1s linear, background-color 0.2s; border-radius: 5px; }
+
+    #sidebar {
+      width: 380px;
+      background: rgba(15, 23, 42, 0.95);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.4);
+      z-index: 5;
+      backdrop-filter: blur(12px);
+    }
+    .panel-header {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-weight: bold;
+      color: #38bdf8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .panel-content {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    
+    .organ-title { font-size: 24px; color: #ffffff; margin-bottom: 10px; border-bottom: 2px solid #38bdf8; padding-bottom: 6px; }
+    .cbc-badge { background: rgba(2, 132, 199, 0.3); border: 1px solid #0284c7; color: #7dd3fc; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 16px; }
+    .organ-desc { font-size: 15px; line-height: 1.7; color: #cbd5e1; margin-bottom: 20px; }
+    
+    .organ-hover-label {
+      background: rgba(11, 19, 43, 0.95);
+      border: 1px solid #38bdf8;
+      color: #ffffff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      pointer-events: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      backdrop-filter: blur(6px);
+      transition: opacity 0.15s ease-out;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      white-space: nowrap;
+    }
+    .organ-hover-sub {
+      font-size: 10px;
+      color: #38bdf8;
+      font-weight: normal;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Anatomical On-Demand Overlay Labels */
+    .anatomical-tag {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid #38bdf8;
+      color: #7dd3fc;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      pointer-events: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      white-space: nowrap;
+      transition: opacity 0.3s;
+    }
+
+    .quiz-container { display: none; }
+    .quiz-q { font-weight: bold; font-size: 16px; margin-bottom: 16px; color: #e2e8f0; }
+    .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+    .quiz-opt { padding: 12px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 14px; color: #e2e8f0; }
+    .quiz-opt:hover { background: rgba(255,255,255,0.15); border-color: #38bdf8; }
+    .quiz-opt.correct { background: rgba(56, 161, 105, 0.3); border-color: #38a169; color: #68d391; }
+    .quiz-opt.wrong { background: rgba(229, 62, 62, 0.3); border-color: #e53e3e; color: #fc8181; }
+    
+    .score-card { text-align: center; padding: 20px; display: none; }
+    .score-num { font-size: 52px; color: #38bdf8; font-weight: bold; margin: 10px 0; }
+    
+    @media (max-width: 850px) {
+      #app-container { flex-direction: column; }
+      #sidebar { width: 100%; height: 45vh; }
+      #canvas-container { height: 55vh; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      🎨 DigiElimu <span class="brand-tag">CBC Curriculum</span>
+    </div>
+    <div style="font-size: 14px; opacity: 0.9;">🫁 Anatomical 3D Respiratory System</div>
+  </header>
+
+  <div id="app-container">
+    <div id="canvas-container">
+      <div class="controls-overlay">
+        <button class="btn active" id="btn-animate">💨 Airflow Simulation: ON</button>
+        <button class="btn active" id="btn-labels">🏷️ Show Labels: ON</button>
+        <button class="btn active" id="btn-ribs">🦴 Rib Cage: ON</button>
+        <button class="btn active" id="btn-outline">👤 Body Outline: ON</button>
+        <button class="btn" id="btn-quiz">📝 Quiz Mode</button>
+        <button class="btn" id="btn-audio">🔊 Audio: ON</button>
+      </div>
+
+      <!-- Real-time Gas Exchange HUD Bar -->
+      <div class="gas-meter-hud">
+        <div class="gas-meter-title">Gaseous Exchange Tracker</div>
+        <div class="gas-label">
+          <span id="gas-status-text">O₂ Inhaling</span>
+          <span id="gas-percent">100%</span>
+        </div>
+        <div class="meter-bar-bg">
+          <div class="meter-bar-fill" id="meter-fill" style="width: 100%; background: #38bdf8;"></div>
+        </div>
+      </div>
+
+      <canvas id="viewer"></canvas>
+    </div>
+
+    <div id="sidebar">
+      <div class="panel-header">
+        <span id="panel-mode-title">📚 Information Panel</span>
+        <span style="font-size: 12px; color: #94a3b8;">🖱 Click organ to inspect</span>
+      </div>
+      
+      <div class="panel-content" id="info-panel">
+        <div class="organ-title" id="org-title">👃 Nasal Cavity</div>
+        <div class="cbc-badge" id="org-cbc">CBC Grade 5-7 Science</div>
+        <div class="organ-desc" id="org-desc">
+          Air enters the body through the nostrils. Microscopic hairs (cilia) and mucus trap dust, germs, and particles while warming and moistening the incoming air.
+        </div>
+        <button class="btn" id="btn-reset-cam" style="display:none; width:100%; justify-content:center; margin-top:10px;">🔍 Reset Camera View</button>
+      </div>
+
+      <div class="panel-content quiz-container" id="quiz-panel">
+        <div class="quiz-q" id="quiz-q-text">Question goes here...</div>
+        <div class="quiz-options" id="quiz-options"></div>
+      </div>
+
+      <div class="panel-content score-card" id="score-panel">
+        🏆
+        <h2>Quiz Completed!</h2>
+        <p>Your Final Score:</p>
+        <div class="score-num" id="final-score">0 / 0</div>
+        <button class="btn" style="margin: 20px auto 0 auto;" id="btn-restart">Retry Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+    // Organ metadata aligned with CBC Curriculum
+    const organData = {
+      NasalCavity: {
+        title: "Nasal Cavity & Passages",
+        hoverTitle: "Nasal Cavity",
+        emoji: "👃",
+        cbc: "CBC Strand: Breathing Mechanism - Air Filtration",
+        desc: "Air enters through dual nostrils separated by a nasal septum into a complex curved nasal cavity. Mucus and cilia filter particles while capillaries warm and humidify the air.",
+        color: 0xf4a261,
+        pos: new THREE.Vector3(0, 2.2, 0.1)
+      },
+      Pharynx: {
+        title: "Pharynx (Throat)",
+        hoverTitle: "Pharynx",
+        emoji: "🗣️",
+        cbc: "CBC Strand: Airway Passages",
+        desc: "A shared passageway for both air and food. Air flows down through the pharynx toward the larynx, while the epiglottis flap prevents food from entering the windpipe.",
+        color: 0xe76f51,
+        pos: new THREE.Vector3(0, 1.8, -0.05)
+      },
+      Larynx: {
+        title: "Larynx (Voice Box)",
+        hoverTitle: "Larynx",
+        emoji: "🎙️",
+        cbc: "CBC Strand: Sound Production & Protection",
+        desc: "Houses the vocal cords. Air passing through the larynx vibrates the vocal cords to produce sound. It is protected by the thyroid cartilage (Adam's apple).",
+        color: 0xe9c46a,
+        pos: new THREE.Vector3(0, 1.45, 0.05)
+      },
+      Trachea: {
+        title: "Trachea (Windpipe)",
+        hoverTitle: "Trachea",
+        emoji: "🥢",
+        cbc: "CBC Strand: C-shaped Cartilaginous Rings",
+        desc: "A tough tube supported by C-shaped cartilage rings that prevent it from collapsing during breathing. Lined with ciliated cells that push mucus upwards.",
+        color: 0x2a9d8f,
+        pos: new THREE.Vector3(0, 0.95, 0.05)
+      },
+      Bronchi: {
+        title: "Bronchi & Bronchioles",
+        hoverTitle: "Bronchi / Bronchioles",
+        emoji: "🌿",
+        cbc: "CBC Strand: Airway Branching Tree",
+        desc: "The trachea branches into primary left and right bronchi, extending through 4 recursive levels of fine bronchiole branches delivering air to hundreds of microscopic alveoli clusters.",
+        color: 0x264653,
+        pos: new THREE.Vector3(0, 0.45, 0.02)
+      },
+      Lungs: {
+        title: "Anatomical Lungs & Alveoli Density",
+        hoverTitle: "Lungs & Alveoli",
+        emoji: "🫁",
+        cbc: "CBC Strand: Gaseous Exchange & Capillaries",
+        desc: "Anatomically realistic asymmetrical lungs. The left lung features a distinct cardiac notch accommodating the heart, while the right lung is slightly larger. Contains ~800 microscopic alveoli for hyper-dense gaseous exchange.",
+        color: 0xff70a6,
+        pos: new THREE.Vector3(0, 0.25, 0.1)
+      },
+      Heart: {
+        title: "Heart & Pulmonary Circulation",
+        hoverTitle: "Heart",
+        emoji: "❤️",
+        cbc: "CBC Strand: Circulatory & Gas Transport System",
+        desc: "Anatomical heart nestles into the left lung's cardiac notch. Pumps deoxygenated blood (blue) into pulmonary arteries to the lungs, and returns oxygenated blood (red) via pulmonary veins to the systemic body.",
+        color: 0xcc1122,
+        pos: new THREE.Vector3(-0.1, 0.22, 0.12)
+      },
+      Diaphragm: {
+        title: "Rib-to-Rib Dome Diaphragm",
+        hoverTitle: "Diaphragm",
+        emoji: "🪗",
+        cbc: "CBC Strand: Breathing Movements & Pressure Changes",
+        desc: "A wide, rib-to-rib muscular sheet spanning the full thoracic base. Contracts and flattens during inhalation, creating a vacuum that draws air into the thoracic cavity.",
+        color: 0xd90429,
+        pos: new THREE.Vector3(0, -0.55, 0.0)
+      }
+    };
+
+    const quizQuestions = [
+      { q: "What gas is absorbed into the blood inside the microscopic alveoli?", options: ["Carbon Dioxide", "Oxygen", "Nitrogen"], answer: 1 },
+      { q: "What happens to the dome-shaped diaphragm during inhalation?", options: ["Flattens downwards", "Curves upwards", "Stops moving"], answer: 0 },
+      { q: "Which anatomical feature of the left lung accommodates the heart?", options: ["Cardiac Notch", "Pleural Cavity", "Nasal Septum"], answer: 0 },
+      { q: "What color change represents blood becoming oxygenated in pulmonary exchange?", options: ["Red to Blue", "Blue to Red", "Yellow to Green"], answer: 1 },
+      { q: "What protective structural rings prevent the trachea from collapsing?", options: ["Bone rings", "C-shaped cartilage rings", "Muscle bands"], answer: 1 },
+      { q: "Where are the red blood capillaries wrapped around to exchange gases?", options: ["Trachea", "Alveoli air sacs", "Nasal cavity"], answer: 1 },
+      { q: "Which lung is slightly larger in human anatomy?", options: ["Left Lung", "Right Lung", "Both are identical"], answer: 1 },
+      { q: "How do the ribs move when you take a deep breath in?", options: ["Down and in", "Upwards and outwards", "They do not move"], answer: 1 },
+      { q: "What gas is expelled back out through the airways during exhalation?", options: ["Oxygen", "Carbon Dioxide", "Hydrogen"], answer: 1 },
+      { q: "What microscopic hair-like structures trap dust in the nasal passage?", options: ["Villi", "Cilia", "Tendon"], answer: 1 }
+    ];
+
+    let audioEnabled = true;
+    let selectedOrganGroup = null;
+    let hoveredOrganGroup = null;
+    let animatingAir = true;
+    let showOutline = true;
+    let showRibs = true;
+    let showOnDemandLabels = true;
+    let currentQuizIndex = 0;
+    let quizScore = 0;
+
+    // Smooth Ease Camera Transition State
+    let isCamAnimating = false;
+    let camAnimProgress = 0;
+    let camStartPos = new THREE.Vector3();
+    let camStartLook = new THREE.Vector3();
+    let camEndPos = new THREE.Vector3();
+    let camEndLook = new THREE.Vector3();
+    let currentLookAt = new THREE.Vector3(0, 0.5, 0);
+
+    const defaultCamPos = new THREE.Vector3(0, 0.8, 6.8);
+    const defaultTarget = new THREE.Vector3(0, 0.5, 0);
+
+    const container = document.getElementById("canvas-container");
+    const canvas = document.getElementById("viewer");
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(container.clientWidth, container.clientHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    container.appendChild(labelRenderer.domElement);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    camera.position.copy(defaultCamPos);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.target.copy(defaultTarget);
+
+    // Lighting
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x111122, 2.5));
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.0);
+    dirLight1.position.set(5, 10, 7);
+    scene.add(dirLight1);
+
+    const dirLight2 = new THREE.DirectionalLight(0x38bdf8, 1.2);
+    dirLight2.position.set(-5, -5, -5);
+    scene.add(dirLight2);
+
+    const organGroup = new THREE.Group();
+    organGroup.scale.set(1.2, 1.2, 1.2);
+    scene.add(organGroup);
+
+    const organMeshGroups = {};
+    const onDemandLabelObjects = [];
+
+    function getAnatomicalMaterial(color, opacity = 1.0) {
+      return new THREE.MeshPhysicalMaterial({
+        color: color,
+        roughness: 0.4,
+        metalness: 0.1,
+        clearcoat: 0.5,
+        transparent: opacity < 1.0,
+        opacity: opacity
+      });
+    }
+
+    // Ease in-out cubic easing function
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    function triggerSmoothCameraMove(targetPos, targetLookAt) {
+      camStartPos.copy(camera.position);
+      camStartLook.copy(controls.target);
+      camEndPos.copy(targetPos);
+      camEndLook.copy(targetLookAt);
+      camAnimProgress = 0;
+      isCamAnimating = true;
+    }
+
+    // -------------------------------------------------------------
+    // Body Outline & Rib Cage Setup
+    // -------------------------------------------------------------
+    const bodyOutlineGroup = new THREE.Group();
+    bodyOutlineGroup.scale.set(1.2, 1.2, 1.2);
+
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.08,
+      roughness: 0.5,
+      side: THREE.DoubleSide
+    });
+
+    const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.7, 32, 32), bodyMat);
+    headMesh.position.set(0, 2.2, -0.1);
+    const torsoMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.8, 3.5, 32), bodyMat);
+    torsoMesh.position.set(0, 0.2, -0.1);
+
+    bodyOutlineGroup.add(headMesh, torsoMesh);
+    scene.add(bodyOutlineGroup);
+
+    // Rib Cage Mechanics
+    const ribCageGroup = new THREE.Group();
+    const ribMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 });
+    const ribPairs = [];
+
+    for (let i = 0; i < 7; i++) {
+      const yPos = 1.0 - (i * 0.22);
+      const radius = 0.72 + Math.sin(i * 0.4) * 0.22;
+      
+      const ribLeft = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.035, 12, 24, Math.PI * 0.82), ribMat);
+      ribLeft.rotation.x = Math.PI / 2 + 0.1;
+      ribLeft.rotation.y = -0.2;
+      ribLeft.position.set(0, yPos, 0.05);
+
+      const ribRight = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.035, 12, 24, Math.PI * 0.82), ribMat);
+      ribRight.rotation.x = Math.PI / 2 + 0.1;
+      ribRight.rotation.y = Math.PI - 0.2;
+      ribRight.position.set(0, yPos, 0.05);
+
+      const pair = new THREE.Group();
+      pair.add(ribLeft, ribRight);
+      ribPairs.push(pair);
+      ribCageGroup.add(pair);
+    }
+    organGroup.add(ribCageGroup);
+
+    // -------------------------------------------------------------
+    // Organ Construction
+    // -------------------------------------------------------------
+
+    // 1. Anatomical Nose (Nostrils, Nasal Cavity, Septum)
+    const nasalGroup = new THREE.Group();
+    nasalGroup.name = "NasalCavity";
+
+    const nasalBridgeShape = new THREE.Shape();
+    nasalBridgeShape.moveTo(0, 2.45);
+    nasalBridgeShape.quadraticCurveTo(0.18, 2.2, 0.14, 2.05);
+    nasalBridgeShape.lineTo(0.02, 2.05);
+    nasalBridgeShape.quadraticCurveTo(0.08, 2.2, 0, 2.45);
+
+    const noseMat = getAnatomicalMaterial(organData.NasalCavity.color);
+    
+    // Curved outer nasal shell
+    const outerNoseGeom = new THREE.LatheGeometry([
+      new THREE.Vector2(0.02, 2.4),
+      new THREE.Vector2(0.08, 2.25),
+      new THREE.Vector2(0.18, 2.08),
+      new THREE.Vector2(0.16, 2.0)
+    ], 24);
+    const noseShell = new THREE.Mesh(outerNoseGeom, noseMat);
+    noseShell.position.set(0, 0, 0.12);
+    nasalGroup.add(noseShell);
+
+    // Central Septum Divider
+    const septumGeom = new THREE.BoxGeometry(0.02, 0.35, 0.22);
+    const septumMesh = new THREE.Mesh(septumGeom, getAnatomicalMaterial(0xe76f51));
+    septumMesh.position.set(0, 2.18, 0.18);
+    nasalGroup.add(septumMesh);
+
+    // Nostril Passages (Dual Cylindrical voids)
+    const nostrilL = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 0.18, 16), getAnatomicalMaterial(0x3d0c02));
+    nostrilL.position.set(-0.06, 2.04, 0.18);
+    nostrilL.rotation.x = 0.3;
+    const nostrilR = nostrilL.clone();
+    nostrilR.position.x = 0.06;
+    nasalGroup.add(nostrilL, nostrilR);
+
+    // Inner Nasal Cavity Chamber
+    const innerCavityGeom = new THREE.SphereGeometry(0.16, 16, 16);
+    const innerCavity = new THREE.Mesh(innerCavityGeom, getAnatomicalMaterial(0xd97706, 0.85));
+    innerCavity.scale.set(0.9, 1.4, 1.1);
+    innerCavity.position.set(0, 2.2, 0.08);
+    nasalGroup.add(innerCavity);
+
+    organGroup.add(nasalGroup);
+    organMeshGroups["NasalCavity"] = nasalGroup;
+
+    // 2. Pharynx
+    const pharynxGroup = new THREE.Group();
+    pharynxGroup.name = "Pharynx";
+    const pharynxMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.11, 0.4, 16), getAnatomicalMaterial(organData.Pharynx.color));
+    pharynxMesh.position.set(0, 1.8, 0.02);
+    pharynxGroup.add(pharynxMesh);
+    organGroup.add(pharynxGroup);
+    organMeshGroups["Pharynx"] = pharynxGroup;
+
+    // 3. Larynx
+    const larynxGroup = new THREE.Group();
+    larynxGroup.name = "Larynx";
+    const larynxMesh = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.3, 0.24), getAnatomicalMaterial(organData.Larynx.color));
+    larynxMesh.position.set(0, 1.45, 0.05);
+    larynxGroup.add(larynxMesh);
+    organGroup.add(larynxGroup);
+    organMeshGroups["Larynx"] = larynxGroup;
+
+    // 4. Trachea
+    const tracheaGroup = new THREE.Group();
+    tracheaGroup.name = "Trachea";
+    const tracheaTube = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.8, 24), getAnatomicalMaterial(organData.Trachea.color));
+    tracheaTube.position.set(0, 0.95, 0.05);
+    tracheaGroup.add(tracheaTube);
+
+    for (let i = 0; i < 7; i++) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.02, 12, 24, Math.PI * 1.6), getAnatomicalMaterial(0xffffff));
+      ring.rotation.x = Math.PI / 2;
+      ring.rotation.z = -Math.PI / 1.2;
+      ring.position.set(0, 1.3 - (i * 0.1), 0.05);
+      tracheaGroup.add(ring);
+    }
+    organGroup.add(tracheaGroup);
+    organMeshGroups["Trachea"] = tracheaGroup;
+
+    // 5. Recursive Deep Bronchi Tree (Depth = 4)
+    const bronchiGroup = new THREE.Group();
+    bronchiGroup.name = "Bronchi";
+    const bMat = getAnatomicalMaterial(organData.Bronchi.color);
+
+    const leftBronchusCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 0.55, 0.05),
+      new THREE.Vector3(-0.18, 0.48, 0.05),
+      new THREE.Vector3(-0.35, 0.38, 0.05)
+    ]);
+    const rightBronchusCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 0.55, 0.05),
+      new THREE.Vector3(0.18, 0.48, 0.05),
+      new THREE.Vector3(0.35, 0.38, 0.05)
+    ]);
+    bronchiGroup.add(new THREE.Mesh(new THREE.TubeGeometry(leftBronchusCurve, 16, 0.05, 12, false), bMat));
+    bronchiGroup.add(new THREE.Mesh(new THREE.TubeGeometry(rightBronchusCurve, 16, 0.05, 12, false), bMat));
+
+    function createBronchioleBranches(startPt, direction, depth) {
+      if (depth <= 0) return;
+      const branchCount = 2;
+      for (let b = 0; b < branchCount; b++) {
+        const angle = (b === 0 ? 0.42 : -0.42) + (Math.random() * 0.2 - 0.1);
+        const endPt = new THREE.Vector3(
+          startPt.x + direction.x * 0.14 + Math.cos(angle) * 0.11,
+          startPt.y + direction.y * 0.14 + Math.sin(angle) * 0.11,
+          startPt.z + (Math.random() * 0.08 - 0.04)
+        );
+        const curve = new THREE.CatmullRomCurve3([startPt, endPt]);
+        const radius = Math.max(0.008, 0.012 * depth);
+        const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 8, radius, 8, false), bMat);
+        bronchiGroup.add(tube);
+        createBronchioleBranches(endPt, new THREE.Vector3().subVectors(endPt, startPt).normalize(), depth - 1);
+      }
+    }
+    // Recursive branching depth = 4
+    createBronchioleBranches(new THREE.Vector3(-0.35, 0.38, 0.05), new THREE.Vector3(-0.6, -0.4, 0), 4);
+    createBronchioleBranches(new THREE.Vector3(0.35, 0.38, 0.05), new THREE.Vector3(0.6, -0.4, 0), 4);
+
+    organGroup.add(bronchiGroup);
+    organMeshGroups["Bronchi"] = bronchiGroup;
+
+    // 6. Anatomical Lungs (Cardiac Notch Left, Larger Right) + Dense Alveoli (800 total)
+    const lungsGroup = new THREE.Group();
+    lungsGroup.name = "Lungs";
+    const lungMat = getAnatomicalMaterial(organData.Lungs.color, 0.68);
+
+    // Anatomical Left Lung (With Cardiac Notch indent)
+    const leftLungPoints = [];
+    for (let i = 0; i <= 20; i++) {
+      const t = i / 20;
+      const angle = t * Math.PI;
+      let r = 0.42 * Math.sin(angle);
+      // Indent at cardiac notch height
+      if (t > 0.35 && t < 0.65) {
+        r *= 0.68; 
+      }
+      leftLungPoints.push(new THREE.Vector2(r, (t - 0.5) * 1.1));
+    }
+    const leftLungGeom = new THREE.LatheGeometry(leftLungPoints, 32);
+    const leftLung = new THREE.Mesh(leftLungGeom, lungMat);
+    leftLung.scale.set(0.9, 1.25, 1.0);
+    leftLung.position.set(-0.50, 0.25, 0.05);
+
+    // Anatomical Right Lung (Slightly larger, 3 lobes volume)
+    const rightLungPoints = [];
+    for (let i = 0; i <= 20; i++) {
+      const t = i / 20;
+      const angle = t * Math.PI;
+      const r = 0.47 * Math.sin(angle);
+      rightLungPoints.push(new THREE.Vector2(r, (t - 0.5) * 1.15));
+    }
+    const rightLungGeom = new THREE.LatheGeometry(rightLungPoints, 32);
+    const rightLung = new THREE.Mesh(rightLungGeom, lungMat);
+    rightLung.scale.set(1.08, 1.3, 1.05);
+    rightLung.position.set(0.52, 0.25, 0.05);
+
+    lungsGroup.add(leftLung, rightLung);
+
+    // Microscopic Dense Alveoli (400 per lung = 800 total)
+    const alveolusGeom = new THREE.SphereGeometry(0.014, 6, 6);
+    const alveolusMat = getAnatomicalMaterial(0xffc4dd);
+    const alveoliInstancedL = new THREE.InstancedMesh(alveolusGeom, alveolusMat, 400);
+    const alveoliInstancedR = new THREE.InstancedMesh(alveolusGeom, alveolusMat, 400);
+    const dummy = new THREE.Object3D();
+
+    for (let i = 0; i < 400; i++) {
+      // Left Lung dense placement
+      dummy.position.set(
+        -0.52 + (Math.random() * 0.4 - 0.2),
+         0.25 + (Math.random() * 0.7 - 0.35),
+         0.05 + (Math.random() * 0.3 - 0.15)
+      );
+      dummy.scale.setScalar(0.8 + Math.random() * 0.6);
+      dummy.updateMatrix();
+      alveoliInstancedL.setMatrixAt(i, dummy.matrix);
+
+      // Right Lung dense placement
+      dummy.position.set(
+         0.52 + (Math.random() * 0.44 - 0.22),
+         0.25 + (Math.random() * 0.75 - 0.37),
+         0.05 + (Math.random() * 0.32 - 0.16)
+      );
+      dummy.scale.setScalar(0.8 + Math.random() * 0.6);
+      dummy.updateMatrix();
+      alveoliInstancedR.setMatrixAt(i, dummy.matrix);
+    }
+    lungsGroup.add(alveoliInstancedL, alveoliInstancedR);
+
+    // Red Capillaries Mesh
+    const capillaryMat = new THREE.MeshBasicMaterial({ color: 0xef4444, wireframe: true, transparent: true, opacity: 0.25 });
+    const capL = new THREE.Mesh(leftLungGeom, capillaryMat);
+    capL.scale.set(0.91, 1.26, 1.01);
+    capL.position.set(-0.50, 0.25, 0.05);
+    
+    const capR = new THREE.Mesh(rightLungGeom, capillaryMat);
+    capR.scale.set(1.09, 1.31, 1.06);
+    capR.position.set(0.52, 0.25, 0.05);
+    lungsGroup.add(capL, capR);
+
+    organGroup.add(lungsGroup);
+    organMeshGroups["Lungs"] = lungsGroup;
+
+    // 7. Anatomical Silhouette Heart (Merged Spheres + Cone nestled in Cardiac Notch)
+    const heartGroup = new THREE.Group();
+    heartGroup.name = "Heart";
+    const heartMat = getAnatomicalMaterial(0xa81c1c);
+
+    const atriumL = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), heartMat);
+    atriumL.position.set(-0.06, 0.08, 0);
+    const atriumR = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), heartMat);
+    atriumR.position.set(0.06, 0.08, 0);
+    
+    const ventricleCone = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.28, 16), heartMat);
+    ventricleCone.rotation.z = Math.PI;
+    ventricleCone.position.set(0, -0.06, 0);
+
+    const classicHeart = new THREE.Group();
+    classicHeart.add(atriumL, atriumR, ventricleCone);
+    classicHeart.position.set(-0.10, 0.22, 0.12);
+    classicHeart.rotation.z = -0.2; // Anatomical tilt towards left lung
+    classicHeart.scale.set(1.1, 1.1, 1.1);
+    heartGroup.add(classicHeart);
+
+    organGroup.add(heartGroup);
+    organMeshGroups["Heart"] = heartGroup;
+
+    // 8. Rib-to-Rib Dome Diaphragm
+    const diaphragmGroup = new THREE.Group();
+    diaphragmGroup.name = "Diaphragm";
+    const domeGeom = new THREE.SphereGeometry(1.4, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2);
+    const diaphragmMesh = new THREE.Mesh(domeGeom, getAnatomicalMaterial(organData.Diaphragm.color));
+    diaphragmMesh.rotation.x = Math.PI; // Invert to form a muscular dome
+    diaphragmMesh.scale.set(0.95, 0.38, 0.7); // Rib-to-rib span
+    diaphragmMesh.position.set(0, -0.32, 0.0);
+    diaphragmGroup.add(diaphragmMesh);
+    organGroup.add(diaphragmGroup);
+    organMeshGroups["Diaphragm"] = diaphragmGroup;
+
+    // -------------------------------------------------------------
+    // Dynamic Air Particle System (20 Continuous Flow Particles)
+    // -------------------------------------------------------------
+    const leftAirPath = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 2.2, 0.22),
+      new THREE.Vector3(0, 1.8, 0.02),
+      new THREE.Vector3(0, 1.45, 0.05),
+      new THREE.Vector3(0, 0.95, 0.05),
+      new THREE.Vector3(-0.18, 0.55, 0.05),
+      new THREE.Vector3(-0.35, 0.38, 0.05),
+      new THREE.Vector3(-0.52, 0.22, 0.05)
+    ]);
+
+    const rightAirPath = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 2.2, 0.22),
+      new THREE.Vector3(0, 1.8, 0.02),
+      new THREE.Vector3(0, 1.45, 0.05),
+      new THREE.Vector3(0, 0.95, 0.05),
+      new THREE.Vector3(0.18, 0.55, 0.05),
+      new THREE.Vector3(0.35, 0.38, 0.05),
+      new THREE.Vector3(0.52, 0.22, 0.05)
+    ]);
+
+    const airParticlesGroup = new THREE.Group();
+    const airParticleCount = 20;
+    const airParticleData = [];
+    const airParticleMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.8,
+      roughness: 0.2
+    });
+    const airParticleGeom = new THREE.SphereGeometry(0.035, 12, 12);
+
+    for (let i = 0; i < airParticleCount; i++) {
+      const pMesh = new THREE.Mesh(airParticleGeom, airParticleMat);
+      airParticlesGroup.add(pMesh);
+      airParticleData.push({
+        mesh: pMesh,
+        progress: (i / airParticleCount),
+        pathIndex: i % 2 // Alternates Left and Right Lung pathways
+      });
+    }
+    organGroup.add(airParticlesGroup);
+
+    // -------------------------------------------------------------
+    // Oxygenated/Deoxygenated Blood Flow Animation
+    // -------------------------------------------------------------
+    const bloodFlowPath = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.50, 0.22, 0.05), // Lungs (Alveoli Gas Exchange)
+      new THREE.Vector3(-0.30, 0.22, 0.08), // Pulmonary Veins
+      new THREE.Vector3(-0.10, 0.22, 0.12), // Heart
+      new THREE.Vector3(0.0, 0.10, 0.05),   // Aorta / Systemic Body
+      new THREE.Vector3(0.40, -0.20, 0.05), // Lower Body / Organs
+      new THREE.Vector3(0.30, 0.15, 0.08),  // Vena Cava / Pulmonary Arteries
+      new THREE.Vector3(0.52, 0.22, 0.05)   // Back to Right Lung
+    ]);
+
+    const bloodParticleCount = 12;
+    const bloodParticles = [];
+    const bloodGroup = new THREE.Group();
+    
+    for (let i = 0; i < bloodParticleCount; i++) {
+      const bMat = new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0x991111, emissiveIntensity: 0.6 });
+      const bMesh = new THREE.Mesh(new THREE.SphereGeometry(0.028, 12, 12), bMat);
+      bloodGroup.add(bMesh);
+      bloodParticles.push({ mesh: bMesh, progress: i / bloodParticleCount, mat: bMat });
+    }
+    organGroup.add(bloodGroup);
+
+    // Hover Label
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'organ-hover-label';
+    labelDiv.style.opacity = '0';
+    const hoverLabelObj = new CSS2DObject(labelDiv);
+    scene.add(hoverLabelObj);
+
+    // -------------------------------------------------------------
+    // On-Demand Labels Construction
+    // -------------------------------------------------------------
+    const anatomicalLabelsList = [
+      { name: "Nasal Cavity", pos: new THREE.Vector3(0, 2.25, 0.25) },
+      { name: "Pharynx", pos: new THREE.Vector3(0.2, 1.8, 0.05) },
+      { name: "Larynx", pos: new THREE.Vector3(-0.25, 1.45, 0.08) },
+      { name: "Trachea", pos: new THREE.Vector3(0.25, 0.95, 0.08) },
+      { name: "Bronchi", pos: new THREE.Vector3(-0.35, 0.45, 0.08) },
+      { name: "Bronchioles", pos: new THREE.Vector3(0.45, 0.40, 0.08) },
+      { name: "Alveoli", pos: new THREE.Vector3(-0.65, 0.1, 0.1) },
+      { name: "Lungs", pos: new THREE.Vector3(0.68, 0.25, 0.1) },
+      { name: "Heart", pos: new THREE.Vector3(-0.1, 0.22, 0.25) },
+      { name: "Diaphragm", pos: new THREE.Vector3(0, -0.45, 0.1) }
+    ];
+
+    anatomicalLabelsList.forEach(lbl => {
+      const tagDiv = document.createElement('div');
+      tagDiv.className = 'anatomical-tag';
+      tagDiv.innerText = lbl.name;
+      const cssObj = new CSS2DObject(tagDiv);
+      cssObj.position.copy(lbl.pos);
+      organGroup.add(cssObj);
+      onDemandLabelObjects.push(cssObj);
+    });
+
+    // Speech function
+    function speakText(text) {
+      if (!audioEnabled || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.95;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    // -------------------------------------------------------------
+    // Organ Focus & Selection Highlight Mechanics
+    // -------------------------------------------------------------
+    function focusOrgan(group) {
+      selectedOrganGroup = group;
+      const data = organData[group.name];
+      
+      document.getElementById("org-title").innerText = `${data.emoji} ${data.title}`;
+      document.getElementById("org-cbc").innerText = data.cbc;
+      document.getElementById("org-desc").innerText = data.desc;
+      document.getElementById("btn-reset-cam").style.display = "flex";
+
+      speakText(data.title + ". " + data.desc);
+
+      // Highlight selected organ: dimmed opacity for rest (0.15), full (1.0) for target
+      Object.keys(organMeshGroups).forEach(key => {
+        const g = organMeshGroups[key];
+        const targetOpacity = (g === group) ? 1.0 : 0.15;
+        g.traverse(c => {
+          if (c.isMesh && c.material) {
+            c.material.transparent = true;
+            c.material.opacity = targetOpacity;
+          }
+        });
+      });
+
+      const worldPos = new THREE.Vector3();
+      group.getWorldPosition(worldPos);
+      
+      triggerSmoothCameraMove(
+        worldPos.clone().add(new THREE.Vector3(0, 0, 3.2)),
+        worldPos.clone()
+      );
+    }
+
+    function resetCamera() {
+      selectedOrganGroup = null;
+      
+      // Reset all organ opacities
+      Object.keys(organMeshGroups).forEach(key => {
+        const g = organMeshGroups[key];
+        const defaultOp = (key === "Lungs") ? 0.68 : 1.0;
+        g.traverse(c => {
+          if (c.isMesh && c.material) {
+            c.material.opacity = defaultOp;
+          }
+        });
+      });
+
+      triggerSmoothCameraMove(defaultCamPos, defaultTarget);
+      document.getElementById("btn-reset-cam").style.display = "none";
+    }
+
+    document.getElementById("btn-reset-cam").addEventListener("click", resetCamera);
+
+    window.addEventListener("pointermove", (e) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      
+      const allMeshes = [];
+      Object.values(organMeshGroups).forEach(g => {
+        g.traverse(c => { if(c.isMesh) allMeshes.push(c); });
+      });
+
+      const intersects = raycaster.intersectObjects(allMeshes);
+
+      if (intersects.length > 0) {
+        let parentGroup = intersects[0].object.parent;
+        while (parentGroup && !organData[parentGroup.name]) {
+          parentGroup = parentGroup.parent;
+        }
+        if (parentGroup) {
+          hoveredOrganGroup = parentGroup;
+          const data = organData[parentGroup.name];
+          labelDiv.innerHTML = `${data.emoji} ${data.hoverTitle || data.title}<div class="organ-hover-sub">Click to Inspect</div>`;
+          labelDiv.style.opacity = '1';
+          
+          const organWorldPos = new THREE.Vector3();
+          parentGroup.getWorldPosition(organWorldPos);
+          hoverLabelObj.position.copy(organWorldPos).add(new THREE.Vector3(0, 0.45, 0));
+          document.body.style.cursor = 'pointer';
+          return;
+        }
+      }
+      
+      hoveredOrganGroup = null;
+      labelDiv.style.opacity = '0';
+      document.body.style.cursor = 'default';
+    });
+
+    window.addEventListener("pointerdown", () => {
+      if (hoveredOrganGroup) {
+        focusOrgan(hoveredOrganGroup);
+      }
+    });
+
+    document.getElementById("btn-outline").addEventListener("click", (e) => {
+      showOutline = !showOutline;
+      bodyOutlineGroup.visible = showOutline;
+      e.target.classList.toggle("active", showOutline);
+      e.target.innerText = showOutline ? "👤 Body Outline: ON" : "👤 Body Outline: OFF";
+    });
+
+    document.getElementById("btn-ribs").addEventListener("click", (e) => {
+      showRibs = !showRibs;
+      ribCageGroup.visible = showRibs;
+      e.target.classList.toggle("active", showRibs);
+      e.target.innerText = showRibs ? "🦴 Rib Cage: ON" : "🦴 Rib Cage: OFF";
+    });
+
+    document.getElementById("btn-labels").addEventListener("click", (e) => {
+      showOnDemandLabels = !showOnDemandLabels;
+      onDemandLabelObjects.forEach(obj => {
+        obj.element.style.opacity = showOnDemandLabels ? "1" : "0";
+      });
+      e.target.classList.toggle("active", showOnDemandLabels);
+      e.target.innerText = showOnDemandLabels ? "🏷️ Show Labels: ON" : "🏷️ Show Labels: OFF";
+    });
+
+    document.getElementById("btn-audio").addEventListener("click", (e) => {
+      audioEnabled = !audioEnabled;
+      e.target.innerText = audioEnabled ? "🔊 Audio: ON" : "🔇 Audio: OFF";
+      if (!audioEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+    });
+
+    document.getElementById("btn-animate").addEventListener("click", (e) => {
+      animatingAir = !animatingAir;
+      airParticlesGroup.visible = animatingAir;
+      e.target.classList.toggle("active", animatingAir);
+      e.target.innerText = animatingAir ? "💨 Airflow Simulation: ON" : "💨 Airflow Simulation: OFF";
+    });
+
+    document.getElementById("btn-quiz").addEventListener("click", startQuiz);
+    document.getElementById("btn-restart").addEventListener("click", startQuiz);
+
+    function startQuiz() {
+      currentQuizIndex = 0;
+      quizScore = 0;
+      document.getElementById("info-panel").style.display = "none";
+      document.getElementById("score-panel").style.display = "none";
+      document.getElementById("quiz-panel").style.display = "block";
+      document.getElementById("panel-mode-title").innerText = "📝 Respiratory Quiz";
+      renderQuizQuestion();
+    }
+
+    function renderQuizQuestion() {
+      const q = quizQuestions[currentQuizIndex];
+      document.getElementById("quiz-q-text").innerText = `${currentQuizIndex + 1}. ${q.q}`;
+      const optContainer = document.getElementById("quiz-options");
+      optContainer.innerHTML = "";
+
+      q.options.forEach((opt, idx) => {
+        const div = document.createElement("div");
+        div.className = "quiz-opt";
+        div.innerText = opt;
+        div.addEventListener("click", () => handleQuizAnswer(idx, div));
+        optContainer.appendChild(div);
+      });
+    }
+
+    function handleQuizAnswer(selectedIdx, element) {
+      const q = quizQuestions[currentQuizIndex];
+      const opts = document.querySelectorAll(".quiz-opt");
+      opts.forEach(o => o.style.pointerEvents = "none");
+
+      if (selectedIdx === q.answer) {
+        element.classList.add("correct");
+        quizScore++;
+        speakText("Correct!");
+      } else {
+        element.classList.add("wrong");
+        opts[q.answer].classList.add("correct");
+        speakText("Incorrect.");
+      }
+
+      setTimeout(() => {
+        currentQuizIndex++;
+        if (currentQuizIndex < quizQuestions.length) {
+          renderQuizQuestion();
+        } else {
+          showQuizResults();
+        }
+      }, 1400);
+    }
+
+    function showQuizResults() {
+      document.getElementById("quiz-panel").style.display = "none";
+      document.getElementById("score-panel").style.display = "block";
+      document.getElementById("final-score").innerText = `${quizScore} / ${quizQuestions.length}`;
+      speakText(`Quiz complete. You scored ${quizScore} out of ${quizQuestions.length}`);
+    }
+
+    // -------------------------------------------------------------
+    // Main Animation Loop
+    // -------------------------------------------------------------
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      const time = clock.getElapsedTime();
+
+      // Smooth Camera Ease-In-Out Animation (1 Second Transition)
+      if (isCamAnimating) {
+        camAnimProgress += delta * 1.0; // 1.0 second total duration
+        if (camAnimProgress >= 1.0) {
+          camAnimProgress = 1.0;
+          isCamAnimating = false;
+        }
+        const easeT = easeInOutCubic(camAnimProgress);
+        camera.position.lerpVectors(camStartPos, camEndPos, easeT);
+        controls.target.lerpVectors(camStartLook, camEndLook, easeT);
+      }
+
+      controls.update();
+
+      // Selected Organ Pulse / Glow Effect
+      if (selectedOrganGroup) {
+        const pulse = 1.0 + Math.sin(time * 4) * 0.05;
+        selectedOrganGroup.scale.set(1.2 * pulse, 1.2 * pulse, 1.2 * pulse);
+      }
+
+      // Airflow Particles Animation & Gas Meter Sync
+      if (animatingAir) {
+        airParticleData.forEach(p => {
+          p.progress += delta * 0.35;
+          if (p.progress > 1.0) p.progress = 0;
+          const path = (p.pathIndex === 0) ? leftAirPath : rightAirPath;
+          const pos = path.getPoint(p.progress);
+          p.mesh.position.copy(pos);
+        });
+
+        // Breathing cycle gas exchange tracker HUD
+        const cycleProgress = (time * 0.7) % (Math.PI * 2);
+        const isInhaling = Math.sin(cycleProgress) > 0;
+        const gasPercent = Math.floor(Math.abs(Math.sin(cycleProgress)) * 100);
+
+        const meterFill = document.getElementById("meter-fill");
+        const statusText = document.getElementById("gas-status-text");
+        const percentText = document.getElementById("gas-percent");
+
+        meterFill.style.width = `${gasPercent}%`;
+        percentText.innerText = `${gasPercent}%`;
+
+        if (isInhaling) {
+          statusText.innerText = "O₂ Inhaling";
+          meterFill.style.backgroundColor = "#38bdf8";
+        } else {
+          statusText.innerText = "CO₂ Exhaling";
+          meterFill.style.backgroundColor = "#ef4444";
+        }
+
+        // Rib Cage Expansion
+        const ribExpand = 1.0 + Math.sin(cycleProgress) * 0.04;
+        ribCageGroup.scale.set(ribExpand, 1.0, ribExpand);
+
+        // Diaphragm Muscle Flattening
+        const diaphragmFlatten = -0.32 - Math.sin(cycleProgress) * 0.08;
+        organMeshGroups["Diaphragm"].position.y = diaphragmFlatten;
+      }
+
+      // Blood Flow Animation (Blue veins -> Red arteries -> Heart -> Body)
+      bloodParticles.forEach(b => {
+        b.progress += delta * 0.25;
+        if (b.progress > 1.0) b.progress = 0;
+        
+        const pt = bloodFlowPath.getPoint(b.progress);
+        b.mesh.position.copy(pt);
+
+        // Oxygenated vs Deoxygenated Color Phase
+        if (b.progress < 0.3) {
+          b.mat.color.setHex(0xef4444); // Oxygenated Red from Lungs to Heart
+          b.mat.emissive.setHex(0x991111);
+        } else if (b.progress >= 0.3 && b.progress < 0.6) {
+          b.mat.color.setHex(0x38bdf8); // Transitioning Deoxygenated Blue in Body
+          b.mat.emissive.setHex(0x0284c7);
+        } else {
+          b.mat.color.setHex(0x2563eb); // Returning Blue to Pulmonary Exchange
+          b.mat.emissive.setHex(0x1d4ed8);
+        }
+      });
+
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+
+    animate();
+
+    window.addEventListener("resize", () => {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      labelRenderer.setSize(w, h);
+    });
+  </script>
+</body>
+</html>
