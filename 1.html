@@ -209,6 +209,7 @@
     </div>
   </div>
 
+
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -232,7 +233,7 @@
         cbc: "CBC Strand: Human Body Systems - Ingestion",
         desc: "Food enters the body here. Mechanical breakdown takes place via chewing (teeth), while salivary glands secrete amylase to begin starch digestion.",
         color: 0xff85a2,
-        pos: new THREE.Vector3(0, 3.1, 0)
+        pos: new THREE.Vector3(0, 2, 0)
       },
       Oesophagus: {
         title: "Oesophagus (Gullet)",
@@ -381,14 +382,17 @@
     organMeshGroups["Mouth"] = mouthGroup;
 
     // Oesophagus
-    const oesophagusGroup = new THREE.Group();
+   const oesophagusGroup = new THREE.Group();
     oesophagusGroup.name = "Oesophagus";
     const oesoCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0, 2.3, 0.02),
-      new THREE.Vector3(0.02, 1.7, 0.01),
-      new THREE.Vector3(-0.02, 1.1, 0.0),
-      new THREE.Vector3(0.08, 0.55, 0.02)
+      new THREE.Vector3(0, 1.8, 0.02),
+  new THREE.Vector3(0.02, 1.4, 0.01),
+  new THREE.Vector3(-0.02, 1.0, 0.0),
+  new THREE.Vector3(0.08, 0.75, 0.02)
     ]);
+
+
+  
     const oesoMesh = new THREE.Mesh(new THREE.TubeGeometry(oesoCurve, 32, 0.09, 16, false), getAnatomicalMaterial(organData.Oesophagus.color));
     oesophagusGroup.add(oesoMesh);
     organGroup.add(oesophagusGroup);
