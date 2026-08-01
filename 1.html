@@ -5,28 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DigiElimu 3D Digestive System</title>
 
-  <!-- ES Module Import Map for Three.js r174 -->
-  
-  
-  <!-- Add this polyfill FIRST to enable importmap support on older TV browsers -->
-<script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
+  <!-- ES Module Polyfill for older browsers -->
+  <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
 
-<script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.174.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.174.0/examples/jsm/"
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.174.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.174.0/examples/jsm/"
+      }
     }
-  }
-</script>
-
-<script type="module">
-  import * as THREE from 'three';
-  // your module code...
-</script>
-  
-  
-  
+  </script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
@@ -55,12 +44,16 @@
       width: 100vw;
       position: relative;
     }
-    
+
     #canvas-container {
       flex: 1;
       height: 100%;
       position: relative;
       background: radial-gradient(circle, #1a2a4a 0%, #0b132b 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
     }
     
     #viewer { width: 100%; height: 100%; display: block; }
@@ -209,7 +202,6 @@
     </div>
   </div>
 
-
   <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -251,16 +243,40 @@
         color: 0xfa8072,
         pos: new THREE.Vector3(0.4, 0.25, 0.12)
       },
-      Liver: {
-        title: "Liver & Gallbladder",
+      Duodenum: {
+        title: "Duodenum",
+        emoji: "🔄",
+        cbc: "CBC Strand: Upper Small Intestine Neutralization",
+        desc: "The first C-shaped section of the small intestine. It receives chyme from the stomach, bile from the gall bladder, and digestive enzymes from the pancreas.",
+        color: 0xe0a96d,
+        pos: new THREE.Vector3(0.1, -0.1, 0.15)
+      },
+      Pancreas: {
+        title: "Pancreas",
+        emoji: "🥐",
+        cbc: "CBC Strand: Enzyme Secretion & Hormones",
+        desc: "A leaf-shaped gland located behind the stomach. It secretes pancreatic juice containing enzymes (lipase, amylase, trypsin) and sodium bicarbonate into the duodenum.",
+        color: 0xf5d061,
+        pos: new THREE.Vector3(-0.05, -0.05, 0.02)
+      },
+      BileGland: {
+        title: "Gallbladder & Bile Duct System",
         emoji: "🟢",
+        cbc: "CBC Strand: Bile Storage & Emulsification",
+        desc: "Stores and concentrates bile produced by the liver. Releases bile into the duodenum via the bile duct to emulsify fats.",
+        color: 0x408000,
+        pos: new THREE.Vector3(-0.35, 0.1, 0.3)
+      },
+      Liver: {
+        title: "Liver",
+        emoji: "🟤",
         cbc: "CBC Strand: Bile & Assimilation",
-        desc: "Produces bile which emulsifies fats (breaks large fat droplets into smaller droplets) for easier enzymatic digestion.",
+        desc: "The largest gland in the body. Produces bile which emulsifies fats and plays a central role in nutrient processing and detoxification.",
         color: 0x6b2d2d,
         pos: new THREE.Vector3(-0.68, 0.55, 0.25)
       },
       SmallIntestine: {
-        title: "Small Intestine",
+        title: "Small Intestine (Jejunum & Ileum)",
         emoji: "🟡",
         cbc: "CBC Strand: Absorption & Villi",
         desc: "The primary site for final chemical digestion and nutrient absorption into the blood via tiny finger-like structures called villi.",
@@ -269,7 +285,7 @@
       },
       LargeIntestine: {
         title: "Large Intestine (Colon)",
-        emoji: "🟤",
+        emoji: "🧱",
         cbc: "CBC Strand: Water Absorption & Egestion",
         desc: "Surrounds the small intestine. Absorbs remaining water and mineral salts from indigestible food residues, compacting waste into feces.",
         color: 0xd6a4a4,
@@ -278,12 +294,56 @@
     };
 
     const quizQuestions = [
-      { q: "Where does chemical digestion of starch begin?", options: ["Stomach", "Mouth", "Small Intestine"], answer: 1 },
-      { q: "What wave-like muscle movement pushes food down the gullet?", options: ["Peristalsis", "Pumping", "Absorption"], answer: 0 },
-      { q: "Which organ produces bile to help break down fats?", options: ["Stomach", "Liver", "Large Intestine"], answer: 1 },
-      { q: "Where are digested nutrients absorbed into the bloodstream?", options: ["Small Intestine", "Large Intestine", "Oesophagus"], answer: 0 },
-      { q: "What is the primary role of the Large Intestine?", options: ["Protein digestion", "Water absorption", "Chewing food"], answer: 1 }
-    ];
+  { q:"Where does chemical digestion of starch begin?", options:["Stomach","Mouth","Small Intestine"], answer:1 },
+
+  { q:"What wave-like muscle movement pushes food down the gullet?", options:["Peristalsis","Absorption","Pumping"], answer:0 },
+
+  { q:"Which organ produces bile?", options:["Stomach","Large Intestine","Liver"], answer:2 },
+
+  { q:"Where are most digested nutrients absorbed?", options:["Large Intestine","Oesophagus","Small Intestine"], answer:2 },
+
+  { q:"What is the main role of the Large Intestine?", options:["Protein digestion","Water absorption","Chewing food"], answer:1 },
+
+  { q:"Which organ stores food temporarily?", options:["Liver","Mouth","Stomach"], answer:2 },
+
+  { q:"Which enzyme in saliva digests starch?", options:["Lipase","Amylase","Pepsin"], answer:1 },
+
+  { q:"What is the work of teeth?", options:["Mechanical digestion","Produce bile","Absorb nutrients"], answer:0 },
+
+  { q:"Which organ connects the mouth to the stomach?", options:["Colon","Small Intestine","Oesophagus"], answer:2 },
+
+  { q:"Which acid is found in the stomach?", options:["Hydrochloric acid","Nitric acid","Sulphuric acid"], answer:0 },
+
+  { q:"Which structures increase nutrient absorption?", options:["Nephrons","Alveoli","Villi"], answer:2 },
+
+  { q:"Which nutrient is mainly digested in the stomach?", options:["Minerals","Proteins","Vitamins"], answer:1 },
+
+  { q:"Where does most chemical digestion occur?", options:["Large Intestine","Small Intestine","Mouth"], answer:1 },
+
+  { q:"What is the removal of undigested food called?", options:["Respiration","Excretion","Egestion"], answer:2 },
+
+  { q:"Why is the digestive system important?", options:["Breaks food into nutrients","Controls movement","Pumps blood"], answer:0 },
+
+  { q:"Which organ produces pancreatic juice?", options:["Gall Bladder","Liver","Pancreas"], answer:2 },
+
+  { q:"Pancreatic juice digests:", options:["Proteins only","Carbohydrates, proteins and fats","Fats only"], answer:1 },
+
+  { q:"Where does the pancreas release its digestive juice?", options:["Duodenum","Stomach","Large Intestine"], answer:0 },
+
+  { q:"The duodenum is the first part of the:", options:["Large Intestine","Small Intestine","Oesophagus"], answer:1 },
+
+  { q:"What enters the duodenum to help digestion?", options:["Saliva only","Hydrochloric acid only","Bile and pancreatic juice"], answer:2 },
+
+  { q:"Most digestion after the stomach begins in the:", options:["Duodenum","Colon","Mouth"], answer:0 },
+
+  { q:"What is the main function of the gall bladder?", options:["Produces bile","Stores bile","Digests proteins"], answer:1 },
+
+  { q:"The gall bladder releases bile into the:", options:["Stomach","Oesophagus","Duodenum"], answer:2 },
+
+  { q:"Bile helps digest:", options:["Fats","Proteins","Starch"], answer:0 },
+
+  { q:"Which organ absorbs most nutrients into the bloodstream?", options:["Large Intestine","Stomach","Small Intestine"], answer:2 }
+];
 
     let audioEnabled = true;
     let selectedOrganGroup = null;
@@ -294,8 +354,8 @@
     let currentQuizIndex = 0;
     let quizScore = 0;
 
-    const defaultCamPos = new THREE.Vector3(0, 0.5, 7.5);
-    const defaultTarget = new THREE.Vector3(0, 0, 0);
+    const defaultCamPos = new THREE.Vector3(0.8, 0.5, 7.5);
+    const defaultTarget = new THREE.Vector3(0.8, 0, 0);
     let targetCamPos = defaultCamPos.clone();
     let targetCamLook = defaultTarget.clone();
 
@@ -333,6 +393,7 @@
 
     const organGroup = new THREE.Group();
     organGroup.scale.set(1.25, 1.25, 1.25);
+    organGroup.position.x = 0.8;
     scene.add(organGroup);
 
     const organMeshGroups = {};
@@ -350,7 +411,8 @@
 
     const bodyOutlineGroup = new THREE.Group();
     bodyOutlineGroup.scale.set(1.25, 1.25, 1.25);
-    
+    bodyOutlineGroup.position.x = 0.8;
+
     const bodyMat = new THREE.MeshStandardMaterial({
       color: 0x88bbff,
       transparent: true,
@@ -358,17 +420,17 @@
       roughness: 0.5,
       side: THREE.DoubleSide
     });
-    
+
     const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.7, 32, 32), bodyMat);
     headMesh.position.set(0, 2.5, -0.3);
-    
+
     const torsoMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.8, 3.9, 32), bodyMat);
     torsoMesh.position.set(0, 0.2, -0.3);
-    
+
     bodyOutlineGroup.add(headMesh, torsoMesh);
     scene.add(bodyOutlineGroup);
 
-    // Mouth
+    // 1. Mouth
     const mouthGroup = new THREE.Group();
     mouthGroup.name = "Mouth";
     const headBase = new THREE.Mesh(new THREE.SphereGeometry(0.42, 32, 32), getAnatomicalMaterial(organData.Mouth.color));
@@ -381,24 +443,21 @@
     organGroup.add(mouthGroup);
     organMeshGroups["Mouth"] = mouthGroup;
 
-    // Oesophagus
-   const oesophagusGroup = new THREE.Group();
+    // 2. Oesophagus
+    const oesophagusGroup = new THREE.Group();
     oesophagusGroup.name = "Oesophagus";
     const oesoCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(0, 1.8, 0.02),
-  new THREE.Vector3(0.02, 1.4, 0.01),
-  new THREE.Vector3(-0.02, 1.0, 0.0),
-  new THREE.Vector3(0.08, 0.75, 0.02)
+      new THREE.Vector3(0.02, 1.4, 0.01),
+      new THREE.Vector3(-0.02, 1.0, 0.0),
+      new THREE.Vector3(0.08, 0.75, 0.02)
     ]);
-
-
-  
     const oesoMesh = new THREE.Mesh(new THREE.TubeGeometry(oesoCurve, 32, 0.09, 16, false), getAnatomicalMaterial(organData.Oesophagus.color));
     oesophagusGroup.add(oesoMesh);
     organGroup.add(oesophagusGroup);
     organMeshGroups["Oesophagus"] = oesophagusGroup;
 
-    // Stomach
+    // 3. Stomach
     const stomachGroup = new THREE.Group();
     stomachGroup.name = "Stomach";
     const stomachMat = getAnatomicalMaterial(organData.Stomach.color);
@@ -421,7 +480,63 @@
     organGroup.add(stomachGroup);
     organMeshGroups["Stomach"] = stomachGroup;
 
-    // Liver
+    // 4. Duodenum
+    const duodenumGroup = new THREE.Group();
+    duodenumGroup.name = "Duodenum";
+    const duoMat = getAnatomicalMaterial(organData.Duodenum.color);
+    const duoCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0.6, 0.0, 0.12),
+      new THREE.Vector3(0.4, -0.12, 0.15),
+      new THREE.Vector3(0.1, -0.18, 0.18),
+      new THREE.Vector3(-0.15, -0.22, 0.16),
+      new THREE.Vector3(-0.05, -0.38, 0.18)
+    ]);
+    const duoMesh = new THREE.Mesh(new THREE.TubeGeometry(duoCurve, 32, 0.08, 16, false), duoMat);
+    duodenumGroup.add(duoMesh);
+    organGroup.add(duodenumGroup);
+    organMeshGroups["Duodenum"] = duodenumGroup;
+
+    // 5. Pancreas
+    const pancreasGroup = new THREE.Group();
+    pancreasGroup.name = "Pancreas";
+    const pancreasMat = getAnatomicalMaterial(organData.Pancreas.color);
+    const pancBody = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.7, 32), pancreasMat);
+    pancBody.rotation.z = Math.PI / 2 + 0.3;
+    pancBody.scale.set(1, 1, 0.4);
+    pancBody.position.set(0.15, -0.12, 0.05);
+    
+    // Pancreatic Duct
+    const pancDuctCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.15, -0.18, 0.05),
+      new THREE.Vector3(0.1, -0.14, 0.07),
+      new THREE.Vector3(0.28, -0.12, 0.1)
+    ]);
+    const pancDuctMesh = new THREE.Mesh(new THREE.TubeGeometry(pancDuctCurve, 16, 0.02, 8, false), getAnatomicalMaterial(0xffffff));
+    pancreasGroup.add(pancBody, pancDuctMesh);
+    organGroup.add(pancreasGroup);
+    organMeshGroups["Pancreas"] = pancreasGroup;
+
+    // 6. Bile Gland & Gallbladder
+    const bileGroup = new THREE.Group();
+    bileGroup.name = "BileGland";
+    const gbMat = getAnatomicalMaterial(organData.BileGland.color);
+    const gbMesh = new THREE.Mesh(new THREE.SphereGeometry(0.14, 24, 24), gbMat);
+    gbMesh.scale.set(0.8, 1.3, 0.8);
+    gbMesh.rotation.z = -0.4;
+    gbMesh.position.set(-0.35, 0.1, 0.3);
+
+    // Bile Duct connecting Gallbladder to Duodenum
+    const bileDuctCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.35, 0.0, 0.28),
+      new THREE.Vector3(-0.1, -0.05, 0.2),
+      new THREE.Vector3(0.2, -0.12, 0.14)
+    ]);
+    const bileDuctMesh = new THREE.Mesh(new THREE.TubeGeometry(bileDuctCurve, 20, 0.025, 8, false), gbMat);
+    bileGroup.add(gbMesh, bileDuctMesh);
+    organGroup.add(bileGroup);
+    organMeshGroups["BileGland"] = bileGroup;
+
+    // 7. Liver
     const liverGroup = new THREE.Group();
     liverGroup.name = "Liver";
     const liverMat = getAnatomicalMaterial(organData.Liver.color);
@@ -429,14 +544,12 @@
     liverBlob.scale.set(2.2, 1.1, 1.5);
     liverBlob.rotation.z = 0.35;
     liverBlob.rotation.y = -0.2;
-    const gallbladder = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 16), getAnatomicalMaterial(0x408000));
-    gallbladder.position.set(0.1, -0.35, 0.35);
-    liverGroup.add(liverBlob, gallbladder);
+    liverGroup.add(liverBlob);
     liverGroup.position.copy(organData.Liver.pos);
     organGroup.add(liverGroup);
     organMeshGroups["Liver"] = liverGroup;
 
-    // Small Intestine
+    // 8. Small Intestine
     const smallIntestineGroup = new THREE.Group();
     smallIntestineGroup.name = "SmallIntestine";
     const smallIntMat = getAnatomicalMaterial(organData.SmallIntestine.color);
@@ -456,7 +569,7 @@
     organGroup.add(smallIntestineGroup);
     organMeshGroups["SmallIntestine"] = smallIntestineGroup;
 
-    // Large Intestine
+    // 9. Large Intestine
     const largeIntestineGroup = new THREE.Group();
     largeIntestineGroup.name = "LargeIntestine";
     const largeIntMat = getAnatomicalMaterial(organData.LargeIntestine.color);
@@ -483,23 +596,25 @@
     const hoverLabelObj = new CSS2DObject(labelDiv);
     scene.add(hoverLabelObj);
 
+    // Updated Food Animation Path passing through Duodenum
     const foodPath = new THREE.CatmullRomCurve3([
-      organData.Mouth.pos.clone().multiplyScalar(1.25),
-      new THREE.Vector3(0.02, 1.7, 0.01).multiplyScalar(1.25),
-      new THREE.Vector3(0.08, 0.55, 0.02).multiplyScalar(1.25),
-      organData.Stomach.pos.clone().multiplyScalar(1.25),
-      new THREE.Vector3(0.2, -0.2, 0.1).multiplyScalar(1.25),
-      organData.SmallIntestine.pos.clone().multiplyScalar(1.25),
-      new THREE.Vector3(0.65, -0.9, 0.05).multiplyScalar(1.25),
-      new THREE.Vector3(0, -1.35, -0.05).multiplyScalar(1.25)
+      new THREE.Vector3(0, 2, 0),          // Mouth
+      new THREE.Vector3(0.02, 1.7, 0.01),  // Oesophagus
+      new THREE.Vector3(0.08, 0.55, 0.02), // Stomach entry
+      new THREE.Vector3(0.4, 0.25, 0.12),  // Stomach body
+      new THREE.Vector3(0.6, 0.0, 0.12),   // Pyloric Sphincter
+      new THREE.Vector3(0.2, -0.15, 0.16), // Duodenum
+      new THREE.Vector3(0, -0.8, 0.18),    // Small intestine
+      new THREE.Vector3(0.65, -0.9, 0.05), // Large intestine
+      new THREE.Vector3(0, -1.35, -0.05)   // Exit
     ]);
 
     const foodMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.14, 16, 16),
+      new THREE.SphereGeometry(0.10, 16, 16),
       new THREE.MeshStandardMaterial({ color: 0xff3366, emissive: 0xff0055, emissiveIntensity: 0.9 })
     );
-    scene.add(foodMesh);
-
+    organGroup.add(foodMesh);
+    
     function speakText(text) {
       if (!audioEnabled || !('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
