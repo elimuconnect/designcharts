@@ -1,9 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DigiElimu 3D Digestive System</title>
+
+  <!-- ES Module Import Map for Three.js r174 -->
+  
+  
+  <!-- Add this polyfill FIRST to enable importmap support on older TV browsers -->
+<script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.174.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.174.0/examples/jsm/"
+    }
+  }
+</script>
+
+<script type="module">
+  import * as THREE from 'three';
+  // your module code...
+</script>
+  
+  
+  
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0b132b; color: #ffffff; overflow-x: hidden; }
@@ -41,7 +65,6 @@
     
     #viewer { width: 100%; height: 100%; display: block; }
     
-    /* Overlay Controls */
     .controls-overlay {
       position: absolute;
       top: 15px;
@@ -70,7 +93,6 @@
     .btn:hover { background: #0b4ea2; border-color: #0b4ea2; transform: translateY(-2px); }
     .btn.active { background: #0b4ea2; border-color: #4da6ff; }
 
-    /* Side Panel */
     #sidebar {
       width: 380px;
       background: rgba(15, 23, 42, 0.95);
@@ -97,12 +119,10 @@
       flex: 1;
     }
     
-    /* Organ Info */
     .organ-title { font-size: 24px; color: #ffffff; margin-bottom: 10px; border-bottom: 2px solid #ff9800; padding-bottom: 6px; }
     .cbc-badge { background: rgba(46, 125, 50, 0.3); border: 1px solid #2e7d32; color: #81c784; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 16px; }
     .organ-desc { font-size: 15px; line-height: 1.7; color: #cbd5e1; margin-bottom: 20px; }
     
-    /* Hover Label Styling */
     .organ-hover-label {
       background: rgba(11, 19, 43, 0.9);
       border: 1px solid #4da6ff;
@@ -121,7 +141,6 @@
       white-space: nowrap;
     }
 
-    /* Quiz UI */
     .quiz-container { display: none; }
     .quiz-q { font-weight: bold; font-size: 16px; margin-bottom: 16px; color: #e2e8f0; }
     .quiz-options { display: flex; flex-direction: column; gap: 10px; }
@@ -133,22 +152,12 @@
     .score-card { text-align: center; padding: 20px; display: none; }
     .score-num { font-size: 52px; color: #4da6ff; font-weight: bold; margin: 10px 0; }
     
-    /* Responsive Layout */
     @media (max-width: 850px) {
       #app-container { flex-direction: column; }
       #sidebar { width: 100%; height: 45vh; }
       #canvas-container { height: 55vh; }
     }
   </style>
-
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.179.1/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.179.1/examples/jsm/"
-    }
-  }
-  </script>
 </head>
 <body>
 
@@ -176,7 +185,6 @@
         <span style="font-size: 12px; color: #94a3b8;">🖱 Click organ to inspect</span>
       </div>
       
-      <!-- Info Content -->
       <div class="panel-content" id="info-panel">
         <div class="organ-title" id="org-title">👄 Mouth</div>
         <div class="cbc-badge" id="org-cbc">CBC Grade 4-6 Science</div>
@@ -186,13 +194,11 @@
         <button class="btn" id="btn-reset-cam" style="display:none; width:100%; justify-content:center; margin-top:10px;">🔍 Reset Camera View</button>
       </div>
 
-      <!-- Quiz Content -->
       <div class="panel-content quiz-container" id="quiz-panel">
         <div class="quiz-q" id="quiz-q-text">Question goes here...</div>
         <div class="quiz-options" id="quiz-options"></div>
       </div>
 
-      <!-- Score Content -->
       <div class="panel-content score-card" id="score-panel">
         🏆
         <h2>Quiz Completed!</h2>
@@ -204,11 +210,10 @@
   </div>
 
   <script type="module">
-    import * as THREE from "three";
-    import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-    import { CSS2DRenderer, CSS2DObject } from "three/addons/renderers/CSS2DRenderer.js";
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-    // Offline Cache Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         const swBlob = new Blob([`
@@ -220,14 +225,13 @@
       });
     }
 
-    // Item 3: Natural Anatomical Palette & Data
     const organData = {
       Mouth: {
         title: "Mouth (Oral Cavity)",
         emoji: "👄",
         cbc: "CBC Strand: Human Body Systems - Ingestion",
         desc: "Food enters the body here. Mechanical breakdown takes place via chewing (teeth), while salivary glands secrete amylase to begin starch digestion.",
-        color: 0xff85a2, // Soft Pink
+        color: 0xff85a2,
         pos: new THREE.Vector3(0, 3.1, 0)
       },
       Oesophagus: {
@@ -235,7 +239,7 @@
         emoji: "🥢",
         cbc: "CBC Strand: Peristalsis Movement",
         desc: "A muscular tube connecting the mouth to the stomach. Food moves down using rhythmic wave-like contractions called peristalsis.",
-        color: 0xd4a373, // Light Tan / Flesh
+        color: 0xd4a373,
         pos: new THREE.Vector3(0, 1.7, 0)
       },
       Stomach: {
@@ -243,7 +247,7 @@
         emoji: "🩷",
         cbc: "CBC Strand: Chemical Digestion & Acid",
         desc: "A muscular, J-shaped sac that churns food with gastric juices and hydrochloric acid to break down proteins and kill harmful bacteria.",
-        color: 0xfa8072, // Salmon Pink
+        color: 0xfa8072,
         pos: new THREE.Vector3(0.4, 0.25, 0.12)
       },
       Liver: {
@@ -251,7 +255,7 @@
         emoji: "🟢",
         cbc: "CBC Strand: Bile & Assimilation",
         desc: "Produces bile which emulsifies fats (breaks large fat droplets into smaller droplets) for easier enzymatic digestion.",
-        color: 0x6b2d2d, // Dark Reddish-Brown
+        color: 0x6b2d2d,
         pos: new THREE.Vector3(-0.68, 0.55, 0.25)
       },
       SmallIntestine: {
@@ -259,7 +263,7 @@
         emoji: "🟡",
         cbc: "CBC Strand: Absorption & Villi",
         desc: "The primary site for final chemical digestion and nutrient absorption into the blood via tiny finger-like structures called villi.",
-        color: 0xf4e285, // Light Cream / Yellow
+        color: 0xf4e285,
         pos: new THREE.Vector3(0, -0.8, 0.18)
       },
       LargeIntestine: {
@@ -267,7 +271,7 @@
         emoji: "🟤",
         cbc: "CBC Strand: Water Absorption & Egestion",
         desc: "Surrounds the small intestine. Absorbs remaining water and mineral salts from indigestible food residues, compacting waste into feces.",
-        color: 0xd6a4a4, // Light Grey / Pink
+        color: 0xd6a4a4,
         pos: new THREE.Vector3(0, -0.68, -0.06)
       }
     };
@@ -289,21 +293,18 @@
     let currentQuizIndex = 0;
     let quizScore = 0;
 
-    // Camera target positions for smooth flight transition
     const defaultCamPos = new THREE.Vector3(0, 0.5, 7.5);
     const defaultTarget = new THREE.Vector3(0, 0, 0);
     let targetCamPos = defaultCamPos.clone();
     let targetCamLook = defaultTarget.clone();
 
-    // Three.js Core Setup
     const container = document.getElementById("canvas-container");
     const canvas = document.getElementById("viewer");
-    
+
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // 2D HTML Hover Label Overlay Renderer
     const labelRenderer = new CSS2DRenderer();
     labelRenderer.setSize(container.clientWidth, container.clientHeight);
     labelRenderer.domElement.style.position = 'absolute';
@@ -319,7 +320,6 @@
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
 
-    // Realistic Anatomical Studio Lighting
     scene.add(new THREE.HemisphereLight(0xffffff, 0x111122, 2.5));
     
     const dirLight1 = new THREE.DirectionalLight(0xffffff, 2.0);
@@ -331,7 +331,6 @@
     scene.add(dirLight2);
 
     const organGroup = new THREE.Group();
-    // Item 2: Scale up overall model scale by 25% for high visibility on projectors
     organGroup.scale.set(1.25, 1.25, 1.25);
     scene.add(organGroup);
 
@@ -348,7 +347,6 @@
       });
     }
 
-    // Item 7: Semi-transparent Body Outline (No debug wireframe boxes)
     const bodyOutlineGroup = new THREE.Group();
     bodyOutlineGroup.scale.set(1.25, 1.25, 1.25);
     
@@ -369,7 +367,7 @@
     bodyOutlineGroup.add(headMesh, torsoMesh);
     scene.add(bodyOutlineGroup);
 
-    // --- 1. Mouth ---
+    // Mouth
     const mouthGroup = new THREE.Group();
     mouthGroup.name = "Mouth";
     const headBase = new THREE.Mesh(new THREE.SphereGeometry(0.42, 32, 32), getAnatomicalMaterial(organData.Mouth.color));
@@ -382,7 +380,7 @@
     organGroup.add(mouthGroup);
     organMeshGroups["Mouth"] = mouthGroup;
 
-    // --- 2. Oesophagus ---
+    // Oesophagus
     const oesophagusGroup = new THREE.Group();
     oesophagusGroup.name = "Oesophagus";
     const oesoCurve = new THREE.CatmullRomCurve3([
@@ -396,7 +394,7 @@
     organGroup.add(oesophagusGroup);
     organMeshGroups["Oesophagus"] = oesophagusGroup;
 
-    // --- 3. Stomach ---
+    // Stomach
     const stomachGroup = new THREE.Group();
     stomachGroup.name = "Stomach";
     const stomachMat = getAnatomicalMaterial(organData.Stomach.color);
@@ -419,7 +417,7 @@
     organGroup.add(stomachGroup);
     organMeshGroups["Stomach"] = stomachGroup;
 
-    // --- 4. Liver ---
+    // Liver
     const liverGroup = new THREE.Group();
     liverGroup.name = "Liver";
     const liverMat = getAnatomicalMaterial(organData.Liver.color);
@@ -434,7 +432,7 @@
     organGroup.add(liverGroup);
     organMeshGroups["Liver"] = liverGroup;
 
-    // --- 5. Small Intestine ---
+    // Small Intestine
     const smallIntestineGroup = new THREE.Group();
     smallIntestineGroup.name = "SmallIntestine";
     const smallIntMat = getAnatomicalMaterial(organData.SmallIntestine.color);
@@ -454,7 +452,7 @@
     organGroup.add(smallIntestineGroup);
     organMeshGroups["SmallIntestine"] = smallIntestineGroup;
 
-    // --- 6. Large Intestine ---
+    // Large Intestine
     const largeIntestineGroup = new THREE.Group();
     largeIntestineGroup.name = "LargeIntestine";
     const largeIntMat = getAnatomicalMaterial(organData.LargeIntestine.color);
@@ -475,14 +473,12 @@
     organGroup.add(largeIntestineGroup);
     organMeshGroups["LargeIntestine"] = largeIntestineGroup;
 
-    // Item 4: Hover Labels (CSS2D Floating Element)
     const labelDiv = document.createElement('div');
     labelDiv.className = 'organ-hover-label';
     labelDiv.style.opacity = '0';
     const hoverLabelObj = new CSS2DObject(labelDiv);
     scene.add(hoverLabelObj);
 
-    // Item 6: Continuous Food Digesting Particle Path
     const foodPath = new THREE.CatmullRomCurve3([
       organData.Mouth.pos.clone().multiplyScalar(1.25),
       new THREE.Vector3(0.02, 1.7, 0.01).multiplyScalar(1.25),
@@ -500,7 +496,6 @@
     );
     scene.add(foodMesh);
 
-    // Audio Speech Synthesis Engine
     function speakText(text) {
       if (!audioEnabled || !('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
@@ -509,11 +504,9 @@
       window.speechSynthesis.speak(utterance);
     }
 
-    // Raycasting & Pointer Interactions
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
-    // Item 5: Smooth Camera Focus Implementation
     function focusOrgan(group) {
       selectedOrganGroup = group;
       const data = organData[group.name];
@@ -525,7 +518,6 @@
 
       speakText(data.title + ". " + data.desc);
 
-      // Compute smooth fly-to target coordinates
       const worldPos = new THREE.Vector3();
       group.getWorldPosition(worldPos);
       
@@ -586,7 +578,6 @@
       }
     });
 
-    // Item 7: Body Outline Toggle Control
     document.getElementById("btn-outline").addEventListener("click", (e) => {
       showOutline = !showOutline;
       bodyOutlineGroup.visible = showOutline;
@@ -594,7 +585,6 @@
       e.target.innerText = showOutline ? "👤 Body Outline: ON" : "👤 Body Outline: OFF";
     });
 
-    // Additional Controls
     document.getElementById("btn-audio").addEventListener("click", (e) => {
       audioEnabled = !audioEnabled;
       e.target.innerText = audioEnabled ? "🔊 Audio: ON" : "🔇 Audio: OFF";
@@ -611,7 +601,6 @@
     document.getElementById("btn-quiz").addEventListener("click", startQuiz);
     document.getElementById("btn-restart").addEventListener("click", startQuiz);
 
-    // Quiz Functions
     function startQuiz() {
       currentQuizIndex = 0;
       quizScore = 0;
@@ -681,35 +670,28 @@
     }
     window.addEventListener("resize", resize);
 
-    // Main Render Loop
     let time = 0;
     function animate() {
       requestAnimationFrame(animate);
       time += 0.02;
 
-      // Item 5: Smooth Camera Flight Animation (LERP)
       camera.position.lerp(targetCamPos, 0.05);
       controls.target.lerp(targetCamLook, 0.05);
 
-      // Gentle Ambient Body Rotation when idle
       if (!selectedOrganGroup) {
         organGroup.rotation.y += 0.0015;
         bodyOutlineGroup.rotation.y = organGroup.rotation.y;
       }
 
-      // Item 6: Organic System Animations
-      // Stomach contracting/expanding gently
       if (organMeshGroups["Stomach"]) {
         const stomachPulse = 1.0 + Math.sin(time * 2.5) * 0.04;
         organMeshGroups["Stomach"].scale.set(stomachPulse, stomachPulse, stomachPulse);
       }
 
-      // Intestines subtle wiggling animation
       if (organMeshGroups["SmallIntestine"]) {
         organMeshGroups["SmallIntestine"].rotation.z = Math.sin(time * 1.5) * 0.02;
       }
 
-      // Item 6: Continuous Food Particle Motion
       if (animatingFood) {
         foodProgress += 0.0025;
         if (foodProgress > 1) foodProgress = 0;
