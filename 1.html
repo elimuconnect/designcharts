@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DigiElimu 3D Digestive System</title>
+<style>
+body{margin:0;font-family:Arial;background:#eef6ff}
+header{background:#0b4ea2;color:#fff;padding:18px;text-align:center;font-size:30px}
+#viewer{width:100%;height:70vh;display:block}
+#info{padding:20px;max-width:900px;margin:auto}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.179.1/build/three.module.js","three/addons/":"https://unpkg.com/three@0.179.1/examples/jsm/"}}
+</script>
+</head>
+<body>
+<header>DigiElimu Interactive 3D Digestive System</header>
+<canvas id="viewer"></canvas>
+<div id="info">
+<h2>Interactive Demo</h2>
+<p>Drag to rotate. Scroll to zoom. This starter demonstrates a 3D scene ready for real organ models.</p>
+</div>
+<script type="module">
+import * as THREE from "three";
+import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+const canvas=document.getElementById("viewer");
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setSize(innerWidth,innerHeight*0.7);
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0xeef6ff);
+const camera=new THREE.PerspectiveCamera(45,innerWidth/(innerHeight*0.7),0.1,100);
+camera.position.set(0,2,8);
+const controls=new OrbitControls(camera,renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xffffff,0x888888,2));
+const d=new THREE.DirectionalLight(0xffffff,2);d.position.set(4,8,5);scene.add(d);
+function organ(x,y,z,c,sx,sy,sz){
+ const m=new THREE.Mesh(new THREE.SphereGeometry(0.5,48,48),new THREE.MeshStandardMaterial({color:c}));
+ m.position.set(x,y,z);m.scale.set(sx,sy,sz);scene.add(m);return m;}
+organ(0,2,0,0xff6666,.5,.5,.5);
+const oeso=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,2,24),new THREE.MeshStandardMaterial({color:0xff9800}));
+oeso.position.y=.8;scene.add(oeso);
+organ(.5,-.3,0,0xf06292,1.4,1.8,1);
+organ(-1.2,.2,0,0x7cb342,1.8,.8,.8);
+organ(.2,-2,0,0xffeb3b,2.2,1.5,1.4);
+const large=new THREE.Mesh(new THREE.TorusGeometry(2,.22,24,120),new THREE.MeshStandardMaterial({color:0x795548}));
+large.rotation.x=Math.PI/2;large.position.y=-2;scene.add(large);
+function resize(){renderer.setSize(innerWidth,innerHeight*0.7);camera.aspect=innerWidth/(innerHeight*0.7);camera.updateProjectionMatrix();}
+addEventListener("resize",resize);
+(function anim(){requestAnimationFrame(anim);scene.rotation.y+=0.003;controls.update();renderer.render(scene,camera);})();
+</script>
+</body></html>
