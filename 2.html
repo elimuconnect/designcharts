@@ -324,10 +324,11 @@ header div:last-child{
 }
 
 #viewer{
-    width:100%;
+    width:calc(100% - 80px);
     height:100%;
+    margin-left:80px;
 }
-
+  
 /* INFORMATION PANEL */
 #sidebar{
     width:100%;
@@ -358,13 +359,56 @@ header div:last-child{
 }
 
 /* GAS METER BELOW BUTTONS */
+
+
+
+/* GAS METER - PHONE */
 .gas-meter-hud{
     position:absolute;
+
     top:95px;
     left:8px;
-    right:8px;
-    width:auto;
+
+    width:70px;
+    padding:8px 6px;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+
+    z-index:4;
 }
+
+.gas-meter-title{
+    font-size:9px;
+    text-align:center;
+    line-height:1.2;
+    margin-bottom:6px;
+}
+
+.gas-label{
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    font-size:10px;
+    text-align:center;
+}
+
+.gas-label span{
+    display:block;
+}
+
+.meter-bar-bg{
+    width:12px;
+    height:90px;
+    margin-top:6px;
+}
+
+.meter-bar-fill{
+    width:100% !important;
+    height:100%;
+}
+  
 
 .panel-header{
     padding:12px;
