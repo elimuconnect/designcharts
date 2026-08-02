@@ -359,8 +359,32 @@ header div:last-child{
 }
 
 
+
+
+/* PHONE GAS METER */
 .gas-meter-hud{
+    position:absolute;
+
+    top:190px;      /* Increase this if it still touches the buttons */
+    left:8px;
+
     width:80px;
+    padding:4px 6px;
+
+    z-index:9999;
+}
+
+.gas-meter-title{
+    display:none;
+}
+
+#gas-status-text{
+    display:none;
+}
+
+.gas-label{
+    justify-content:center;
+    font-size:10px;
 }
 
 .meter-bar-bg{
@@ -371,11 +395,9 @@ header div:last-child{
 .meter-bar-fill{
     height:100%;
 }
+
+
   
-/* Hide Gas Exchange title on phones */
-.gas-meter-title{
-    display:none;
-}
 .panel-header{
     padding:12px;
     font-size:14px;
