@@ -257,19 +257,28 @@ header div:last-child{
     height:calc(100vh - 90px);
 }
 
+/* 3D VIEW */
 #canvas-container{
-    height:52vh;
     position:relative;
+    height:48vh;
+    padding-top:60px;      /* pushes the 3D model below the buttons */
+    box-sizing:border-box;
 }
 
+#viewer{
+    width:100%;
+    height:100%;
+}
+
+/* INFO PANEL */
 #sidebar{
     width:100%;
-    height:48vh;
+    height:52vh;
     border-left:none;
     border-top:1px solid rgba(255,255,255,.1);
 }
 
-/* Buttons across the top of the 3D model */
+/* BUTTONS */
 .controls-overlay{
     position:absolute;
     top:8px;
@@ -332,6 +341,7 @@ header div:last-child{
 }
 
 }
+    
     </style>
 </head>
 <body>
