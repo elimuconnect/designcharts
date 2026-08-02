@@ -365,7 +365,8 @@ header div:last-child{
 /* GAS METER - PHONE */
 .gas-meter-hud{
     position:absolute;
-    top:105px;
+
+    top:120px;
     left:8px;
 
     width:70px;
@@ -375,8 +376,9 @@ header div:last-child{
     flex-direction:column;
     align-items:center;
 
-    z-index:9999;      /* make sure it stays above the canvas */
+    z-index:4;
 }
+
 
   
 
@@ -449,7 +451,10 @@ header div:last-child{
     font-size:40px;
 }
 
-
+.organ-hover-label,
+.anatomical-tag{
+    display:none;
+}
 }
 
     
