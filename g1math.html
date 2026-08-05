@@ -2846,86 +2846,35 @@ case "boss":
 
     </div>`;
   break;
-    // 29. PUZZLE
-    case "puzzle":
-      let step = 0;
-      container.innerHTML = `
-        <p class="instruction">${lesson.instruction}</p>
-        <div class="options-grid">
-          ${lesson.numbers.map(n => `<button class="option-btn" onclick="if(${n} === ${lesson.correctOrder}[step]){ step++; this.style.opacity='0.3'; if(step===${lesson.correctOrder.length}) checkAnswer('puzzle_complete'); } else speakText('Pick in order');">${n}</button>`).join('')}
-        </div>`;
-      break;
+     // 29. BOSS
+{ 
+  id: "math029", 
+  type: "boss", 
+  title: "Strand Mastery Check", 
+  instruction: "Final Challenge: Which sequence is in order?", 
+  options: ["1, 2, 3, 4", "4, 2, 1, 3", "2, 1, 4, 3"], 
+  answer: "done",
+  correctOption: "1, 2, 3, 4",
+  reward: { stars: 5, coins: 30, xp: 100 } 
+},
+  // 30. PUZZLE
 
- // 30. PUZZLE
-  case "puzzle":
-    const puzzleSeq = lesson.correctOrder || [1, 2, 3];
-    // Store expected sequence stringified on the container element for bulletproof scoping
-    container.dataset.expected = JSON.stringify(puzzleSeq);
-    container.dataset.currentIndex = "0";
-
-    container.innerHTML = `
-      <div style="text-align: center; width: 100%; padding: 10px;">
-        <!-- Instruction -->
-        <p class="instruction" style="font-size: 1.15rem; font-weight: bold; color: #1e293b; margin-bottom: 20px;">
-          🧩 ${lesson.instruction}
-        </p>
-
-        <!-- Assembly Target Slots Board -->
-        <div style="
-          display: flex;
-          justify-content: center;
-          gap: 10px;
-          margin-bottom: 25px;
-        ">
-          ${puzzleSeq.map((_, i) => `
-            <div id="puzzle-slot-${i}" style="
-              width: 50px;
-              height: 50px;
-              background: #f1f5f9;
-              border: 3px dashed #cbd5e1;
-              border-radius: 12px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 1.4rem;
-              font-weight: bold;
-              color: #94a3b8;
-            ">?</div>
-          `).join('')}
-        </div>
-
-        <!-- Jigsaw Pieces Grid -->
-        <div style="
-          display: flex;
-          justify-content: center;
-          gap: 14px;
-          flex-wrap: wrap;
-        ">
-          ${lesson.numbers.map((num, idx) => `
-            <button class="puzzle-piece-btn" id="puzzle-btn-${idx}" onclick="validatePuzzlePiece(this, ${num})" style="
-              width: 65px;
-              height: 65px;
-              background: #ffffff;
-              border: 3px solid #cbd5e1;
-              border-radius: 16px;
-              font-size: 1.6rem;
-              font-weight: bold;
-              color: #1e293b;
-              cursor: pointer;
-              box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-              transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
-              touch-action: manipulation;
-            ">
-              ${num}
-            </button>
-          `).join('')}
-        </div>
-      </div>`;
-    break;
+// 30. PUZZLE
+{ 
+  id: "math030", 
+  type: "puzzle", 
+  title: "Number Jigsaw", 
+  instruction: "Tap numbers in ascending order to assemble the puzzle", 
+  numbers: [3, 1, 2], 
+  correctOrder: [1, 2, 3], 
+  answer: "done",
+  reward: { stars: 3, coins: 15, xp: 30 } 
+},
 
 
+  ];
 }
-}
+
 
 // Helper to render standard multiple-choice option grids
 function renderOptions(gridElement, options) {
@@ -4077,64 +4026,6 @@ function validateSpeedChoice(btn, selectedOpt, correctOpt) {
 }
   
   
-  
-  function validatePuzzlePiece(btn, tappedNum, btnIdx) {
-  if (btn.disabled) return;
-
-  const expectedNum = window.puzzleExpected[window.puzzleCurrentIndex];
-
-  if (tappedNum === expectedNum) {
-    // CORRECT NEXT PIECE IN SEQUENCE
-    btn.style.borderColor = "#10b981";
-    btn.style.backgroundColor = "#dcfce7";
-    btn.style.color = "#047857";
-    btn.style.transform = "scale(0.95)";
-    btn.disabled = true;
-
-    // Populate corresponding assembly slot
-    const slotElem = document.getElementById(`puzzle-slot-${window.puzzleCurrentIndex}`);
-    if (slotElem) {
-      slotElem.textContent = tappedNum;
-      slotElem.style.borderStyle = "solid";
-      slotElem.style.borderColor = "#10b981";
-      slotElem.style.backgroundColor = "#dcfce7";
-      slotElem.style.color = "#047857";
-    }
-
-    if (typeof playSound === "function") playSound("correct");
-
-    window.puzzleCurrentIndex++;
-
-    // Check if entire puzzle is complete
-    if (window.puzzleCurrentIndex >= window.puzzleExpected.length) {
-      if (typeof speakText === "function") {
-        speakText("Puzzle complete! Wonderful job!", "en-KE");
-      }
-
-      setTimeout(() => {
-        checkAnswer("done");
-      }, 800);
-    }
-
-  } else {
-    // INCORRECT SEQUENCE ORDER
-    btn.style.borderColor = "#ef4444";
-    btn.style.backgroundColor = "#fee2e2";
-    btn.style.color = "#b91c1c";
-
-    if (typeof speakText === "function") {
-      speakText(`Not quite! Find the number ${expectedNum} next.`, "en-KE");
-    }
-
-    setTimeout(() => {
-      if (!btn.disabled) {
-        btn.style.borderColor = "#cbd5e1";
-        btn.style.backgroundColor = "#ffffff";
-        btn.style.color = "#1e293b";
-      }
-    }, 800);
-  }
-}
   
   
   
