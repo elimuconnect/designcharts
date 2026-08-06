@@ -9,7 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <!-- Standard Three.js and OrbitControls -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <style>
+ <style>
     :root {
       --primary: #0284c7;
       --accent: #f59e0b;
@@ -102,30 +102,141 @@
     .strand-view { width: 100%; height: 100%; display: none; padding: 20px; position: absolute; top:0; left:0; overflow-y: auto; }
     .strand-view.active { display: flex; flex-direction: column; }
 
-    /* --- BEAUTIFUL RAINBOW SKY DASHBOARD --- */
-    .rainbow-dashboard {
-      background: linear-gradient(180deg, #38bdf8 0%, #818cf8 40%, #a7f3d0 80%, #4ade80 100%);
-      border-radius: 24px;
-      padding: 24px;
-      position: relative;
-      overflow: hidden;
-      min-height: 280px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  
+  
+  /* --- BEAUTIFUL RAINBOW SKY DASHBOARD --- */
+.rainbow-dashboard {
+  background: linear-gradient(180deg, #38bdf8 0%, #818cf8 40%, #a7f3d0 80%, #4ade80 100%);
+  border-radius: 24px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+/* ---------------- CLOUDS ---------------- */
+
+.cloud{
+    position:absolute;
+    background:#fff;
+    border-radius:50px;
+    box-shadow:0 8px 15px rgba(0,0,0,.08);
+    opacity:.9;
+    will-change:transform;
+}
+
+.cloud::before,
+.cloud::after{
+    content:"";
+    position:absolute;
+    background:#fff;
+    border-radius:50%;
+}
+
+/* Cloud 1 */
+.cloud1{
+    width:120px;
+    height:45px;
+    top:30px;
+    left:-150px;                     /* Start outside screen */
+    animation:cloudLeftRight 25s linear infinite;
+}
+
+.cloud1::before{
+    width:55px;
+    height:55px;
+    top:-28px;
+    left:18px;
+}
+
+.cloud1::after{
+    width:45px;
+    height:45px;
+    top:-18px;
+    left:60px;
+}
+
+/* Cloud 2 */
+.cloud2{
+    width:140px;
+    height:50px;
+    bottom:40px;
+    right:-180px;                    /* Start outside screen */
+    animation:cloudRightLeft 35s linear infinite;
+}
+
+.cloud2::before{
+    width:60px;
+    height:60px;
+    top:-30px;
+    left:20px;
+}
+
+.cloud2::after{
+    width:50px;
+    height:50px;
+    top:-20px;
+    right:20px;
+}
+
+
+
+.cloud3::after{
+    width:50px;
+    height:50px;
+    top:-20px;
+    right:20px;
+    animation:cloudLeftRight 40s linear infinite;
+}
+
+.cloud4::after{
+    width:50px;
+    height:50px;
+    top:-20px;
+    right:20px;
+    animation:cloudRightLeft 55s linear infinite;
+}
+
+
+
+
+/* Animations */
+
+@keyframes cloudLeftRight{
+
+    from{
+        transform:translateX(0);
     }
 
-    .cloud { position: absolute; background: #fff; border-radius: 50px; opacity: 0.85; animation: floatClouds 25s linear infinite; }
-    .cloud1 { width: 120px; height: 40px; top: 20px; left: -120px; }
-    .cloud2 { width: 180px; height: 50px; top: 60px; left: -180px; animation-delay: 10s; }
-
-    @keyframes floatClouds {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(1200px); }
+    to{
+        transform:translateX(calc(100vw + 350px));
     }
 
+}
+
+@keyframes cloudRightLeft{
+
+    from{
+        transform:translateX(0);
+    }
+
+    to{
+        transform:translateX(calc(-100vw - 350px));
+    }
+
+}
+
+
+
+  
+  
+	 
+	 
     /* --- ANIMATED MASCOT MWALIMU AMINA --- */
     .mascot-container {
       position: absolute;
@@ -432,9 +543,211 @@
   100% { transform: rotateX(360deg) rotateY(360deg); }
 }
 
+
+/* ===========================
+   RESPONSIVE DESIGN (PHONES ONLY)
+=========================== */
+
+#main-content{
+    min-width:0;
+}
+
+/* ---------------- PHONES ---------------- */
+@media (max-width:768px){
+
+    body{
+        overflow:auto;
+    }
+
+    #app-container{
+        flex-direction:column;
+        height:auto;
+        min-height:100vh;
+    }
+
+    #sidebar{
+        width:100%;
+        height:auto;
+        border-right:none;
+        border-bottom:2px solid #334155;
+    }
+
+    .brand{
+        justify-content:center;
+        font-size:16px;
+        padding:12px;
+    }
+
+    .nav-scroll{
+        display:flex;
+        flex-direction:row;
+        overflow-x:auto;
+        overflow-y:hidden;
+        white-space:nowrap;
+        gap:8px;
+        padding:10px;
+    }
+
+    .nav-item{
+        flex:none;
+        padding:10px 14px;
+        font-size:13px;
+        border-radius:30px;
+    }
+
+    header{
+        height:auto;
+        flex-direction:column;
+        gap:12px;
+        padding:12px;
+    }
+
+    #current-view-title{
+        font-size:18px;
+        text-align:center;
+    }
+
+    .rewards-bar{
+        justify-content:center;
+        flex-wrap:wrap;
+        gap:8px;
+    }
+
+    .reward-badge{
+        font-size:13px;
+        padding:6px 12px;
+    }
+
+    .strand-view{
+        padding:15px;
+    }
+
+    .rainbow-dashboard{
+        min-height:220px;
+        padding:18px;
+    }
+
+    .rainbow-dashboard h1{
+        font-size:24px !important;
+    }
+
+    .dashboard-grid{
+        grid-template-columns:repeat(2,1fr);
+        gap:12px;
+    }
+
+    .dash-card{
+        padding:14px;
+    }
+
+    .dash-icon{
+        font-size:30px;
+    }
+
+    .game-board{
+        min-height:280px;
+        padding:15px;
+    }
+
+    .question-title{
+        font-size:20px;
+    }
+
+    .options-grid,
+    .tap-grid,
+    .diff-grid,
+    .connect-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .option-btn,
+    .tap-btn{
+        width:100%;
+        font-size:18px;
+        padding:12px;
+    }
+
+    .memory-grid{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+    .maze-grid{
+        grid-template-columns:repeat(4,60px);
+        gap:8px;
+    }
+
+    .maze-cell{
+        width:60px;
+        height:60px;
+        font-size:20px;
+    }
+
+    #three-canvas-container{
+        height:220px;
+    }
+
+    .mascot-container{
+        right:10px;
+        bottom:10px;
+    }
+
+    .mascot-avatar{
+        font-size:60px;
+    }
+
+    .mascot-speech{
+        font-size:11px;
+    }
+}
+
+/* ---------------- SMALL PHONES ---------------- */
+@media (max-width:480px){
+
+    .dashboard-grid{
+        grid-template-columns:1fr;
+    }
+
+    .options-grid,
+    .tap-grid,
+    .diff-grid,
+    .connect-grid{
+        grid-template-columns:1fr;
+    }
+
+    .memory-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .maze-grid{
+        grid-template-columns:repeat(3,55px);
+    }
+
+    .maze-cell{
+        width:55px;
+        height:55px;
+        font-size:18px;
+    }
+
+    .question-title{
+        font-size:18px;
+    }
+
+    .option-btn{
+        font-size:17px;
+    }
+
+    #three-canvas-container{
+        height:180px;
+    }
+}
+
+
+
   </style>
 </head>
 
+
+          
 <body onload="loadProgress(); if('speechSynthesis' in window){window.speechSynthesis.getVoices();}">
 
   <div id="app-container">
@@ -448,9 +761,17 @@
         
         <div class="nav-group-title">Core Learning Areas</div>
         <div class="nav-item" onclick="loadView('math')">📚 Mathematics</div>
-      
+        <a href="https://wisdomappweb.site/english" target="_blank" class="nav-item" style="text-decoration: none;">🔤 English Activities</a>
+        <a href="https://wisdomappweb.site/kiswahili" target="_blank" class="nav-item" style="text-decoration: none;">📝 Kiswahili Activities</a>
+        <a href="https://wisdomappweb.site/environment" target="_blank" class="nav-item" style="text-decoration: none;">🌱 Environmental (3D)</a>
+        <a href="https://wisdomappweb.site/creative" target="_blank" class="nav-item" style="text-decoration: none;">🎨 Creative Arts & Games</a>
+
+       
+        <a href="https://wisdomappweb.site/digital" target="_blank" class="nav-item" style="text-decoration: none;">💻 Digital Literacy</a>
+        <a href="https://wisdomappweb.site/hygiene" target="_blank" class="nav-item" style="text-decoration: none;">❤️ Hygiene & Health</a>
+
         <div class="nav-group-title">Learner Zone</div>
-        <div class="nav-item" onclick="loadView('rewards')">⭐ My Stars & Badges</div>
+        <a href="https://wisdomappweb.site/rewards" target="_blank" class="nav-item" style="text-decoration: none;">⭐ My Stars & Badges</a>
       </div>
     </div>
 
@@ -460,103 +781,70 @@
         <div style="font-size: 18px; font-weight: bold;" id="current-view-title">Home Dashboard</div>
 
         <div class="rewards-bar">
-          <button class="ai-teacher-btn" onclick="openModal('ai-modal')">
-            👩‍🏫 Smart AI Tutor
-          </button>
+          
           <div class="reward-badge">⭐ Stars: <span id="star-count">5</span></div>
           <div class="reward-badge">🪙 Coins: <span id="coin-count">100</span></div>
           <div class="reward-badge">🏅 Badges: <span id="badge-count">2</span></div>
         </div>
       </header>
 
-      <div id="view-viewport">
-        <!-- 1. HOME DASHBOARD VIEW (Rainbow Sky & Mascot) -->
-        <div id="view-home" class="strand-view active">
-          <div class="rainbow-dashboard">
-            <div class="cloud cloud1"></div>
-            <div class="cloud cloud2"></div>
+     <div id="view-viewport">
+  <!-- 1. HOME DASHBOARD VIEW (Rainbow Sky & Mascot) -->
+  <div id="view-home" class="strand-view active">
+    <div class="rainbow-dashboard">
+      <div class="cloud cloud1"></div>
+      <div class="cloud cloud2"></div>
+<div class="cloud cloud1"></div>
+<div class="cloud cloud2"></div>
+<div class="cloud cloud3"></div>
+<div class="cloud cloud4"></div>
 
-            <div style="z-index: 2;">
-              <h1 style="font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Jambo, Learner! 🌈</h1>
-              <p style="font-size: 16px; margin-top: 5px; opacity: 0.95;">Ready for today's fun learning adventure?</p>
-            </div>
 
-            <!-- ANIMATED MASCOT MWALIMU AMINA -->
-            <div class="mascot-container" onclick="triggerMascotGreeting()">
-              <div class="mascot-speech" id="mascot-text">Click me! Jambo! 👋</div>
-              <div class="mascot-avatar">👩‍🏫</div>
-            </div>
-          </div>
 
-          <h3 style="margin-bottom: 12px; color: #38bdf8;">Select Mathematicsto Start:</h3>
+
+      <div style="z-index: 2;">
+        <h1 style="font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Jambo, Learner! 🌈</h1>
+        <p style="font-size: 16px; margin-top: 5px; opacity: 0.95;">Ready for today's fun learning adventure?</p>
+      </div>
+
+      <!-- ANIMATED MASCOT MWALIMU AMINA -->
+      <div class="mascot-container" onclick="triggerMascotGreeting()">
+        <div class="mascot-speech" id="mascot-text">Click me! Jambo! 👋</div>
+        <div class="mascot-avatar">👩‍🏫</div>
+      </div>
+    </div>
+
+          <h3 style="margin-bottom: 12px; color: #38bdf8;">Select a Learning Strand to Start:</h3>
           <div class="dashboard-grid">
-            <div class="dash-card" onclick="loadView('math')"><div class="dash-icon">📚</div><h3>Mathematics</h3><p>Numbers, Games & Puzzles</p></div>
+            <a href="#math" class="dash-card" onclick="loadView('math')" style="text-decoration: none; color: inherit;"><div class="dash-icon">📚</div><h3>Mathematics</h3><p>Numbers, Games & Puzzles</p></a>
+            <a href="https://wisdomappweb.site/english" target="_blank" class="dash-card" style="text-decoration: none; color: inherit;"><div class="dash-icon">🔤</div><h3>English</h3><p>Phonics, Alphabet & Race</p></a>
+            <a href="https://wisdomappweb.site/kiswahili" target="_blank" class="dash-card" style="text-decoration: none; color: inherit;"><div class="dash-icon">📝</div><h3>Kiswahili</h3><p>Silabi, Kusoma na Games</p></a>
+            <a href="https://wisdomappweb.site/environment" target="_blank" class="dash-card" style="text-decoration: none; color: inherit;"><div class="dash-icon">🌱</div><h3>Environmental</h3><p>3D Body, Animals & Plants</p></a>
+           
+            <a href="https://wisdomappweb.site/creative" target="_blank" class="dash-card" style="text-decoration: none; color: inherit;"><div class="dash-icon">🎨</div><h3>Creative Games</h3><p>Coloring, Matching & Puzzles</p></a>
+            <a href="https://wisdomappweb.site/digital" target="_blank" class="dash-card" style="text-decoration: none; color: inherit;"><div class="dash-icon">💻</div><h3>Digital Literacy</h3><p>Computer Parts & Games</p></a>
           </div>
         </div>
 
-        <!-- 2. MATHEMATICS MODULE VIEW -->
-        <div id="view-math" class="strand-view">
-          <h2 style="margin-bottom: 10px;" id="math-strand-title">Mathematics Curriculum</h2>
-          <div class="game-board">
-            <div class="question-title" id="math-question">What number comes NEXT? 4, 5, 6, ___?</div>
-            <div class="options-grid" id="math-options">
-              <!-- Default initial lesson buttons -->
-              <button class="option-btn" onclick="checkAnswer(7)">7</button>
-              <button class="option-btn" onclick="checkAnswer(8)">8</button>
-              <button class="option-btn" onclick="checkAnswer(9)">9</button>
-            </div>
-          </div>
-        </div>
 
-        <!-- 3. KISWAHILI MODULE VIEW -->
-        <div id="view-kiswahili" class="strand-view">
-          <h2 style="margin-bottom: 10px;">Mazoezi ya Kiswahili: Silabi na Msamiati</h2>
-          <div class="game-board">
-            <div class="question-title">Chagua silabi inayoanza jina la picha: 🍎 (Tunda)</div>
-            <div class="options-grid">
-              <button class="option-btn" onclick="speakText('Safi sana! Tunda linaanza na Tu', 'sw-KE'); triggerCelebration();">Tu</button>
-              <button class="option-btn" onclick="speakText('Jaribu tena!', 'sw-KE');">Ma</button>
-              <button class="option-btn" onclick="speakText('Jaribu tena!', 'sw-KE');">Ki</button>
-            </div>
-          </div>
-        </div>
 
-        <!-- 4. ENVIRONMENTAL 3D VIEWER VIEW -->
-        <div id="view-environment" class="strand-view">
-          <h2>Environmental Activities: Interactive 3D World</h2>
-          <p style="color: #cbd5e1; margin-top: 5px;">Rotate and explore the object in full 3D space!</p>
-          <div id="three-canvas-container"></div>
-        </div>
 
-        <!-- 5. STORY LIBRARY -->
-        <div id="view-stories" class="strand-view">
-          <h2>📖 Read-Along Story Library</h2>
-          <div class="game-board" style="margin-top: 15px; text-align: center;">
-            <div class="question-title">Story 1: The Clever Hare and Simba 🦁</div>
-            <p style="font-size: 18px; color: #cbd5e1; max-width: 600px; line-height: 1.6; margin-bottom: 20px;">
-              Once upon a time in the Kenyan savanna, Hare said to Lion, "I can outsmart you using wisdom, not power!"
-            </p>
-            <button class="option-btn" onclick="speakText('Once upon a time in the Kenyan savanna, Hare said to Lion, I can outsmart you using wisdom, not power!', 'en-KE')">
-              🔊 Read Aloud
-            </button>
-          </div>
-        </div>
 
-        <!-- 6. SONGS VIEW -->
-        <div id="view-music" class="strand-view">
-          <h2>🎵 CBC Learning Songs & Karaoke</h2>
-          <div class="dashboard-grid" style="margin-top: 15px;">
-            <div class="dash-card" onclick="speakText('A B C D E F G, Come and sing along with me!', 'en-KE')">
-              <div class="dash-icon">🔤</div>
-              <h3>Alphabet Song</h3>
-              <p>Sing & Learn</p>
-            </div>
-            <div class="dash-card" onclick="speakText('Moja, mbili, tatu, nne, tano! Tuhesabu pamoja!', 'sw-KE')">
-              <div class="dash-icon">🔢</div>
-              <h3>Wimbo wa Nambari</h3>
-              <p>Hesabu kwa Kiswahili</p>
-            </div>
-          </div>
+<!-- 2. MATHEMATICS MODULE VIEW -->
+<div id="view-math" class="strand-view">
+
+    <h2 id="math-strand-title" style="margin-bottom:10px;"></h2>
+
+    <div class="game-board">
+
+        <div class="question-title" id="math-question"></div>
+
+        <!-- JavaScript will generate the lesson buttons -->
+        <div class="options-grid" id="math-options"></div>
+
+    </div>
+
+</div>
         </div>
 
         <!-- REWARDS VIEW -->
@@ -602,11 +890,17 @@
     </div>
   </div>
 
+
+
   <!-- SCRIPT ENGINE -->
   <script type="module">
   import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js?module";
 
 import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js?module";
+  
+ 
+  
+  
   
 window.state = {
   stars: 5,
@@ -620,9 +914,10 @@ window.state = {
   currentLessonIdx: 0,
   currentLesson: null,
   completedLessons: [],
-  learner: "Grade 1 Learner"
+  learner: "Grade 1 Learner",
+  lessonMistake: false
 };
-
+const state = window.state;
 
 
 
@@ -7796,84 +8091,53 @@ function validateSpeedChoice(btn, selectedOpt, correctOpt) {
   
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-   function loadLesson(subject, strandIdx, subStrandIdx, lessonIndex){
+  // =========================
+// LESSON QUEUE
+// =========================
+let lessonQueue = [];
+
+// Create a new shuffled queue
+function refillLessonQueue(subject, strandIdx, subStrandIdx) {
+
+    const lessons = cbcCurriculum[subject]
+        .strands[strandIdx]
+        .subStrands[subStrandIdx]
+        .lessons;
+
+    // Create indexes
+    lessonQueue = lessons.map((_, index) => index);
+
+    // Fisher-Yates Shuffle
+    for (let i = lessonQueue.length - 1; i > 0; i--) {
+
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [lessonQueue[i], lessonQueue[j]] =
+        [lessonQueue[j], lessonQueue[i]];
+
+    }
+
+    console.log("Lesson Queue:", lessonQueue);
+}
+
+
+// =========================
+// LOAD LESSON
+// =========================
+function loadLesson(subject, strandIdx = 0, subStrandIdx = 0, lessonIndex = 0) {
 
     const curriculum = cbcCurriculum[subject];
 
-    if(!curriculum){
-        console.error("Subject not found:",subject);
-        return;
-    }
-
-    strandIdx = strandIdx || 0;
-    subStrandIdx = subStrandIdx || 0;
-    lessonIndex = lessonIndex || 0;
+    if (!curriculum) return;
 
     const strand = curriculum.strands[strandIdx];
-
-    if(!strand){
-        console.error("Invalid strand:",strandIdx);
-        return;
-    }
+    if (!strand) return;
 
     const subStrand = strand.subStrands[subStrandIdx];
-
-    if(!subStrand){
-        console.error("Invalid subStrand:",subStrandIdx);
-        return;
-    }
+    if (!subStrand) return;
 
     const lesson = subStrand.lessons[lessonIndex];
-
-    if(!lesson){
-        console.error("Invalid lesson:",lessonIndex);
-        return;
-    }
+    if (!lesson) return;
 
     state.currentSubject = subject;
     state.currentStrandIdx = strandIdx;
@@ -7881,68 +8145,103 @@ function validateSpeedChoice(btn, selectedOpt, correctOpt) {
     state.currentLessonIdx = lessonIndex;
     state.currentLesson = lesson;
 
+
     document.getElementById("math-strand-title").textContent = lesson.title;
     document.getElementById("math-question").textContent =
         lesson.question || lesson.instruction || "";
 
     renderGameLesson(lesson);
 
-    if(lesson.type==="3d"){
-        setTimeout(()=>{
-            init3DWorld(lesson.model);
-        },50);
+    if (lesson.type === "3d") {
+        setTimeout(() => init3DWorld(lesson.model), 50);
     }
 
-}
-   
-
-   function checkAnswer(answer) {
-  const lesson = state.currentLesson;
-  
-  if (lesson && answer === lesson.answer) {
-    rewardLearner(lesson.reward || { stars: 1, coins: 5, xp: 10 });
-    speakText("Excellent! Well done.", 'en-KE');
-    triggerCelebration();
-
-    // --- AUTOMATICALLY ADVANCE TO THE NEXT LESSON ---
-    setTimeout(() => {
-      advanceToNextLesson();
-    }, 1500); // 1.5s delay so the learner sees celebration
-
-  } else if (!lesson && answer == 7) { 
-    rewardLearner({ stars: 1, coins: 5, xp: 10 });
-    speakText("Excellent! Well done.", 'en-KE');
-    triggerCelebration();
-    
-    // Load first dynamic lesson from JSON array
-    loadLesson('mathematics', 0, 0, 0);
-  } else {
-    speakText("Try again.", 'en-KE');
-  }
+    console.log("Loaded:", lesson.title);
 }
 
 function advanceToNextLesson() {
-  const currentSubStrand = cbcCurriculum[state.currentSubject]
-    .strands[state.currentStrandIdx]
-    .subStrands[state.currentSubStrandIdx];
 
-  // Check if there is another lesson in this sub-strand
-  if (state.currentLessonIdx + 1 < currentSubStrand.lessons.length) {
-    state.currentLessonIdx++;
-  } else {
-    // If sub-strand ends, reset to lesson 0 of next sub-strand (if available)
-    state.currentLessonIdx = 0;
-    const strand = cbcCurriculum[state.currentSubject].strands[state.currentStrandIdx];
-    if (state.currentSubStrandIdx + 1 < strand.subStrands.length) {
-      state.currentSubStrandIdx++;
-    } else {
-      alert("🎉 Congratulations! You completed this strand!");
-      return;
+    state.lessonMistake = false;
+
+    if (lessonQueue.length === 0) {
+
+        refillLessonQueue(
+            state.currentSubject,
+            state.currentStrandIdx,
+            state.currentSubStrandIdx
+        );
+
     }
-  }
 
-  loadLesson(state.currentSubject, state.currentStrandIdx, state.currentSubStrandIdx, state.currentLessonIdx);
+    const nextIndex = lessonQueue.pop();
+
+    loadLesson(
+        state.currentSubject,
+        state.currentStrandIdx,
+        state.currentSubStrandIdx,
+        nextIndex
+    );
 }
+
+  
+  
+  function checkAnswer(answer) {
+
+    const lesson = state.currentLesson;
+
+    if (!lesson) return;
+
+    // Correct answer
+    if (answer === lesson.answer) {
+
+        // Reward ONLY if learner never got this lesson wrong
+        if (!state.lessonMistake) {
+
+            rewardLearner(
+                lesson.reward || {
+                    stars: 1,
+                    coins: 5,
+                    xp: 10
+                }
+            );
+
+            triggerCelebration();
+
+        }
+
+        speakText("Excellent! Well done.", "en-KE");
+
+        setTimeout(() => {
+            advanceToNextLesson();
+        }, 1500);
+
+    } else {
+
+        // Mark that this lesson has been answered wrongly
+        state.lessonMistake = true;
+
+        speakText("Try again.", "en-KE");
+
+        // Reload the SAME activity
+        loadLesson(
+            state.currentSubject,
+            state.currentStrandIdx,
+            state.currentSubStrandIdx,
+            state.currentLessonIdx
+        );
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 
     function rewardLearner(reward) {
       state.stars += reward.stars;
@@ -7967,23 +8266,44 @@ function advanceToNextLesson() {
       }
     }
 
-    function loadView(viewId) {
-  document.querySelectorAll('.strand-view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  
-  const targetView = document.getElementById(`view-${viewId}`);
-  if (targetView) targetView.classList.add('active');
+   
+   
+   function loadView(viewId) {
 
-  if (viewId === 'math') {
-    // Load current active lesson or default to index 0
-    loadLesson(
-      state.currentSubject || 'mathematics',
-      state.currentStrandIdx || 0,
-      state.currentSubStrandIdx || 0,
-      state.currentLessonIdx || 0
-    );
-  }
+    document.querySelectorAll('.strand-view')
+        .forEach(v => v.classList.remove('active'));
+
+    document.querySelectorAll('.nav-item')
+        .forEach(n => n.classList.remove('active'));
+
+    const targetView = document.getElementById(`view-${viewId}`);
+
+    if (targetView) {
+        targetView.classList.add('active');
+    }
+
+    if (viewId === 'math') {
+
+        // First time entering Math
+        if (!state.currentLesson) {
+
+            advanceToNextLesson();
+
+        } else {
+loadLesson(
+    state.currentSubject,
+    state.currentStrandIdx,
+    state.currentSubStrandIdx,
+    state.currentLessonIdx
+);
+          
+            
+
+        }
+    }
 }
+   
+   
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
@@ -8157,6 +8477,27 @@ function advanceToNextLesson() {
 
 }
 	
+	
+	
+	
+	
+	window.addEventListener("load", () => { 
+
+    loadProgress();
+
+    refillLessonQueue(
+        state.currentSubject,
+        state.currentStrandIdx,
+        state.currentSubStrandIdx
+    );
+
+    advanceToNextLesson();
+
+});
+	
+	
+	
+	
   </script>
 </body>
-</html>
+</html>  
