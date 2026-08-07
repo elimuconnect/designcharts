@@ -888,28 +888,61 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-    // Global navigation bridge for module scope
-    window.loadView = function(viewName) {
-      document.querySelectorAll('.strand-view').forEach(view => {
-        view.classList.remove('active');
-      });
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-      });
 
-      const targetView = document.getElementById(`view-${viewName}`);
-      if (targetView) {
+
+// Compatible with PC, Phone and Smart Projector
+window.loadView = function(viewId) {
+
+    // Hide all views
+    document.querySelectorAll('.strand-view').forEach(v => {
+        v.classList.remove('active');
+    });
+
+    // Remove active navigation
+    document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.remove('active');
+    });
+
+    // Show selected view
+    const targetView = document.getElementById("view-" + viewId);
+    if (targetView) {
         targetView.classList.add('active');
-        
-        const titles = {
-          home: 'Home Dashboard',
-          math: 'Mathematics Activities',
-          rewards: 'My Stars & Badges'
-        };
-        document.getElementById('current-view-title').innerText = titles[viewName] || 'Learning Area';
-      }
+    }
+
+    // Update page title
+    const titles = {
+        home: "Home Dashboard",
+        math: "Mathematics Activities",
+        rewards: "My Stars & Badges"
     };
 
+    const title = document.getElementById("current-view-title");
+    if (title) {
+        title.textContent = titles[viewId] || "Learning Area";
+    }
+
+    // Load Mathematics lesson
+    if (viewId === "math") {
+
+        if (!state.currentLesson) {
+
+            advanceToNextLesson();
+
+        } else {
+
+            loadLesson(
+                state.currentSubject,
+                state.currentStrandIdx,
+                state.currentSubStrandIdx,
+                state.currentLessonIdx
+            );
+
+        }
+
+    }
+};
+
+	  
     window.triggerMascotGreeting = function() {
       const speech = document.getElementById('mascot-text');
       const messages = [
@@ -8294,40 +8327,6 @@ function advanceToNextLesson() {
 
    
    
-   function loadView(viewId) {
-
-    document.querySelectorAll('.strand-view')
-        .forEach(v => v.classList.remove('active'));
-
-    document.querySelectorAll('.nav-item')
-        .forEach(n => n.classList.remove('active'));
-
-    const targetView = document.getElementById(`view-${viewId}`);
-
-    if (targetView) {
-        targetView.classList.add('active');
-    }
-
-    if (viewId === 'math') {
-
-        // First time entering Math
-        if (!state.currentLesson) {
-
-            advanceToNextLesson();
-
-        } else {
-loadLesson(
-    state.currentSubject,
-    state.currentStrandIdx,
-    state.currentSubStrandIdx,
-    state.currentLessonIdx
-);
-          
-            
-
-        }
-    }
-}
    
    
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
