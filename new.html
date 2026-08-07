@@ -8287,70 +8287,71 @@ loadLesson(
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    // Speech Engine: Kenya Female Priority -> Nigeria Female -> General Female Fallback
-   function speakText(text, lang = 'en-KE') {
-      if (!('speechSynthesis' in window)) return;
-      
-      window.speechSynthesis.cancel();
-      const msg = new SpeechSynthesisUtterance(text);
-      const voices = window.speechSynthesis.getVoices();
 
-      const isFemale = (voice) => {
-        const name = voice.name.toLowerCase();
-        return (
-          name.includes('female') ||
-          name.includes('zira') ||
-          name.includes('hazel') ||
-          name.includes('susan') ||
-          name.includes('victoria') ||
-          name.includes('catherine') ||
-          name.includes('wambui') ||
-          name.includes('yemi') ||
-          name.includes('google')
-        );
-      };
+// Speech Engine: English Female Priority -> General English Fallback
 
+let availableVoices = [];
 
-const kenyaVoices = voices.filter(v =>
-  v.lang.toLowerCase().includes('en-ke') ||
-  v.lang.toLowerCase().includes('ke')
-);
+function loadVoices() {
+  availableVoices = speechSynthesis.getVoices();
+}
 
-	   
-      const kenyaFemale = kenyaVoices.find(v => isFemale(v)) || kenyaVoices[0];
+function speakText(text, lang = "en-US") {
+  if (!("speechSynthesis" in window)) return;
 
-      const nigeriaVoices = voices.filter(v => 
-        v.lang.toLowerCase().replace('_', '-').includes('en-ng')
-      );
-      const nigeriaFemale = nigeriaVoices.find(v => isFemale(v)) || nigeriaVoices[0];
+  window.speechSynthesis.cancel();
 
-     const fallbackFemale = voices.find(v =>
-  v.lang.startsWith('en') && isFemale(v)
-);
+  const msg = new SpeechSynthesisUtterance(text);
 
-      if (kenyaFemale) {
-        msg.voice = kenyaFemale;
-        msg.lang = kenyaFemale.lang;
-      } else if (nigeriaFemale) {
-        msg.voice = nigeriaFemale;
-        msg.lang = 'en-NG';
-      } else if (fallbackFemale) {
-        msg.voice = fallbackFemale;
-        msg.lang = fallbackFemale.lang;
-      } else {
-        msg.lang = lang;
-      }
+  const voices = availableVoices.length
+    ? availableVoices
+    : speechSynthesis.getVoices();
 
-      msg.rate = 0.9;
-      msg.pitch = 1.1;
-      
-      window.speechSynthesis.speak(msg);
-    }
+  const isFemale = (voice) => {
+    const name = voice.name.toLowerCase();
+    return (
+      name.includes("female") ||
+      name.includes("zira") ||
+      name.includes("hazel") ||
+      name.includes("susan") ||
+      name.includes("victoria") ||
+      name.includes("catherine") ||
+      name.includes("samantha") ||
+      name.includes("karen") ||
+      name.includes("aria") ||
+      name.includes("jenny") ||
+      name.includes("google")
+    );
+  };
 
-    if ('speechSynthesis' in window && window.speechSynthesis.onvoiceschanged !== undefined) {
-      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-    }
+  const englishVoices = voices.filter(v =>
+    v.lang.toLowerCase().startsWith("en")
+  );
 
+  const englishFemale =
+    englishVoices.find(v => isFemale(v)) ||
+    englishVoices[0];
+
+  if (englishFemale) {
+    msg.voice = englishFemale;
+    msg.lang = englishFemale.lang;
+  } else {
+    msg.lang = lang;
+  }
+
+  msg.rate = 0.95;
+  msg.pitch = 1.0;
+  msg.volume = 1;
+
+  window.speechSynthesis.speak(msg);
+}
+
+if ("speechSynthesis" in window) {
+  loadVoices();
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+	  
 
 const mascotMessages = [
   "Hello! Ready to learn?",
