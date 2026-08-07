@@ -5,13 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DigiElimu CBC Grade 1</title>
   
-  <!-- Polyfill for browser compatibility -->
-  <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
-
+  
   <!-- Canvas Confetti Library -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-<!-- Standard Three.js and OrbitControls -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
  <style>
     :root {
       --primary: #0284c7;
@@ -874,12 +871,58 @@
   </div>
 
 
+<!-- Polyfill for browser compatibility -->
+  <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
 
-  <!-- SCRIPT ENGINE -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.174.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.174.0/examples/jsm/"
+      }
+    }
+  </script>
+
   <script type="module">
-  import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js?module";
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js?module";
+    // Global navigation bridge for module scope
+    window.loadView = function(viewName) {
+      document.querySelectorAll('.strand-view').forEach(view => {
+        view.classList.remove('active');
+      });
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      const targetView = document.getElementById(`view-${viewName}`);
+      if (targetView) {
+        targetView.classList.add('active');
+        
+        const titles = {
+          home: 'Home Dashboard',
+          math: 'Mathematics Activities',
+          rewards: 'My Stars & Badges'
+        };
+        document.getElementById('current-view-title').innerText = titles[viewName] || 'Learning Area';
+      }
+    };
+
+    window.triggerMascotGreeting = function() {
+      const speech = document.getElementById('mascot-text');
+      const messages = [
+        "Wewe ni bingwa! Keep learning! 🌟",
+        "Tap Mathematics on the left to start! 📚",
+        "Mwalimu Amina is proud of you! ✨"
+      ];
+      speech.innerText = messages[Math.floor(Math.random() * messages.length)];
+    };
+
+    window.loadProgress = function() {
+      // Initialize progress counters if needed
+    };
   
  
   
