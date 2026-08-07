@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DigiElimu CBC Grade 1</title>
   
-  
+   
   <!-- Canvas Confetti Library -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
+<!-- Standard Three.js and OrbitControls -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  
  <style>
     :root {
       --primary: #0284c7;
@@ -871,93 +873,16 @@
   </div>
 
 
-<!-- Polyfill for browser compatibility -->
-  <script async src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
-
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.174.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.174.0/examples/jsm/"
-      }
-    }
-  </script>
-
-  <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-
-
-
-// Compatible with PC, Phone and Smart Projector
-window.loadView = function(viewId) {
-
-    // Hide all views
-    document.querySelectorAll('.strand-view').forEach(v => {
-        v.classList.remove('active');
-    });
-
-    // Remove active navigation
-    document.querySelectorAll('.nav-item').forEach(n => {
-        n.classList.remove('active');
-    });
-
-    // Show selected view
-    const targetView = document.getElementById("view-" + viewId);
-    if (targetView) {
-        targetView.classList.add('active');
-    }
-
-    // Update page title
-    const titles = {
-        home: "Home Dashboard",
-        math: "Mathematics Activities",
-        rewards: "My Stars & Badges"
-    };
-
-    const title = document.getElementById("current-view-title");
-    if (title) {
-        title.textContent = titles[viewId] || "Learning Area";
-    }
-
-    // Load Mathematics lesson
-    if (viewId === "math") {
-
-        if (!state.currentLesson) {
-
-            advanceToNextLesson();
-
-        } else {
-
-            loadLesson(
-                state.currentSubject,
-                state.currentStrandIdx,
-                state.currentSubStrandIdx,
-                state.currentLessonIdx
-            );
-
-        }
-
-    }
-};
-
-	  
-    window.triggerMascotGreeting = function() {
-      const speech = document.getElementById('mascot-text');
-      const messages = [
-        "Wewe ni bingwa! Keep learning! 🌟",
-        "Tap Mathematics on the left to start! 📚",
-        "Mwalimu Amina is proud of you! ✨"
-      ];
-      speech.innerText = messages[Math.floor(Math.random() * messages.length)];
-    };
-
-    window.loadProgress = function() {
-      // Initialize progress counters if needed
-    };
   
  
+  <!-- SCRIPT ENGINE -->
+  <script type="module">
+  import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js?module";
+
+import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js?module";
+  
+ 
+  
   
   
   
@@ -8295,7 +8220,23 @@ function advanceToNextLesson() {
 
 
 
+ function loadView(viewId) {
+  document.querySelectorAll('.strand-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  
+  const targetView = document.getElementById(`view-${viewId}`);
+  if (targetView) targetView.classList.add('active');
 
+  if (viewId === 'math') {
+    // Load current active lesson or default to index 0
+    loadLesson(
+      state.currentSubject || 'mathematics',
+      state.currentStrandIdx || 0,
+      state.currentSubStrandIdx || 0,
+      state.currentLessonIdx || 0
+    );
+  }
+}
 
 
 
