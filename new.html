@@ -8308,7 +8308,7 @@ loadLesson(
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     // Speech Engine: Kenya Female Priority -> Nigeria Female -> General Female Fallback
-    function speakText(text, lang = 'sw-KE') {
+   function speakText(text, lang = 'en-KE') {
       if (!('speechSynthesis' in window)) return;
       
       window.speechSynthesis.cancel();
@@ -8330,10 +8330,13 @@ loadLesson(
         );
       };
 
-      const kenyaVoices = voices.filter(v => 
-        v.lang.toLowerCase().includes('ke') || 
-        v.lang.toLowerCase().includes('sw')
-      );
+
+const kenyaVoices = voices.filter(v =>
+  v.lang.toLowerCase().includes('en-ke') ||
+  v.lang.toLowerCase().includes('ke')
+);
+
+	   
       const kenyaFemale = kenyaVoices.find(v => isFemale(v)) || kenyaVoices[0];
 
       const nigeriaVoices = voices.filter(v => 
@@ -8341,9 +8344,9 @@ loadLesson(
       );
       const nigeriaFemale = nigeriaVoices.find(v => isFemale(v)) || nigeriaVoices[0];
 
-      const fallbackFemale = voices.find(v => 
-        (v.lang.startsWith('en') || v.lang.startsWith('sw')) && isFemale(v)
-      );
+     const fallbackFemale = voices.find(v =>
+  v.lang.startsWith('en') && isFemale(v)
+);
 
       if (kenyaFemale) {
         msg.voice = kenyaFemale;
@@ -8369,20 +8372,20 @@ loadLesson(
     }
 
     const mascotMessages = [
-      "Jambo! Ready to learn?",
-      "Can we count together?",
-      "You are doing great!",
-      "Let's earn another star!",
-      "Today's lesson will be fun!",
-      "Twende tusome!",
-      "Excellent work!",
-      "Keep smiling!"
-    ];
+  "Hello! Ready to learn?",
+  "Can we count together?",
+  "You are doing great!",
+  "Let's earn another star!",
+  "Today's lesson will be fun!",
+  "Let's learn together!",
+  "Excellent work!",
+  "Keep smiling!"
+];
 
     function triggerMascotGreeting() {
       const text = mascotMessages[Math.floor(Math.random() * mascotMessages.length)];
       document.getElementById("mascot-text").textContent = text;
-      speakText(text, 'sw-KE');
+      speakText(text, 'en-KE');
     }
 
     function triggerCelebration() {
